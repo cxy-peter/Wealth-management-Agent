@@ -1,36 +1,29 @@
 # Codex Implementation Notes
 
-This repository is positioned as `wealth-research-agent`: a runnable asset-management research assistant demo for portfolio research, wealth-product comparison, risk summary, and report generation.
+This repository is positioned as `wealth-research-agent`: a weekly asset-management product research and benchmarking workbench.
 
 ## Hard Constraints
 
-1. All pages, APIs, and reports must be framed as research assistance, risk summary, product benchmarking, or report generation.
-2. Do not output trade-direction language or promised return language.
-3. Do not commit credentials, private data, real customer data, model weights, or internal company files.
-4. Default data must come from `data/` sample/mock files. Real connectors must be configured through environment variables.
-5. Report conclusions must be traceable to sample data, metric tools, news evidence, product metrics, or guardrail output through `tool_call_id` or `evidence_id`.
+1. All pages, APIs and reports must be framed as research assistance, risk summary, product benchmarking, market/channel percentile analysis or report generation.
+2. Do not output trade-direction language, configuration instructions or promised-return language.
+3. Do not commit credentials, private data, real customer data, model weights or internal company files.
+4. Default data must come from `data/` synthetic/mock files. Real connectors must be configured through environment variables.
+5. Report conclusions must be traceable through `tool_call_id` or `evidence_id`.
 
 ## Backend Architecture
 
-Current workflow:
+Weekly report path:
 
 ```text
-planner_agent
-  -> conditional LangGraph route
-  -> ReAct/MCP-capable tool agents with deterministic fallback
-  -> risk_guardrail_agent
-  -> report_agent
-  -> verifier_agent
-  -> human_review_agent when needed
+weekly_report parsers
+  -> scale/return/percentile/benchmark metrics
+  -> weekly_report_generator / benchmark_report_generator
+  -> weekly_report_verifier
+  -> guardrail / human review when needed
+  -> audit trace
 ```
 
-Product benchmark uses:
-
-```text
-sample_product_catalog.csv
-sample_product_nav.csv
-sample_product_risk_events.csv
-```
+Agent path remains ReAct/MCP-capable with deterministic fallback.
 
 ## Frontend Architecture
 
@@ -38,22 +31,23 @@ Top-level pages:
 
 ```text
 frontend/src/pages/
-  ResearchDashboard.jsx
-  ProductBenchmark.jsx
-  TraceView.jsx
+  WeeklyReportDashboard.jsx
+  ProductBenchmarkWorkbench.jsx
+  AgentTraceView.jsx
 ```
 
-Human review is implemented as a drawer, not a top-level page. News risk is a tab in `ResearchDashboard`. Eval, route optimization, contextual bandit, and ScenarioReplay are in `TraceView` advanced tabs.
+Human review is implemented as a drawer, not a top-level page.
 
 ## Verification
 
 ```bash
-python scripts/generate_sample_product_universe.py
-python scripts/run_demo.py --symbol 600519 --company 贵州茅台
+python scripts/generate_weekly_report_universe.py
+python -m compileall backend scripts eval
+pytest
 python eval/run_eval.py
 python eval/run_route_optimization.py
 python eval/run_contextual_bandit.py
-pytest
+python -m backend.app.dpo.eval_dpo_report_style
 cd frontend
 npm run build
 ```

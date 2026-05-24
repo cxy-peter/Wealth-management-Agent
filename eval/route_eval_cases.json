@@ -5,7 +5,7 @@
     "company": "贵州茅台",
     "analysis_type": "full",
     "risk_preference": "balanced",
-    "preferred_action": "standard_research",
+    "preferred_action": "standard_weekly_report",
     "product_filters": {}
   },
   {
@@ -14,7 +14,7 @@
     "company": "贵州茅台",
     "analysis_type": "risk",
     "risk_preference": "conservative",
-    "preferred_action": "risk_only",
+    "preferred_action": "market_update_only",
     "product_filters": {
       "asset_class": "现金管理"
     }
@@ -25,7 +25,7 @@
     "company": "贵州茅台",
     "analysis_type": "product",
     "risk_preference": "balanced",
-    "preferred_action": "product_compare",
+    "preferred_action": "benchmark_only",
     "product_filters": {
       "asset_class": "固收+"
     }
@@ -36,7 +36,7 @@
     "company": "贵州茅台",
     "analysis_type": "fast",
     "risk_preference": "balanced",
-    "preferred_action": "fast_snapshot",
+    "preferred_action": "fast_weekly_snapshot",
     "product_filters": {
       "risk_level": "R4"
     }
@@ -47,7 +47,7 @@
     "company": "贵州茅台",
     "analysis_type": "deep",
     "risk_preference": "strict",
-    "preferred_action": "deep_review",
+    "preferred_action": "deep_product_review",
     "product_filters": {
       "channel": "银行渠道"
     }
@@ -58,7 +58,7 @@
     "company": "贵州茅台",
     "analysis_type": "full",
     "risk_preference": "balanced",
-    "preferred_action": "standard_research",
+    "preferred_action": "standard_weekly_report",
     "product_filters": {
       "duration_bucket": "6-12M"
     }
@@ -69,7 +69,7 @@
     "company": "贵州茅台",
     "analysis_type": "risk",
     "risk_preference": "conservative",
-    "preferred_action": "risk_only",
+    "preferred_action": "market_update_only",
     "product_filters": {
       "liquidity_type": "每月开放"
     }
@@ -80,7 +80,7 @@
     "company": "贵州茅台",
     "analysis_type": "product",
     "risk_preference": "balanced",
-    "preferred_action": "product_compare",
+    "preferred_action": "benchmark_only",
     "product_filters": {
       "strategy_type": "指数增强"
     }
@@ -91,7 +91,7 @@
     "company": "贵州茅台",
     "analysis_type": "fast",
     "risk_preference": "balanced",
-    "preferred_action": "fast_snapshot",
+    "preferred_action": "fast_weekly_snapshot",
     "product_filters": {
       "asset_class": "不存在资产类别"
     }
@@ -102,7 +102,7 @@
     "company": "贵州茅台",
     "analysis_type": "deep",
     "risk_preference": "strict",
-    "preferred_action": "deep_review",
+    "preferred_action": "deep_product_review",
     "product_filters": {}
   },
   {
@@ -111,7 +111,7 @@
     "company": "贵州茅台",
     "analysis_type": "full",
     "risk_preference": "balanced",
-    "preferred_action": "standard_research",
+    "preferred_action": "standard_weekly_report",
     "product_filters": {
       "asset_class": "现金管理"
     }
@@ -122,7 +122,7 @@
     "company": "贵州茅台",
     "analysis_type": "risk",
     "risk_preference": "conservative",
-    "preferred_action": "risk_only",
+    "preferred_action": "market_update_only",
     "product_filters": {
       "asset_class": "固收+"
     }
@@ -133,7 +133,7 @@
     "company": "贵州茅台",
     "analysis_type": "product",
     "risk_preference": "balanced",
-    "preferred_action": "product_compare",
+    "preferred_action": "benchmark_only",
     "product_filters": {
       "risk_level": "R4"
     }
@@ -144,7 +144,7 @@
     "company": "贵州茅台",
     "analysis_type": "fast",
     "risk_preference": "balanced",
-    "preferred_action": "fast_snapshot",
+    "preferred_action": "fast_weekly_snapshot",
     "product_filters": {
       "channel": "银行渠道"
     }
@@ -155,7 +155,7 @@
     "company": "贵州茅台",
     "analysis_type": "deep",
     "risk_preference": "strict",
-    "preferred_action": "deep_review",
+    "preferred_action": "deep_product_review",
     "product_filters": {
       "duration_bucket": "6-12M"
     }

@@ -1,20 +1,20 @@
-import { BarChart3, FileText, Gauge, GitBranch, Landmark, ShieldCheck, SlidersHorizontal } from 'lucide-react';
+import { BarChart3, FileText, GitBranch, Landmark, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import AgentTraceView from './pages/AgentTraceView.jsx';
 import HumanReview from './pages/HumanReview.jsx';
-import ProductBenchmark from './pages/ProductBenchmark.jsx';
-import ResearchDashboard from './pages/ResearchDashboard.jsx';
-import TraceView from './pages/TraceView.jsx';
+import ProductBenchmarkWorkbench from './pages/ProductBenchmarkWorkbench.jsx';
+import WeeklyReportDashboard from './pages/WeeklyReportDashboard.jsx';
 import { sampleAnalysis } from './data/mockData.js';
 
 const pages = [
-  { id: 'research', label: 'ResearchDashboard', icon: FileText },
-  { id: 'benchmark', label: 'ProductBenchmark', icon: BarChart3 },
-  { id: 'trace', label: 'TraceView', icon: GitBranch }
+  { id: 'weekly', label: 'WeeklyReportDashboard', icon: FileText },
+  { id: 'benchmark', label: 'ProductBenchmarkWorkbench', icon: BarChart3 },
+  { id: 'trace', label: 'AgentTraceView', icon: GitBranch }
 ];
 
 export default function App() {
-  const [activePage, setActivePage] = useState('research');
+  const [activePage, setActivePage] = useState('weekly');
   const [analysis, setAnalysis] = useState(sampleAnalysis);
   const [reviewOpen, setReviewOpen] = useState(false);
 
@@ -38,7 +38,7 @@ export default function App() {
           </div>
           <div>
             <div className="brand-title">wealth-research-agent</div>
-            <div className="brand-subtitle">资管投研辅助 Agent 系统</div>
+            <div className="brand-subtitle">周报型资管产品研究 Agent 系统</div>
           </div>
         </div>
 
@@ -61,14 +61,14 @@ export default function App() {
 
         <div className="sidebar-status">
           <div className="status-row">
-            <Gauge size={16} />
-            <span>Workflow</span>
-            <strong>{analysis.workflow_engine || 'mock'}</strong>
-          </div>
-          <div className="status-row">
             <SlidersHorizontal size={16} />
             <span>Data</span>
-            <strong>sample/mock</strong>
+            <strong>synthetic/mock</strong>
+          </div>
+          <div className="status-row">
+            <ShieldCheck size={16} />
+            <span>Boundary</span>
+            <strong>research support</strong>
           </div>
           {pendingReview ? (
             <button className="review-chip" onClick={() => setReviewOpen(true)}>
@@ -81,7 +81,7 @@ export default function App() {
       <main className="main-surface">
         <header className="topbar">
           <div>
-            <div className="eyebrow">投研辅助 / 风险摘要 / 产品对标 / 研究报告生成</div>
+            <div className="eyebrow">产品周报 / 竞品对标 / 市场分位 / 渠道对标 / 审计追溯</div>
             <h1>
               <ActiveIcon size={26} />
               {activeMeta.label}
@@ -93,9 +93,9 @@ export default function App() {
           </div>
         </header>
 
-        {activePage === 'research' ? <ResearchDashboard analysis={analysis} onAnalysis={handleAnalysis} /> : null}
-        {activePage === 'benchmark' ? <ProductBenchmark analysis={analysis} onAnalysis={handleAnalysis} /> : null}
-        {activePage === 'trace' ? <TraceView analysis={analysis} /> : null}
+        {activePage === 'weekly' ? <WeeklyReportDashboard analysis={analysis} onAnalysis={handleAnalysis} /> : null}
+        {activePage === 'benchmark' ? <ProductBenchmarkWorkbench analysis={analysis} onAnalysis={handleAnalysis} /> : null}
+        {activePage === 'trace' ? <AgentTraceView analysis={analysis} /> : null}
       </main>
 
       <HumanReview

@@ -1,51 +1,44 @@
 # Architecture
 
+## Current Product Direction
+
+`wealth-research-agent` is now a weekly asset-management product research workbench. The default path uses synthetic weekly product snapshots, product NAV, peer universe and market issuance data to produce weekly summaries, peer benchmarks, market/channel percentiles and audit traces.
+
 ## Runtime Flow
 
 ```mermaid
-flowchart LR
-  API["FastAPI"] --> Planner["planner_agent"]
-  Planner --> Graph["LangGraph conditional routing"]
-  Graph --> F["fundamental_react_agent"]
-  Graph --> T["technical_react_agent"]
-  Graph --> V["valuation_react_agent"]
-  Graph --> N["news_react_agent"]
-  Graph --> P["product_benchmark_agent"]
-  F --> G["risk_guardrail_agent"]
-  T --> G
-  V --> G
-  N --> G
-  P --> G
-  G --> R["report_agent"]
-  R --> Verify["verifier_agent"]
-  Verify --> H["human_review_agent"]
-  Verify --> Done["completed"]
-  Verify --> Audit["SQLite audit store"]
-  Audit --> Trace["TraceView"]
+flowchart TD
+  Frontend["WeeklyReportDashboard / ProductBenchmarkWorkbench / AgentTraceView"] --> API["FastAPI"]
+  API --> Weekly["backend/app/weekly_report"]
+  Weekly --> Parsers["CSV parsers"]
+  Weekly --> Metrics["Scale, return, percentile, benchmark metrics"]
+  Metrics --> Generators["Weekly + benchmark generators"]
+  Generators --> Verifier["weekly_report_verifier"]
+  Verifier --> Guardrail["Guardrail checks"]
+  Generators --> Trace["evidence_id / tool_call_id trace"]
+  Trace --> Storage["SQLite audit store"]
+  Metrics --> Eval["Eval + LinUCB route optimization"]
 ```
 
-## Product Benchmark Flow
+## Data Boundary
 
-```mermaid
-flowchart LR
-  Catalog["sample_product_catalog.csv"] --> Tool["product_benchmark"]
-  Nav["sample_product_nav.csv"] --> Tool
-  Events["sample_product_risk_events.csv"] --> API["Product detail APIs"]
-  Tool --> Metrics["return / volatility / drawdown / Sharpe / Calmar / excess"]
-  Metrics --> Report["Report with evidence_id"]
-```
+All committed datasets are synthetic/mock. Attachments may be used to understand schema and reporting workflow, but real rows, customer data, internal files, API keys and model weights are not copied into the repository.
 
-## Key Contracts
+## Agent Boundary
 
-- Planner outputs task type, analysis depth, required tools, skipped tools, risk level, and human-review hint.
-- Tool registry returns `tool_call_id`, `tool_name`, `input_args`, `output`, `evidence_ids`, `latency_ms`, `success`, and `error_type`.
-- Product benchmark rows include metric evidence and source tool-call references.
-- Verifier checks metrics, evidence, report structure, product benchmark sourcing, and guardrail wording.
-- SQLite records runs, agent events, tool calls, report snapshots, eval results, and human reviews.
+The default demo is deterministic and does not require an LLM. ReAct/MCP code paths are implemented as optional capabilities:
 
-## Fallback Strategy
+- `create_react_agent` can be enabled when an OpenAI-compatible key is configured.
+- Local MCP tools expose sample data only.
+- The default workflow does not require an external MCP process.
 
-- No API key: ReAct-capable agents use the deterministic tool pipeline.
-- No GPU or local model file: Qwen adapter uses rule-based fallback.
-- No external data connector: default reads `data/` sample/mock CSV files.
-- No blocking LangGraph interrupt: human review uses `pending_review` plus review APIs.
+## Audit Boundary
+
+Every generated report should preserve:
+
+- source file references
+- evidence ids for data-derived claims
+- tool call ids for tool-derived claims
+- verifier result
+- guardrail result
+- optional human review state

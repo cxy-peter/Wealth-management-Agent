@@ -190,6 +190,10 @@ button {
   grid-template-columns: auto minmax(240px, 1fr);
 }
 
+.weekly-control {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
 .review-actions {
   grid-template-columns: repeat(3, minmax(0, 160px));
 }
@@ -223,7 +227,8 @@ button {
   gap: 6px;
 }
 
-.field-group label {
+.field-group label,
+.field-group > span {
   color: #667176;
   font-size: 12px;
   font-weight: 700;
@@ -354,6 +359,10 @@ button {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
+}
+
+.table-title {
+  padding: 14px 16px 0;
 }
 
 .section-title span {
@@ -690,6 +699,10 @@ table {
   width: 100%;
   border-collapse: collapse;
   min-width: 920px;
+}
+
+.split-grid.triple .table-panel table {
+  min-width: 520px;
 }
 
 th,

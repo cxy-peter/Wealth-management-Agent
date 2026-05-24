@@ -1,11 +1,11 @@
-# Frontend Consolidation
+# Frontend Information Architecture
 
 The frontend is intentionally limited to three top-level workspaces:
 
-- `ResearchDashboard`: analysis form, metrics, report preview, and a merged News Risk tab.
-- `ProductBenchmark`: filter sidebar, product table, scatter plot, product detail drawer, NAV/benchmark curves, risk events, and metric trace.
-- `TraceView`: planner/tool/event trace, verifier, guardrail, advanced eval, route optimization, contextual bandit results, and ScenarioReplay preview.
+- `WeeklyReportDashboard`: weekly filters, KPI cards, scale-change rank, benchmark-failed table, low-percentile products, market issuance modules and risk-summary tab.
+- `ProductBenchmarkWorkbench`: peer benchmark, market percentile, channel benchmark, top peer products and product detail drawer with NAV/benchmark curves and evidence trace.
+- `AgentTraceView`: run id, weekly report date, planner plan, tool calls, evidence ids, verifier result, guardrail result, DPO chosen/rejected examples and advanced eval.
 
-Human review is a drawer that opens when `human_review.status === "pending_review"`; it is not a top-level navigation item.
+Human review is rendered as a drawer/modal only when a run enters `pending_review`.
 
-The app keeps sample/mock fallback data in `frontend/src/data/mockData.js`, so the UI remains usable when the backend is unavailable.
+Scenario replay remains an advanced/internal concept and is not exposed as top-level navigation.

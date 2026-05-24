@@ -14,6 +14,10 @@ from backend.app.optimization.reward import compute_reward
 from backend.app.optimization.router_policy import ACTION_TO_REQUEST, EpsilonGreedyRouter
 from backend.app.tools.data_loader import load_product_nav, load_product_risk_events, load_products
 from backend.app.tools.tool_registry import execute_tool, get_registered_tool_names
+from backend.app.weekly_report.generators.benchmark_report_generator import peer_benchmark, weekly_product_detail
+from backend.app.weekly_report.generators.weekly_report_generator import generate_weekly_report, weekly_summary
+from backend.app.weekly_report.weekly_report_verifier import verify_weekly_report
+from backend.app.dpo.dpo_dataset_validator import validate_dpo_dataset
 
 
 def test_tool_registry_has_required_tools() -> None:
@@ -182,3 +186,57 @@ def test_linucb_policy_select_update_and_snapshot() -> None:
     snapshot = policy.snapshot()
     assert action in scores
     assert snapshot["A"][action]
+
+
+def test_weekly_summary_uses_synthetic_universe() -> None:
+    summary = weekly_summary()
+    assert summary["product_count"] == 96
+    assert summary["kpis"]["total_scale_bn"] > 0
+    assert summary["scale_change_rank"]
+    assert summary["market_issuance"]["new_product_count"] > 0
+    assert summary["evidence_ids"]
+
+
+def test_weekly_product_detail_and_peer_benchmark() -> None:
+    detail = weekly_product_detail("WP0001")
+    assert detail is not None
+    assert detail["nav"]
+    assert detail["percentile"]["evidence_id"].startswith("ev_percentile_")
+    peer = peer_benchmark("WP0001")
+    assert peer["peer_count"] > 0
+    assert peer["table"]
+
+
+def test_weekly_report_verifier_passes_generated_report() -> None:
+    report = generate_weekly_report()
+    verification = verify_weekly_report(report)
+    assert verification["pass"] is True
+    assert verification["metric_mismatches"] == []
+
+
+def test_weekly_api_endpoints() -> None:
+    client = TestClient(app)
+    dates = client.get("/api/weekly-report/dates").json()
+    assert dates["latest"]
+    summary = client.get("/api/weekly-report/summary", params={"report_date": dates["latest"]}).json()
+    products = client.get("/api/weekly-report/products", params={"report_date": dates["latest"]}).json()
+    assert summary["product_count"] == products["count"]
+    product_code = products["products"][0]["product_code"]
+    assert client.get(f"/api/weekly-report/products/{product_code}", params={"report_date": dates["latest"]}).status_code == 200
+    assert client.post("/api/weekly-report/generate", json={"report_date": dates["latest"]}).json()["verification_result"]["pass"] is True
+
+
+def test_weekly_benchmark_api_endpoints() -> None:
+    client = TestClient(app)
+    peer = client.post("/api/benchmark/peer", json={"product_code": "WP0001"}).json()
+    channel = client.post("/api/benchmark/channel", json={}).json()
+    top = client.post("/api/benchmark/top-peers", json={}).json()
+    assert peer["peer_count"] > 0
+    assert channel["peer_count"] > 0
+    assert top["count"] > 0
+
+
+def test_dpo_dataset_validator() -> None:
+    result = validate_dpo_dataset()
+    assert result["valid"] is True
+    assert result["pair_count"] >= 20

@@ -1,0 +1,10 @@
+{
+  "task": "weekly_report_style_alignment",
+  "dataset": "data/dpo/weekly_report_preference_pairs.jsonl",
+  "pair_count": 24,
+  "validation_pass": true,
+  "pair_level_pass_rate": 1.0,
+  "failure_count": 0,
+  "failures": [],
+  "training_default": "validation_only"
+}

@@ -1,17 +1,28 @@
-"""Simple epsilon-greedy routing policy."""
+"""Simple epsilon-greedy routing policy.
+
+The actions are weekly-product-workbench routes. ACTION_TO_REQUEST keeps the
+legacy synchronous demo runnable by mapping each weekly route onto the existing
+workflow request shape.
+"""
 from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
 
-ACTIONS = ["fast_snapshot", "standard_research", "deep_review", "product_compare", "risk_only"]
+ACTIONS = [
+    "fast_weekly_snapshot",
+    "standard_weekly_report",
+    "deep_product_review",
+    "benchmark_only",
+    "market_update_only",
+]
 
 ACTION_TO_REQUEST = {
-    "fast_snapshot": {"analysis_type": "fast", "risk_preference": "balanced"},
-    "standard_research": {"analysis_type": "full", "risk_preference": "balanced"},
-    "deep_review": {"analysis_type": "deep", "risk_preference": "strict"},
-    "product_compare": {"analysis_type": "product", "risk_preference": "balanced"},
-    "risk_only": {"analysis_type": "risk", "risk_preference": "conservative"},
+    "fast_weekly_snapshot": {"analysis_type": "fast", "risk_preference": "balanced"},
+    "standard_weekly_report": {"analysis_type": "full", "risk_preference": "balanced"},
+    "deep_product_review": {"analysis_type": "deep", "risk_preference": "strict"},
+    "benchmark_only": {"analysis_type": "product", "risk_preference": "balanced"},
+    "market_update_only": {"analysis_type": "risk", "risk_preference": "conservative"},
 }
 
 

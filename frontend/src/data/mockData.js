@@ -1,164 +1,243 @@
-export const sampleAnalysis = {
-  run_id: 'run_mock_preview',
-  symbol: '600519',
-  company: '贵州茅台',
-  workflow_engine: 'mock-preview',
-  planner_plan: {
-    task_type: 'standard_research',
-    analysis_depth: 'standard',
-    required_tools: [
-      'load_price_series',
-      'calculate_metrics',
-      'load_fundamental_snapshot',
-      'load_valuation_snapshot',
-      'load_news',
-      'classify_news_risk',
-      'product_benchmark'
-    ],
-    skipped_tools: [],
-    risk_level: 'medium',
-    human_review_required: false
+export const weeklyMock = {
+  report_date: '2025-04-04',
+  product_count: 96,
+  filter_options: {
+    product_series: ['稳健添利', '悦享固收', '多元配置', '现金优选', '全球配置', '封闭精选', '持有期增强'],
+    product_type: ['纯固收', '固收增强', '多资产', '混合类', 'QDII', '现金管理', '封闭式', '最短持有期型', '日开型'],
+    channel: ['个金', '私银', '对公', '直销', '百信', '交行', '厦门银行', '邮惠万家'],
+    risk_level: ['R1', 'R2', 'R3', 'R4', 'R5'],
+    benchmark_status: ['above_upper', 'below_lower', 'in_range']
   },
-  metrics: {
-    observations: 25,
-    total_return: 0.024,
-    annualized_return: 0.2828,
-    annualized_volatility: 0.0687,
-    max_drawdown: -0.0079,
-    sharpe_ratio: 3.824
+  kpis: {
+    total_scale_bn: 1330.0452,
+    scale_wow_bn: 1.4164,
+    scale_mom_bn: 2.8569,
+    benchmark_pass_rate: 0.3646,
+    benchmark_failed_count: 28,
+    low_percentile_product_count: 22,
+    attention_product_count: 41,
+    scale_drop_count: 43,
+    scale_evidence_ids: ['ev_snapshot_WP0001_20250404'],
+    benchmark_evidence_ids: ['ev_snapshot_WP0002_20250404']
   },
-  fundamental_analysis: {
-    quality_label: '盈利质量样例较强',
-    points: ['营收增速样例值为 8.3%。', 'ROE 样例值为 28.6%，净利率样例值为 47.2%。']
-  },
-  valuation_analysis: {
-    valuation_band: '相对同业中位数偏高',
-    points: ['PE(TTM) 为 28.4，同业样例中位数为 24.8。', '估值结论只用于横向描述。']
-  },
-  technical_analysis: {
-    trend_label: '样本内短期趋势偏强',
-    risk_regime: '低波动观察',
-    ma5: 1530.4,
-    ma20: 1518.7,
-    momentum_5d: 0.0039,
-    momentum_20d: 0.0186
-  },
-  news_summary: {
-    avg_sentiment: 3.5,
-    avg_risk: 2.75,
-    signal_count: 4,
-    top_risks: ['监管关注酒类价格秩序', '消费数据分化']
-  },
-  news_signals: [
+  scale_change_rank: [
     {
-      date: '2025-01-08',
-      title: '春节消费预期回暖',
-      sentiment_score: 4,
-      risk_score: 3,
-      model_mode: 'rule-based-fallback',
-      evidence: 'positive_hits=2; negative_hits=1; high_risk_hits=1'
+      product_code: 'WP0031',
+      product_name: '稳健添利现金管理样例031',
+      product_type: '现金管理',
+      channel: '交行',
+      risk_level: 'R1',
+      product_scale_bn: 30.185,
+      scale_wow_bn: 0.316,
+      scale_mom_bn: 0.472,
+      evidence_id: 'ev_snapshot_WP0031_20250404'
     },
     {
-      date: '2025-01-14',
-      title: '监管关注酒类价格秩序',
-      sentiment_score: 2,
-      risk_score: 4,
-      model_mode: 'rule-based-fallback',
-      evidence: 'positive_hits=0; negative_hits=1; high_risk_hits=2'
+      product_code: 'WP0047',
+      product_name: '多元配置混合类样例047',
+      product_type: '混合类',
+      channel: '私银',
+      risk_level: 'R4',
+      product_scale_bn: 18.622,
+      scale_wow_bn: -0.284,
+      scale_mom_bn: -0.716,
+      evidence_id: 'ev_snapshot_WP0047_20250404'
     }
   ],
-  peer_summary: {
-    product_count: 108,
-    product_universe_size: 108,
-    risk_levels: ['R1', 'R2', 'R3', 'R4', 'R5'],
-    channels: ['银行渠道', '线上渠道', '机构渠道', '券商渠道', '私行渠道'],
-    filter_options: {
-      asset_class: ['现金管理', '纯债固收', '固收+', '多资产', '权益增强', '量化对冲', '商品/黄金', 'QDII/全球配置', '养老目标/FOF'],
-      strategy_type: ['现金管理', '利率债', '债券增强', '指数增强', '市场中性', '全球多资产'],
-      risk_level: ['R1', 'R2', 'R3', 'R4', 'R5'],
-      duration_bucket: ['0-3M', '3-6M', '6-12M', '1-3Y', '3Y+'],
-      channel: ['银行渠道', '线上渠道', '机构渠道', '券商渠道', '私行渠道'],
-      liquidity_type: ['每日开放', '每周开放', '每月开放', '每季开放', '持有期']
-    },
-    methodology: '基于 synthetic sample 产品周度 NAV 与 benchmark_nav 计算收益、波动、回撤、Sharpe、Calmar、benchmark excess、胜率和回撤修复天数；排序仅用于投研材料整理。',
-    table: [
-      {
-        product_id: 'SP0077',
-        product_name: '权益增强指数增强样例077',
-        asset_class: '权益增强',
-        strategy_type: '指数增强',
-        channel: '券商渠道',
-        risk_level: 'R5',
-        liquidity_type: '每月开放',
-        duration_bucket: '1-3Y',
-        annualized_return: 0.126,
-        annualized_volatility: 0.236,
-        max_drawdown: -0.162,
-        sharpe_ratio: 0.449,
-        calmar_ratio: 0.778,
-        benchmark_excess_return: 0.031,
-        return_rank: 1,
-        risk_adjusted_rank: 18,
-        metric_evidence_id: 'ev_product_metric_SP0077',
-        source_tool_call_id: 'tc_mock_products'
-      },
-      {
-        product_id: 'SP0034',
-        product_name: '多资产目标波动样例034',
-        asset_class: '多资产',
-        strategy_type: '目标波动',
-        channel: '银行渠道',
-        risk_level: 'R3',
-        liquidity_type: '每季开放',
-        duration_bucket: '6-12M',
-        annualized_return: 0.061,
-        annualized_volatility: 0.082,
-        max_drawdown: -0.046,
-        sharpe_ratio: 0.500,
-        calmar_ratio: 1.326,
-        benchmark_excess_return: 0.012,
-        return_rank: 16,
-        risk_adjusted_rank: 9,
-        metric_evidence_id: 'ev_product_metric_SP0034',
-        source_tool_call_id: 'tc_mock_products'
-      },
-      {
-        product_id: 'SP0012',
-        product_name: '现金管理流动性管理样例012',
-        asset_class: '现金管理',
-        strategy_type: '流动性管理',
-        channel: '线上渠道',
-        risk_level: 'R1',
-        liquidity_type: '每日开放',
-        duration_bucket: '0-3M',
-        annualized_return: 0.018,
-        annualized_volatility: 0.006,
-        max_drawdown: -0.002,
-        sharpe_ratio: -0.333,
-        calmar_ratio: 9.0,
-        benchmark_excess_return: 0.002,
-        return_rank: 92,
-        risk_adjusted_rank: 71,
-        metric_evidence_id: 'ev_product_metric_SP0012',
-        source_tool_call_id: 'tc_mock_products'
-      }
-    ]
-  },
-  risk_flags: [
-    '相对估值样例高于同业中位数，需要拆分质量溢价、成长预期和估值回撤风险。',
-    '产品池包含较高风险等级样例，展示收益指标时必须同步展示波动、回撤和风险等级。',
-    '输出仅用于投研辅助、风险摘要、产品对标和研究报告生成，正式使用前保留人工复核与合规校验。'
+  benchmark_failed_products: [
+    {
+      product_code: 'WP0028',
+      product_name: '悦享固收固收增强样例028',
+      product_type: '固收增强',
+      channel: '百信',
+      risk_level: 'R3',
+      since_inception_annual_return: 0.021,
+      benchmark_lower: 0.031,
+      benchmark_upper: 0.052,
+      benchmark_status: 'below_lower',
+      evidence_id: 'ev_snapshot_WP0028_20250404'
+    }
   ],
+  percentile_decline_products: [
+    {
+      product_code: 'WP0047',
+      product_name: '多元配置混合类样例047',
+      product_type: '混合类',
+      return_3m: -0.018,
+      max_drawdown: -0.079,
+      return_percentile: 0.18,
+      drawdown_percentile: 0.24,
+      evidence_id: 'ev_percentile_WP0047_20250404'
+    }
+  ],
+  market_issuance: {
+    new_product_count: 72,
+    by_investment_nature: { 固定收益类: 38, 混合类: 14, 权益类: 6, 商品及金融衍生品类: 4, QDII: 10 },
+    by_duration: { 日开: 9, '30天': 10, '90天': 15, '180天': 13, '360天': 11, '1年封闭': 14 },
+    benchmark_lower_avg: 0.024,
+    benchmark_upper_avg: 0.047,
+    evidence_id: 'ev_market_issuance_20250404'
+  },
+  evidence_ids: ['ev_snapshot_WP0001_20250404', 'ev_market_issuance_20250404']
+};
+
+export const weeklyProductsMock = [
+  {
+    product_code: 'WP0031',
+    product_name: '稳健添利现金管理样例031',
+    product_type: '现金管理',
+    product_series: '稳健添利',
+    channel: '交行',
+    risk_level: 'R1',
+    open_type: '日开',
+    product_scale_bn: 30.185,
+    scale_wow_bn: 0.316,
+    return_3m: 0.0058,
+    max_drawdown: -0.0018,
+    volatility: 0.0049,
+    sharpe: 0.82,
+    benchmark_status: 'in_range',
+    return_percentile: 0.62,
+    drawdown_percentile: 0.77,
+    evidence_id: 'ev_snapshot_WP0031_20250404'
+  },
+  {
+    product_code: 'WP0047',
+    product_name: '多元配置混合类样例047',
+    product_type: '混合类',
+    product_series: '多元配置',
+    channel: '私银',
+    risk_level: 'R4',
+    open_type: '180天',
+    product_scale_bn: 18.622,
+    scale_wow_bn: -0.284,
+    return_3m: -0.018,
+    max_drawdown: -0.079,
+    volatility: 0.094,
+    sharpe: -0.12,
+    benchmark_status: 'below_lower',
+    return_percentile: 0.18,
+    drawdown_percentile: 0.24,
+    evidence_id: 'ev_snapshot_WP0047_20250404'
+  }
+];
+
+export const productDetailMock = {
+  report_date: '2025-04-04',
+  snapshot: weeklyProductsMock[0],
+  nav: [
+    { nav_date: '2025-01-10', nav: 1.002, benchmark_nav: 1.001, nav_evidence_id: 'ev_nav_mock_1' },
+    { nav_date: '2025-01-17', nav: 1.004, benchmark_nav: 1.003, nav_evidence_id: 'ev_nav_mock_2' },
+    { nav_date: '2025-01-24', nav: 1.003, benchmark_nav: 1.004, nav_evidence_id: 'ev_nav_mock_3' },
+    { nav_date: '2025-01-31', nav: 1.007, benchmark_nav: 1.005, nav_evidence_id: 'ev_nav_mock_4' },
+    { nav_date: '2025-02-07', nav: 1.009, benchmark_nav: 1.007, nav_evidence_id: 'ev_nav_mock_5' }
+  ],
+  percentile: {
+    return_percentile: 0.62,
+    drawdown_percentile: 0.77,
+    sharpe_percentile: 0.58,
+    evidence_id: 'ev_percentile_WP0031_20250404'
+  },
+  risk_events: [
+    {
+      event_date: '2025-04-04',
+      event_type: 'benchmark_status',
+      event_summary: 'benchmark_status=in_range; return_percentile=0.62',
+      evidence_id: 'ev_percentile_WP0031_20250404'
+    }
+  ],
+  evidence_ids: ['ev_snapshot_WP0031_20250404', 'ev_percentile_WP0031_20250404']
+};
+
+export const peerBenchmarkMock = {
+  product_code: 'WP0031',
+  report_date: '2025-04-04',
+  product: weeklyProductsMock[0],
+  percentile: productDetailMock.percentile,
+  peer_count: 41,
+  table: [
+    {
+      peer_product_code: 'PR0007',
+      peer_product_name: '现金管理同业样例007',
+      product_type: '现金管理',
+      channel: '个金',
+      return_3m: 0.0064,
+      max_drawdown: -0.0019,
+      volatility: 0.0047,
+      sharpe: 0.86,
+      return_percentile: 0.74,
+      evidence_id_x: 'ev_peer_metric_PR0007'
+    },
+    {
+      peer_product_code: 'PR0041',
+      peer_product_name: '现金管理同业样例041',
+      product_type: '现金管理',
+      channel: '直销',
+      return_3m: 0.0059,
+      max_drawdown: -0.0022,
+      volatility: 0.0044,
+      sharpe: 0.81,
+      return_percentile: 0.67,
+      evidence_id_x: 'ev_peer_metric_PR0041'
+    }
+  ],
+  evidence_ids: ['ev_snapshot_WP0031_20250404', 'ev_peer_metric_PR0007']
+};
+
+export const channelBenchmarkMock = {
+  peer_count: 96,
+  channels: ['个金', '私银', '对公', '直销'],
+  table: [
+    { channel: '个金', product_type: '纯固收', peer_count: 12, avg_return_3m: 0.011, total_scale_bn: 118.5 },
+    { channel: '私银', product_type: '混合类', peer_count: 9, avg_return_3m: 0.008, total_scale_bn: 74.2 }
+  ],
+  evidence_ids: ['ev_channel_peer_PR0001']
+};
+
+export const topPeersMock = {
+  count: 2,
+  table: [
+    {
+      rank: 1,
+      peer_product_code: 'PR0012',
+      peer_product_name: '固收增强同业样例012',
+      product_type: '固收增强',
+      return_3m: 0.024,
+      return_percentile: 0.94,
+      max_drawdown: -0.018,
+      sharpe: 1.12,
+      evidence_id: 'ev_top_peer_PR0012'
+    },
+    {
+      rank: 2,
+      peer_product_code: 'PR0088',
+      peer_product_name: '固收增强同业样例088',
+      product_type: '固收增强',
+      return_3m: 0.021,
+      return_percentile: 0.91,
+      max_drawdown: -0.016,
+      sharpe: 1.04,
+      evidence_id: 'ev_top_peer_PR0088'
+    }
+  ]
+};
+
+export const sampleAnalysis = {
+  run_id: 'weekly_run_mock_preview',
+  weekly_report_date: weeklyMock.report_date,
+  workflow_engine: 'weekly-mock-preview',
+  planner_plan: {
+    task_type: 'standard_weekly_report',
+    required_tools: ['load_weekly_snapshot', 'calculate_weekly_metrics', 'peer_benchmark', 'weekly_report_verifier'],
+    human_review_required: false
+  },
   tool_calls: [
-    { tool_call_id: 'tc_mock_price', tool_name: 'load_price_series', success: true, latency_ms: 5.1, evidence_ids: ['ev_sample_nav_600519'] },
-    { tool_call_id: 'tc_mock_metrics', tool_name: 'calculate_metrics', success: true, latency_ms: 6.8, evidence_ids: ['ev_metrics_600519'] },
-    { tool_call_id: 'tc_mock_news', tool_name: 'classify_news_risk', success: true, latency_ms: 4.7, evidence_ids: ['ev_news_risk_600519'] },
-    { tool_call_id: 'tc_mock_products', tool_name: 'product_benchmark', success: true, latency_ms: 3.2, evidence_ids: ['ev_product_benchmark_108'] }
+    { tool_call_id: 'tc_weekly_summary_mock', tool_name: 'weekly_summary', success: true, latency_ms: 18.4, evidence_ids: weeklyMock.evidence_ids },
+    { tool_call_id: 'tc_peer_mock', tool_name: 'peer_benchmark', success: true, latency_ms: 24.1, evidence_ids: peerBenchmarkMock.evidence_ids }
   ],
   agent_events: [
-    { event_type: 'planner_output', agent_name: 'planner_agent', payload: { task_type: 'standard_research' } },
-    { event_type: 'agent_final', agent_name: 'technical_react_agent', payload: { trend_label: '样本内短期趋势偏强' } },
-    { event_type: 'verification_result', agent_name: 'verifier_agent', payload: { pass: true, confidence_score: 1 } }
+    { event_type: 'planner_output', agent_name: 'weekly_planner', payload: { task_type: 'standard_weekly_report' } },
+    { event_type: 'verification_result', agent_name: 'weekly_report_verifier', payload: { pass: true, confidence_score: 0.96 } }
   ],
   verification_result: {
     pass: true,
@@ -166,20 +245,58 @@ export const sampleAnalysis = {
     metric_mismatches: [],
     missing_evidence: [],
     forbidden_wording: false,
-    confidence_score: 1
+    confidence_score: 0.96
   },
-  human_review: {
-    status: 'auto_cleared',
-    interrupt_available: true
+  guardrail: {
+    pass: true,
+    scope: 'weekly product research support only',
+    forbidden_wording_hit: false
   },
-  report_markdown: '# 资管投研辅助 Agent 报告\n\n本报告仅用于投研辅助、风险摘要、产品对标和研究报告生成。'
+  dpo_trace: {
+    pair_count: 24,
+    samples: [
+      {
+        id: 'dpo_weekly_001',
+        chosen: '本周规模变化、收益表现、基准状态和风险提示均带 evidence_id。',
+        rejected: '泛泛描述，缺少数字来源和风险提示。'
+      }
+    ]
+  },
+  evidence_ids: weeklyMock.evidence_ids,
+  human_review: { status: 'auto_cleared' },
+  report_markdown: '# 资管产品周报摘要\n\n本摘要基于 synthetic/mock 周报数据生成，仅用于投研辅助、风险摘要、产品对标和报告草稿整理。'
 };
 
-export const instrumentOptions = [
-  { symbol: '600519', company: '贵州茅台', label: '贵州茅台 / 600519' },
-  { symbol: 'SP0012', company: '现金管理流动性管理样例012', label: '现金管理样例 / SP0012' },
-  { symbol: 'SP0034', company: '多资产目标波动样例034', label: '多资产样例 / SP0034' }
-];
+export const contextualBanditResults = {
+  case_count: 96,
+  best_policy: 'linucb_contextual_bandit',
+  strategies: {
+    fixed_standard_research: {
+      average_reward: 0.7482,
+      average_latency_ms: 453.43,
+      forbidden_wording_fail_rate: 0,
+      regret_vs_oracle: 0.0727,
+      verifier_pass_rate: 0.6042,
+      action_distribution: { standard_weekly_report: 96 }
+    },
+    epsilon_greedy: {
+      average_reward: 0.7059,
+      average_latency_ms: 732.18,
+      forbidden_wording_fail_rate: 0,
+      regret_vs_oracle: 0.115,
+      verifier_pass_rate: 0.8229,
+      action_distribution: { fast_weekly_snapshot: 7, standard_weekly_report: 7, deep_product_review: 72, benchmark_only: 5, market_update_only: 5 }
+    },
+    linucb_contextual_bandit: {
+      average_reward: 0.7659,
+      average_latency_ms: 498.52,
+      forbidden_wording_fail_rate: 0,
+      regret_vs_oracle: 0.055,
+      verifier_pass_rate: 0.6875,
+      action_distribution: { standard_weekly_report: 47, benchmark_only: 16, market_update_only: 11, deep_product_review: 22 }
+    }
+  }
+};
 
 export const evalResults = {
   metrics: {
@@ -191,58 +308,5 @@ export const evalResults = {
     forbidden_wording_fail_rate: 0,
     avg_latency_ms: 240.64
   },
-  cases: [{ symbol: '600519', passed: true, workflow_engine: 'langgraph', latency_ms: 240.64 }]
+  cases: [{ case_id: 'weekly_eval_mock', passed: true, latency_ms: 240.64 }]
 };
-
-export const routeOptimizationResults = {
-  average_reward: 0.8657,
-  policy: {
-    values: {
-      fast_snapshot: 0.8737,
-      standard_research: 0.8518,
-      deep_review: 0.8426,
-      product_compare: 0.8785,
-      risk_only: 0.882
-    }
-  },
-  evaluations: [
-    { action: 'standard_research', reward: 0.8237, planner_task_type: 'standard_research' },
-    { action: 'risk_only', reward: 0.8861, planner_task_type: 'risk_only' },
-    { action: 'product_compare', reward: 0.885, planner_task_type: 'product_compare' }
-  ]
-};
-
-export const contextualBanditResults = {
-  case_count: 90,
-  best_policy: 'linucb_contextual_bandit',
-  strategies: {
-    fixed_standard_research: {
-      average_reward: 0.682,
-      average_latency_ms: 504.84,
-      forbidden_wording_fail_rate: 0,
-      regret_vs_oracle: 0.1547,
-      action_distribution: { standard_research: 90 }
-    },
-    epsilon_greedy: {
-      average_reward: 0.721,
-      average_latency_ms: 316.66,
-      forbidden_wording_fail_rate: 0,
-      regret_vs_oracle: 0.131,
-      action_distribution: { fast_snapshot: 4, standard_research: 11, deep_review: 13, product_compare: 5, risk_only: 57 }
-    },
-    linucb_contextual_bandit: {
-      average_reward: 0.7518,
-      average_latency_ms: 340.09,
-      forbidden_wording_fail_rate: 0,
-      regret_vs_oracle: 0.1003,
-      action_distribution: { fast_snapshot: 18, standard_research: 18, deep_review: 13, product_compare: 18, risk_only: 23 }
-    }
-  }
-};
-
-export const replayBars = [
-  { date: '01-02', value: 100, event: '样例期初' },
-  { date: '01-14', value: 100.6, event: '新闻风险升温' },
-  { date: '01-28', value: 102.1, event: '波动回落' },
-  { date: '02-12', value: 102.6, event: '样例期末' }
-];

@@ -1,69 +1,72 @@
-"""Context feature extraction for route optimization."""
+"""Context feature extraction for weekly-report route optimization."""
 from __future__ import annotations
 
 from typing import Any
 
 FEATURE_NAMES = [
     "bias",
-    "is_equity",
-    "is_product",
-    "is_risk_only",
-    "is_product_compare",
-    "risk_preference_conservative",
-    "risk_preference_strict",
-    "missing_fundamental_data",
-    "news_count",
-    "avg_news_risk",
-    "max_drawdown_abs",
-    "volatility",
+    "is_weekly_report",
+    "is_product_benchmark",
+    "is_market_update",
+    "is_high_risk_product",
+    "benchmark_failed_count",
+    "scale_drop_count",
     "product_pool_size",
-    "product_risk_level_num",
+    "avg_return_percentile",
+    "avg_drawdown_percentile",
+    "missing_nav_ratio",
+    "market_new_issue_count",
     "latency_budget_ms",
     "human_review_required",
 ]
 
-EQUITY_ASSET_CLASSES = {"权益增强", "多资产", "QDII/全球配置"}
 
-
-def risk_level_num(value: str | int | float | None) -> float:
-    if value is None:
-        return 0.0
-    text = str(value).upper().replace("R", "")
+def _bounded(value: Any, denominator: float, default: float = 0.0) -> float:
     try:
-        return float(text)
-    except ValueError:
-        return 0.0
+        numeric = float(value)
+    except (TypeError, ValueError):
+        numeric = default
+    return min(max(numeric / denominator, 0.0), 1.0)
 
 
 def extract_context(case: dict[str, Any], result: dict[str, Any] | None = None) -> dict[str, float]:
     result = result or {}
-    analysis_type = str(case.get("analysis_type", "full")).lower()
-    risk_preference = str(case.get("risk_preference", "balanced")).lower()
-    asset_class = str(case.get("asset_class") or case.get("product_filters", {}).get("asset_class") or "")
-    product_pool_size = case.get("product_pool_size", result.get("peer_summary", {}).get("product_count", 0))
-    avg_news_risk = case.get("avg_news_risk", result.get("news_summary", {}).get("avg_risk", 0))
-    max_drawdown_abs = case.get("max_drawdown_abs", abs(result.get("metrics", {}).get("max_drawdown", 0)))
-    volatility = case.get("volatility", result.get("metrics", {}).get("annualized_volatility", 0))
-    product_risk_level = case.get("product_risk_level", case.get("product_filters", {}).get("risk_level"))
-    human_review = bool(case.get("human_review_required", False))
+    scenario = str(case.get("scenario", "")).lower()
+    request_type = str(case.get("request_type", case.get("analysis_type", "weekly_report"))).lower()
+    risk_level = str(case.get("risk_level", case.get("product_risk_level", ""))).upper()
+
+    benchmark_failed_count = case.get(
+        "benchmark_failed_count",
+        result.get("kpis", {}).get("benchmark_failed_count", 0),
+    )
+    scale_drop_count = case.get("scale_drop_count", result.get("kpis", {}).get("scale_drop_count", 0))
+    product_pool_size = case.get("product_pool_size", result.get("product_count", 0))
+    avg_return_percentile = case.get("avg_return_percentile", result.get("avg_return_percentile", 0.5))
+    avg_drawdown_percentile = case.get("avg_drawdown_percentile", result.get("avg_drawdown_percentile", 0.5))
+    missing_nav_ratio = case.get("missing_nav_ratio", result.get("missing_nav_ratio", 0))
+    market_new_issue_count = case.get(
+        "market_new_issue_count",
+        result.get("market_issuance", {}).get("new_product_count", 0),
+    )
 
     return {
         "bias": 1.0,
-        "is_equity": 1.0 if asset_class in EQUITY_ASSET_CLASSES or analysis_type in {"equity", "stock"} else 0.0,
-        "is_product": 1.0 if case.get("symbol", "").startswith("SP") or analysis_type == "product" else 0.0,
-        "is_risk_only": 1.0 if analysis_type in {"risk", "risk_only"} else 0.0,
-        "is_product_compare": 1.0 if analysis_type in {"product", "product_compare", "benchmark"} else 0.0,
-        "risk_preference_conservative": 1.0 if risk_preference == "conservative" else 0.0,
-        "risk_preference_strict": 1.0 if risk_preference == "strict" else 0.0,
-        "missing_fundamental_data": 1.0 if case.get("missing_fundamental_data", False) else 0.0,
-        "news_count": min(float(case.get("news_count", result.get("news_summary", {}).get("signal_count", 0))) / 10.0, 1.0),
-        "avg_news_risk": min(float(avg_news_risk) / 5.0, 1.0),
-        "max_drawdown_abs": min(float(max_drawdown_abs) / 0.30, 1.0),
-        "volatility": min(float(volatility) / 0.50, 1.0),
-        "product_pool_size": min(float(product_pool_size) / 120.0, 1.0),
-        "product_risk_level_num": min(risk_level_num(product_risk_level) / 5.0, 1.0),
-        "latency_budget_ms": min(float(case.get("latency_budget_ms", 800)) / 2000.0, 1.0),
-        "human_review_required": 1.0 if human_review else 0.0,
+        "is_weekly_report": 1.0 if request_type in {"weekly_report", "standard_weekly_report", "full"} else 0.0,
+        "is_product_benchmark": 1.0
+        if request_type in {"product_benchmark", "benchmark", "benchmark_only", "product"}
+        or "benchmark" in scenario
+        else 0.0,
+        "is_market_update": 1.0 if request_type in {"market_update", "market_update_only"} or "market" in scenario else 0.0,
+        "is_high_risk_product": 1.0 if risk_level in {"R4", "R5"} or bool(case.get("is_high_risk_product", False)) else 0.0,
+        "benchmark_failed_count": _bounded(benchmark_failed_count, 30.0),
+        "scale_drop_count": _bounded(scale_drop_count, 40.0),
+        "product_pool_size": _bounded(product_pool_size, 160.0),
+        "avg_return_percentile": min(max(float(avg_return_percentile), 0.0), 1.0),
+        "avg_drawdown_percentile": min(max(float(avg_drawdown_percentile), 0.0), 1.0),
+        "missing_nav_ratio": min(max(float(missing_nav_ratio), 0.0), 1.0),
+        "market_new_issue_count": _bounded(market_new_issue_count, 120.0),
+        "latency_budget_ms": _bounded(case.get("latency_budget_ms", 900), 2500.0),
+        "human_review_required": 1.0 if bool(case.get("human_review_required", False)) else 0.0,
     }
 
 

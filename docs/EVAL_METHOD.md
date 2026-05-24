@@ -2,22 +2,11 @@
 
 ## Report Eval
 
-Run:
-
 ```bash
 python eval/run_eval.py
 ```
 
-Output:
-
-```text
-eval/results.json
-```
-
-Current coverage:
-
-- `eval/eval_cases.json`: 20 cases.
-- Scenarios include normal research, product comparison, risk summary, high-risk news, missing data, empty product pool, wording injection, and extreme-volatility labels.
+Output: `eval/results.json`
 
 Metrics:
 
@@ -29,53 +18,67 @@ Metrics:
 - `forbidden_wording_fail_rate`
 - `avg_latency_ms`
 
-## Route Optimization Eval
+This eval keeps the legacy synchronous workflow healthy while the main product direction moves to weekly product research.
 
-Run:
+## Weekly DPO Style Eval
+
+```bash
+python -m backend.app.dpo.eval_dpo_report_style
+```
+
+Output: `eval/dpo_style_eval_results.json`
+
+Checks:
+
+- chosen output has `evidence_id`
+- chosen output is grounded to tool output
+- chosen output avoids configuration-oriented or return-promise wording
+- chosen/rejected are materially different
+
+## Route Optimization Eval
 
 ```bash
 python eval/run_route_optimization.py
 ```
 
-Output:
+Output: `eval/route_optimization_results.json`
 
-```text
-eval/route_optimization_results.json
-```
+Actions:
 
-Reward:
-
-```text
-0.20 * tool_call_success
-+ 0.20 * metric_consistency
-+ 0.15 * risk_warning_coverage
-+ 0.15 * evidence_coverage
-+ 0.10 * report_format_pass
-+ 0.10 * route_match_score
-- 0.10 * latency_penalty
-- 0.15 * unnecessary_tool_penalty
-- 1.00 * forbidden_wording_hit
-```
+- `fast_weekly_snapshot`
+- `standard_weekly_report`
+- `deep_product_review`
+- `benchmark_only`
+- `market_update_only`
 
 ## Contextual Bandit Eval
-
-Run:
 
 ```bash
 python eval/run_contextual_bandit.py
 ```
 
-Output:
-
-```text
-eval/contextual_bandit_results.json
-```
+Output: `eval/contextual_bandit_results.json`
 
 Cases:
 
-- `eval/contextual_bandit_cases.json`: 90 cases.
-- Symbols are diversified across equity-like symbols, product ids, index-like symbols, global allocation and commodity examples.
-- Context features include asset/product flags, risk preference, missing-data flags, news count/risk, volatility, drawdown, product pool size, product risk level, latency budget, and human-review requirement.
+- `eval/contextual_bandit_cases.json`: 96 weekly routing cases.
+- Coverage includes weekly report, product benchmark, market update, high-risk review, low latency, missing NAV, scale pressure and benchmark-failed scenarios.
+
+Context features:
+
+- `is_weekly_report`
+- `is_product_benchmark`
+- `is_market_update`
+- `is_high_risk_product`
+- `benchmark_failed_count`
+- `scale_drop_count`
+- `product_pool_size`
+- `avg_return_percentile`
+- `avg_drawdown_percentile`
+- `missing_nav_ratio`
+- `market_new_issue_count`
+- `latency_budget_ms`
+- `human_review_required`
 
 Compared strategies:
 
@@ -87,7 +90,8 @@ Output fields:
 
 - `average_reward`
 - `average_latency_ms`
-- `forbidden_wording_fail_rate`
 - `action_distribution`
 - `regret_vs_oracle`
+- `verifier_pass_rate`
+- `forbidden_wording_fail_rate`
 - `per_case_results`

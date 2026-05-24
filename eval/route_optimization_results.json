@@ -1,29 +1,29 @@
 {
   "case_count": 15,
-  "average_reward": 0.8657,
+  "average_reward": 0.8771,
   "policy": {
     "epsilon": 0.15,
     "values": {
-      "fast_snapshot": 0.8737333333333334,
-      "standard_research": 0.8518333333333333,
-      "deep_review": 0.8425666666666667,
-      "product_compare": 0.8784666666666666,
-      "risk_only": 0.8820333333333333
+      "fast_weekly_snapshot": 0.8894666666666666,
+      "standard_weekly_report": 0.8615666666666666,
+      "deep_product_review": 0.8614,
+      "benchmark_only": 0.8836666666666667,
+      "market_update_only": 0.8895333333333333
     },
     "counts": {
-      "fast_snapshot": 3,
-      "standard_research": 3,
-      "deep_review": 3,
-      "product_compare": 3,
-      "risk_only": 3
+      "fast_weekly_snapshot": 3,
+      "standard_weekly_report": 3,
+      "deep_product_review": 3,
+      "benchmark_only": 3,
+      "market_update_only": 3
     }
   },
   "evaluations": [
     {
       "symbol": "600519",
-      "action": "standard_research",
+      "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.8237,
+      "reward": 0.8369,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -31,17 +31,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 610.55,
+        "latency_ms": 505.18,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_1cf8ddb8bf22"
+      "run_id": "run_b12f3ba75043"
     },
     {
       "symbol": "600519",
-      "action": "risk_only",
+      "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8861,
+      "reward": 0.8893,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -49,17 +49,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 110.9,
+        "latency_ms": 85.2,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_7cf8700465dc"
+      "run_id": "run_c911464bc640"
     },
     {
       "symbol": "600519",
-      "action": "product_compare",
+      "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.885,
+      "reward": 0.8858,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -67,17 +67,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 119.91,
+        "latency_ms": 113.74,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_38a60f64e2e6"
+      "run_id": "run_be6e88459cbd"
     },
     {
       "symbol": "600519",
-      "action": "fast_snapshot",
+      "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.8682,
+      "reward": 0.889,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -85,17 +85,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 254.14,
+        "latency_ms": 87.75,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_1722b22a6d35"
+      "run_id": "run_2156e3b65957"
     },
     {
       "symbol": "600519",
-      "action": "deep_review",
+      "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.8675,
+      "reward": 0.8726,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -103,17 +103,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 260.37,
+        "latency_ms": 219.0,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_dd0bb7050a70"
+      "run_id": "run_8bba295e0ec2"
     },
     {
       "symbol": "600519",
-      "action": "standard_research",
+      "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.8708,
+      "reward": 0.8714,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -121,17 +121,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 233.88,
+        "latency_ms": 229.1,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_9c6bd417a784"
+      "run_id": "run_e55c22bebe06"
     },
     {
       "symbol": "600519",
-      "action": "risk_only",
+      "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8798,
+      "reward": 0.8895,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -139,17 +139,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 161.58,
+        "latency_ms": 84.0,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_1238bb9b3947"
+      "run_id": "run_ebfd2866dc63"
     },
     {
       "symbol": "600519",
-      "action": "product_compare",
+      "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.8853,
+      "reward": 0.8876,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -157,17 +157,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 117.9,
+        "latency_ms": 99.29,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_19864e7f09b0"
+      "run_id": "run_7b89ad30d575"
     },
     {
       "symbol": "600519",
-      "action": "fast_snapshot",
+      "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.8718,
+      "reward": 0.8898,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -175,17 +175,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 225.84,
+        "latency_ms": 81.49,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_07543251bab9"
+      "run_id": "run_a75d5dd1fd4a"
     },
     {
       "symbol": "600519",
-      "action": "deep_review",
+      "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.8242,
+      "reward": 0.839,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -193,17 +193,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 606.78,
+        "latency_ms": 487.82,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_8218453da23a"
+      "run_id": "run_2d1fa112c196"
     },
     {
       "symbol": "600519",
-      "action": "standard_research",
+      "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.861,
+      "reward": 0.8764,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -211,17 +211,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 311.82,
+        "latency_ms": 188.6,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_63919e410654"
+      "run_id": "run_c0a33d448702"
     },
     {
       "symbol": "600519",
-      "action": "risk_only",
+      "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8802,
+      "reward": 0.8898,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -229,17 +229,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 158.29,
+        "latency_ms": 81.93,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_d9db28b4e159"
+      "run_id": "run_5ceca9479948"
     },
     {
       "symbol": "600519",
-      "action": "product_compare",
+      "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.8651,
+      "reward": 0.8776,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -247,17 +247,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 279.26,
+        "latency_ms": 179.05,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_9dbc21e71907"
+      "run_id": "run_29ae250c351e"
     },
     {
       "symbol": "600519",
-      "action": "fast_snapshot",
+      "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.8812,
+      "reward": 0.8896,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -265,17 +265,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 150.61,
+        "latency_ms": 83.29,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_fd31980cc6d6"
+      "run_id": "run_80a6b706d103"
     },
     {
       "symbol": "600519",
-      "action": "deep_review",
+      "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.836,
+      "reward": 0.8726,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -283,11 +283,11 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 512.08,
+        "latency_ms": 219.55,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_fc88eeb06e69"
+      "run_id": "run_c68c1b507b10"
     }
   ]
 }

@@ -21,6 +21,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Compile Python
         run: python -m compileall backend scripts eval
+      - name: Generate synthetic weekly data
+        run: python scripts/generate_weekly_report_universe.py
       - name: Pytest
         run: pytest
       - name: Report eval
@@ -29,6 +31,8 @@ jobs:
         run: python eval/run_route_optimization.py
       - name: Contextual bandit eval
         run: python eval/run_contextual_bandit.py
+      - name: DPO style eval
+        run: python -m backend.app.dpo.eval_dpo_report_style
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci

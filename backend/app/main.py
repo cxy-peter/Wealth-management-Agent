@@ -20,6 +20,20 @@ from backend.app.storage import (
 )
 from backend.app.tools.data_loader import load_product_nav, load_product_risk_events, load_products
 from backend.app.tools.product_benchmark import filter_products, peer_summary, product_detail
+from backend.app.weekly_report.generators.benchmark_report_generator import (
+    channel_benchmark,
+    peer_benchmark,
+    top_peers,
+    weekly_product_detail,
+)
+from backend.app.weekly_report.generators.dpo_pair_generator import dpo_trace_sample
+from backend.app.weekly_report.generators.weekly_report_generator import (
+    generate_weekly_report,
+    weekly_products,
+    weekly_summary,
+)
+from backend.app.weekly_report.parsers.weekly_snapshot_parser import list_report_dates
+from backend.app.weekly_report.weekly_report_verifier import verify_weekly_report
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -54,6 +68,33 @@ class EvalRunRequest(BaseModel):
     output_path: str | None = None
 
 
+class WeeklyReportRequest(BaseModel):
+    report_date: str | None = None
+    product_series: str | None = None
+    product_type: str | None = None
+    channel: str | None = None
+    risk_level: str | None = None
+    benchmark_status: str | None = None
+    open_type: str | None = None
+
+
+class PeerBenchmarkRequest(BaseModel):
+    product_code: str
+    report_date: str | None = None
+    limit: int = 12
+
+
+class ChannelBenchmarkRequest(BaseModel):
+    product_type: str | None = None
+    channel: str | None = None
+
+
+class TopPeersRequest(BaseModel):
+    product_type: str | None = None
+    report_date: str | None = None
+    limit: int = 20
+
+
 class ReviewRequest(BaseModel):
     reviewer: str | None = None
     comment: str | None = None
@@ -66,7 +107,7 @@ def health() -> dict[str, Any]:
         "status": "ok",
         "service": "wealth-research-agent",
         "data_mode": "sample/mock",
-        "workflow": "LangGraph with deterministic fallbacks",
+        "workflow": "weekly product research workbench with deterministic fallbacks",
     }
 
 
@@ -181,6 +222,100 @@ def get_product_nav(product_id: str) -> dict[str, Any]:
 def get_product_risk_events(product_id: str) -> dict[str, Any]:
     events = load_product_risk_events(product_id)
     return {"product_id": product_id, "records": _frame_records(events)}
+
+
+def _weekly_filters(
+    product_series: str | None = None,
+    product_type: str | None = None,
+    channel: str | None = None,
+    risk_level: str | None = None,
+    benchmark_status: str | None = None,
+    open_type: str | None = None,
+) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in {
+            "product_series": product_series,
+            "product_type": product_type,
+            "channel": channel,
+            "risk_level": risk_level,
+            "benchmark_status": benchmark_status,
+            "open_type": open_type,
+        }.items()
+        if value
+    }
+
+
+@app.get("/api/weekly-report/dates")
+def weekly_report_dates() -> dict[str, Any]:
+    dates = list_report_dates()
+    return {"dates": dates, "latest": dates[-1] if dates else None}
+
+
+@app.get("/api/weekly-report/summary")
+def get_weekly_report_summary(
+    report_date: str | None = None,
+    product_series: str | None = None,
+    product_type: str | None = None,
+    channel: str | None = None,
+    risk_level: str | None = None,
+    benchmark_status: str | None = None,
+    open_type: str | None = None,
+) -> dict[str, Any]:
+    return weekly_summary(
+        report_date,
+        _weekly_filters(product_series, product_type, channel, risk_level, benchmark_status, open_type),
+    )
+
+
+@app.get("/api/weekly-report/products")
+def get_weekly_report_products(
+    report_date: str | None = None,
+    product_series: str | None = None,
+    product_type: str | None = None,
+    channel: str | None = None,
+    risk_level: str | None = None,
+    benchmark_status: str | None = None,
+    open_type: str | None = None,
+) -> dict[str, Any]:
+    return weekly_products(
+        report_date,
+        _weekly_filters(product_series, product_type, channel, risk_level, benchmark_status, open_type),
+    )
+
+
+@app.get("/api/weekly-report/products/{product_code}")
+def get_weekly_report_product(product_code: str, report_date: str | None = None) -> dict[str, Any]:
+    detail = weekly_product_detail(product_code, report_date)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="product_code not found")
+    return detail
+
+
+@app.post("/api/weekly-report/generate")
+def post_weekly_report_generate(req: WeeklyReportRequest) -> dict[str, Any]:
+    result = generate_weekly_report(
+        req.report_date,
+        _weekly_filters(req.product_series, req.product_type, req.channel, req.risk_level, req.benchmark_status, req.open_type),
+    )
+    result["verification_result"] = verify_weekly_report(result)
+    result["dpo_trace"] = dpo_trace_sample(limit=2)
+    return result
+
+
+@app.post("/api/benchmark/peer")
+def post_benchmark_peer(req: PeerBenchmarkRequest) -> dict[str, Any]:
+    return peer_benchmark(req.product_code, report_date=req.report_date, limit=req.limit)
+
+
+@app.post("/api/benchmark/channel")
+def post_benchmark_channel(req: ChannelBenchmarkRequest) -> dict[str, Any]:
+    return channel_benchmark(product_type=req.product_type, channel=req.channel)
+
+
+@app.post("/api/benchmark/top-peers")
+def post_benchmark_top_peers(req: TopPeersRequest) -> dict[str, Any]:
+    return top_peers(product_type=req.product_type, report_date=req.report_date, limit=req.limit)
 
 
 @app.post("/api/eval/run")

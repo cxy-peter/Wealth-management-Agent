@@ -42,7 +42,7 @@ class ResearchRequest:
     company: str
     analysis_type: str = "full"
     risk_preference: str = "balanced"
-    output_path: str = "reports/demo_report.md"
+    output_path: str = "reports/legacy_research_report.md"
     product_filters: dict[str, Any] = field(default_factory=dict)
     run_id: str | None = None
 
