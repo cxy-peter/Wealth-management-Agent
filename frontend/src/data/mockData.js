@@ -70,6 +70,53 @@ export const weeklyMock = {
       evidence_id: 'ev_percentile_WP0047_20250404'
     }
   ],
+  attention_top10: [
+    {
+      product_code: 'WP0047',
+      product_name: '多元配置混合类样例047',
+      product_type: '混合类',
+      channel: '私银',
+      risk_level: 'R4',
+      benchmark_status: 'below_lower',
+      scale_wow_bn: -0.284,
+      return_3m: -0.018,
+      max_drawdown: -0.079,
+      return_percentile: 0.18,
+      drawdown_percentile: 0.24,
+      attention_score: 0.73,
+      attention_reason_tags: ['基准未达标', '规模下降', '收益分位偏低', '回撤分位偏低'],
+      evidence_id: 'ev_snapshot_WP0047_20250404'
+    },
+    {
+      product_code: 'WP0028',
+      product_name: '悦享固收固收增强样例028',
+      product_type: '固收增强',
+      channel: '百信',
+      risk_level: 'R3',
+      benchmark_status: 'below_lower',
+      scale_wow_bn: -0.126,
+      return_3m: -0.004,
+      max_drawdown: -0.032,
+      return_percentile: 0.29,
+      drawdown_percentile: 0.41,
+      attention_score: 0.49,
+      attention_reason_tags: ['基准未达标', '收益分位偏低'],
+      evidence_id: 'ev_snapshot_WP0028_20250404'
+    }
+  ],
+  weekly_diff: [
+    {
+      product_code: 'WP0047',
+      product_name: '多元配置混合类样例047',
+      scale_change_vs_prev_week: -0.284,
+      benchmark_status_prev: 'in_range',
+      benchmark_status: 'below_lower',
+      benchmark_status_changed: true,
+      return_3m_change_vs_prev_week: -0.006,
+      drawdown_change_vs_prev_week: -0.012,
+      evidence_id: 'ev_snapshot_WP0047_20250404'
+    }
+  ],
   market_issuance: {
     new_product_count: 72,
     by_investment_nature: { 固定收益类: 38, 混合类: 14, 权益类: 6, 商品及金融衍生品类: 4, QDII: 10 },
@@ -138,6 +185,11 @@ export const productDetailMock = {
     sharpe_percentile: 0.58,
     evidence_id: 'ev_percentile_WP0031_20250404'
   },
+  field_source_matrix: [
+    { field: 'product_scale_bn', source: 'product_weekly_snapshot', source_type: 'synthetic_weekly_snapshot', as_of_date: '2025-04-04', confidence: 'medium', evidence_id: 'ev_snapshot_WP0031_20250404' },
+    { field: 'return_3m', source: 'product_weekly_snapshot', source_type: 'synthetic_weekly_snapshot', as_of_date: '2025-04-04', confidence: 'medium', evidence_id: 'ev_snapshot_WP0031_20250404' },
+    { field: 'return_percentile', source: 'peer_product_metrics', source_type: 'synthetic_weekly_snapshot', as_of_date: '2025-04-04', confidence: 'medium', evidence_id: 'ev_percentile_WP0031_20250404' }
+  ],
   risk_events: [
     {
       event_date: '2025-04-04',
@@ -181,6 +233,15 @@ export const peerBenchmarkMock = {
       evidence_id_x: 'ev_peer_metric_PR0041'
     }
   ],
+  peer_universe_explainer: {
+    pool_rule: '同产品类型、同风险等级优先、同期限/同渠道优先，成立满3个月；样例不足时使用全市场同类扩展。',
+    included: [
+      { peer_product_code: 'PR0007', include_reason: ['同产品类型', '同风险等级', '成立满3个月'], evidence_id: 'ev_peer_metric_PR0007' }
+    ],
+    excluded: [
+      { peer_product_code: 'PR0099', exclude_reason: '产品类型不一致', evidence_id: 'ev_peer_metric_PR0099' }
+    ]
+  },
   evidence_ids: ['ev_snapshot_WP0031_20250404', 'ev_peer_metric_PR0007']
 };
 
@@ -295,6 +356,54 @@ export const contextualBanditResults = {
       verifier_pass_rate: 0.6875,
       action_distribution: { standard_weekly_report: 47, benchmark_only: 16, market_update_only: 11, deep_product_review: 22 }
     }
+  }
+};
+
+export const dataFreshnessMock = {
+  data_mode: 'sample/mock with explicit source metadata',
+  stale_source_count: 0,
+  sources_with_missing_metadata: 1,
+  sources: [
+    {
+      source_type: 'historical_business_sample',
+      source_name: '历史周报 schema sample',
+      record_count: 960,
+      latest_as_of_date: '2025-04-04',
+      staleness_days: 0,
+      confidence_level: 'medium',
+      adapter_status: 'available',
+      missing_fields: []
+    },
+    {
+      source_type: 'official_disclosure_sample',
+      source_name: '公开披露样本',
+      record_count: 2,
+      latest_as_of_date: '2025-04-04',
+      staleness_days: 0,
+      confidence_level: 'medium',
+      adapter_status: 'available',
+      missing_fields: []
+    },
+    {
+      source_type: 'synthetic_weekly_snapshot',
+      source_name: '模拟新周报',
+      record_count: 96,
+      latest_as_of_date: '2025-04-11',
+      staleness_days: 0,
+      confidence_level: 'medium',
+      adapter_status: 'available',
+      missing_fields: []
+    }
+  ]
+};
+
+export const dpoAgentEvalMock = {
+  training_status: 'not_trained',
+  adapter_available: false,
+  variants: {
+    template_baseline: { average_report_score: 0.57, verifier_pass_rate: 0.25, evidence_coverage_rate: 1, forbidden_wording_rate: 0 },
+    sft_adapter_or_base: { average_report_score: 0.28, verifier_pass_rate: 0, evidence_coverage_rate: 0, forbidden_wording_rate: 0 },
+    dpo_adapter: { average_report_score: 0.93, verifier_pass_rate: 1, evidence_coverage_rate: 1, forbidden_wording_rate: 0, preference_win_rate_vs_baseline: 1 }
   }
 };
 

@@ -1,0 +1,35 @@
+{
+  "records": [
+    {
+      "title": "信银理财样例产品净值公告",
+      "notice_type": "净值公告",
+      "published_at": "2025-04-04",
+      "product_keyword": "稳健添利",
+      "source_type": "official_disclosure_sample",
+      "source_name": "CITIC wealth disclosure sample",
+      "source_url_or_file": "https://www.citicbank.com/disclosure/sample",
+      "fetched_at": "2025-04-04T10:00:00Z",
+      "as_of_date": "2025-04-04",
+      "staleness_days": 0,
+      "confidence_level": "medium",
+      "evidence_id": "ev_citic_disclosure_001",
+      "parser_version": "citic_wealth_adapter.v1"
+    },
+    {
+      "title": "信银理财样例产品说明书更新提示",
+      "notice_type": "产品说明书",
+      "published_at": "2025-03-28",
+      "product_keyword": "多元配置",
+      "source_type": "official_disclosure_sample",
+      "source_name": "CITIC wealth disclosure sample",
+      "source_url_or_file": "https://www.citicbank.com/disclosure/sample",
+      "fetched_at": "2025-04-04T10:00:00Z",
+      "as_of_date": "2025-03-28",
+      "staleness_days": 7,
+      "confidence_level": "medium",
+      "evidence_id": "ev_citic_disclosure_002",
+      "parser_version": "citic_wealth_adapter.v1"
+    }
+  ]
+}
+

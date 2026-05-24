@@ -1,14 +1,14 @@
 {
   "case_count": 15,
-  "average_reward": 0.8771,
+  "average_reward": 0.869,
   "policy": {
     "epsilon": 0.15,
     "values": {
-      "fast_weekly_snapshot": 0.8894666666666666,
-      "standard_weekly_report": 0.8615666666666666,
-      "deep_product_review": 0.8614,
-      "benchmark_only": 0.8836666666666667,
-      "market_update_only": 0.8895333333333333
+      "fast_weekly_snapshot": 0.8802,
+      "standard_weekly_report": 0.8510666666666666,
+      "deep_product_review": 0.8517666666666667,
+      "benchmark_only": 0.8795,
+      "market_update_only": 0.8824000000000001
     },
     "counts": {
       "fast_weekly_snapshot": 3,
@@ -23,7 +23,7 @@
       "symbol": "600519",
       "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.8369,
+      "reward": 0.8294,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -31,17 +31,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 505.18,
+        "latency_ms": 565.16,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_b12f3ba75043"
+      "run_id": "run_5f8fbc5cd814"
     },
     {
       "symbol": "600519",
       "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8893,
+      "reward": 0.8821,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -49,17 +49,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 85.2,
+        "latency_ms": 143.31,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_c911464bc640"
+      "run_id": "run_0f2afa52df10"
     },
     {
       "symbol": "600519",
       "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.8858,
+      "reward": 0.8832,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -67,17 +67,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 113.74,
+        "latency_ms": 134.18,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_be6e88459cbd"
+      "run_id": "run_c5c71aac1e18"
     },
     {
       "symbol": "600519",
       "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.889,
+      "reward": 0.8762,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -85,17 +85,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 87.75,
+        "latency_ms": 190.3,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_2156e3b65957"
+      "run_id": "run_16c3a3ff5941"
     },
     {
       "symbol": "600519",
       "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.8726,
+      "reward": 0.8611,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -103,17 +103,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 219.0,
+        "latency_ms": 311.38,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_8bba295e0ec2"
+      "run_id": "run_f7e4b6bfe90d"
     },
     {
       "symbol": "600519",
       "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.8714,
+      "reward": 0.8709,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -121,17 +121,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 229.1,
+        "latency_ms": 232.96,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_e55c22bebe06"
+      "run_id": "run_1ee36aadd0e3"
     },
     {
       "symbol": "600519",
       "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8895,
+      "reward": 0.8774,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -139,17 +139,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 84.0,
+        "latency_ms": 180.74,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_ebfd2866dc63"
+      "run_id": "run_6dfb08ba86ad"
     },
     {
       "symbol": "600519",
       "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.8876,
+      "reward": 0.8802,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -157,17 +157,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 99.29,
+        "latency_ms": 158.19,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_7b89ad30d575"
+      "run_id": "run_9186707948d1"
     },
     {
       "symbol": "600519",
       "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.8898,
+      "reward": 0.8871,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -175,17 +175,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 81.49,
+        "latency_ms": 103.2,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_a75d5dd1fd4a"
+      "run_id": "run_49e9da14e54b"
     },
     {
       "symbol": "600519",
       "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.839,
+      "reward": 0.8322,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -193,17 +193,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 487.82,
+        "latency_ms": 542.74,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_2d1fa112c196"
+      "run_id": "run_ce5a05e283b2"
     },
     {
       "symbol": "600519",
       "action": "standard_weekly_report",
       "planner_task_type": "standard_research",
-      "reward": 0.8764,
+      "reward": 0.8529,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -211,17 +211,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 188.6,
+        "latency_ms": 376.56,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_c0a33d448702"
+      "run_id": "run_4f216fb51fda"
     },
     {
       "symbol": "600519",
       "action": "market_update_only",
       "planner_task_type": "risk_only",
-      "reward": 0.8898,
+      "reward": 0.8877,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -229,17 +229,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 81.93,
+        "latency_ms": 98.52,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_5ceca9479948"
+      "run_id": "run_3ded5c60521b"
     },
     {
       "symbol": "600519",
       "action": "benchmark_only",
       "planner_task_type": "product_compare",
-      "reward": 0.8776,
+      "reward": 0.8751,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -247,17 +247,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 179.05,
+        "latency_ms": 198.96,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_29ae250c351e"
+      "run_id": "run_047b87d7c40b"
     },
     {
       "symbol": "600519",
       "action": "fast_weekly_snapshot",
       "planner_task_type": "fast_snapshot",
-      "reward": 0.8896,
+      "reward": 0.8773,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -265,17 +265,17 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 83.29,
+        "latency_ms": 181.85,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_80a6b706d103"
+      "run_id": "run_74bf0dd0ff92"
     },
     {
       "symbol": "600519",
       "action": "deep_product_review",
       "planner_task_type": "deep_review",
-      "reward": 0.8726,
+      "reward": 0.862,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
@@ -283,11 +283,11 @@
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
         "route_match_score": 1.0,
-        "latency_ms": 219.55,
+        "latency_ms": 303.95,
         "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_c68c1b507b10"
+      "run_id": "run_b51b95d7b023"
     }
   ]
 }

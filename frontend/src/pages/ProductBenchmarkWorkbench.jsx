@@ -66,6 +66,7 @@ function DetailDrawer({ detail, onClose }) {
   const percentile = detail.percentile || {};
   const nav = detail.nav || [];
   const events = detail.risk_events || [];
+  const sourceMatrix = detail.field_source_matrix || [];
   return (
     <div className="drawer-backdrop" role="presentation">
       <aside className="review-drawer product-drawer" aria-label="Product detail">
@@ -150,6 +151,29 @@ function DetailDrawer({ detail, onClose }) {
             <strong>tool/evidence</strong>
           </div>
           <pre className="json-block">{JSON.stringify({ evidence_ids: detail.evidence_ids, snapshot }, null, 2)}</pre>
+        </section>
+        <section className="table-panel">
+          <div className="section-title table-title">
+            <span>字段来源矩阵</span>
+            <strong>{sourceMatrix.length}</strong>
+          </div>
+          <table>
+            <thead>
+              <tr><th>字段</th><th>来源</th><th>as_of_date</th><th>confidence</th><th>evidence_id</th></tr>
+            </thead>
+            <tbody>
+              {sourceMatrix.map((item) => (
+                <tr key={`${item.field}-${item.evidence_id}`}>
+                  <td>{item.field}</td>
+                  <td>{item.source_type || item.source}</td>
+                  <td>{item.as_of_date}</td>
+                  <td>{item.confidence}</td>
+                  <td>{item.evidence_id}</td>
+                </tr>
+              ))}
+              {!sourceMatrix.length ? <tr><td colSpan="5">暂无字段来源矩阵，使用样例追溯信息兜底。</td></tr> : null}
+            </tbody>
+          </table>
         </section>
       </aside>
     </div>
@@ -347,6 +371,11 @@ export default function ProductBenchmarkWorkbench({ onAnalysis }) {
               <strong>{peer.peer_count || 0} peers</strong>
             </div>
             <pre className="json-block">{JSON.stringify(peer.percentile || {}, null, 2)}</pre>
+            <div className="section-title">
+              <span>Peer Universe Explainer</span>
+              <strong>入池/剔除原因</strong>
+            </div>
+            <pre className="json-block">{JSON.stringify(peer.peer_universe_explainer || {}, null, 2)}</pre>
           </section>
         ) : null}
         {activeTab === 'channel' ? (

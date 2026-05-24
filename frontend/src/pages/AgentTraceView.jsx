@@ -1,8 +1,8 @@
 import { GitBranch, Loader2, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
-import { getJobEvents } from '../api.js';
-import { contextualBanditResults, evalResults } from '../data/mockData.js';
+import { getDataLineage, getJobEvents } from '../api.js';
+import { contextualBanditResults, dataFreshnessMock, dpoAgentEvalMock, evalResults } from '../data/mockData.js';
 
 function pct(value) {
   return `${(Number(value || 0) * 100).toFixed(1)}%`;
@@ -104,12 +104,95 @@ function DpoPanel({ dpoTrace }) {
   );
 }
 
+function DpoAlignmentPanel({ analysis }) {
+  const samples = analysis.dpo_trace?.samples || [];
+  const metrics = dpoAgentEvalMock.variants || {};
+  return (
+    <div className="page-stack nested-stack">
+      <section className="split-grid">
+        <div className="panel">
+          <div className="section-title">
+            <span>DPO preference sample</span>
+            <strong>{samples.length || 1}</strong>
+          </div>
+          <pre className="json-block">{JSON.stringify(samples[0] || {
+            hard_negative_type: 'source_overclaim',
+            chosen: '数字一致、证据充分、包含风险提示，不输出投资建议。',
+            rejected: '把 synthetic/mock 写成真实全市场数据，缺少 evidence_id。'
+          }, null, 2)}</pre>
+        </div>
+        <div className="panel">
+          <div className="section-title">
+            <span>DPO eval metrics</span>
+            <strong>{dpoAgentEvalMock.training_status}</strong>
+          </div>
+          <pre className="json-block">{JSON.stringify(metrics, null, 2)}</pre>
+        </div>
+      </section>
+      <section className="split-grid">
+        <div className="panel">
+          <div className="section-title">
+            <span>Baseline output</span>
+            <strong>template/base</strong>
+          </div>
+          <p className="panel-copy">模板基线能保留 evidence_id，但风险提示和分位解释覆盖不足；zero-shot/base 输出容易泛化。</p>
+        </div>
+        <div className="panel">
+          <div className="section-title">
+            <span>DPO output</span>
+            <strong>fallback/demo</strong>
+          </div>
+          <p className="panel-copy">{analysis.dpo_report?.generated_text || '未配置 adapter 时展示 DPO-aligned 模板输出；若配置本地 adapter，输出仍需 verifier 与 guardrail 复核。'}</p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function LineagePanel({ lineage, evidenceIds, onLookup }) {
+  return (
+    <div className="page-stack nested-stack">
+      <section className="panel">
+        <div className="section-title">
+          <span>Data Lineage</span>
+          <strong>{evidenceIds.length} evidence ids</strong>
+        </div>
+        <div className="evidence-list">
+          {evidenceIds.slice(0, 12).map((evidenceId) => (
+            <button className="evidence-row clickable-row" key={evidenceId} onClick={() => onLookup(evidenceId)}>
+              <strong>{evidenceId}</strong>
+              <span>点击查询 source_type / source_name / parser_version</span>
+            </button>
+          ))}
+        </div>
+      </section>
+      <section className="split-grid">
+        <div className="panel">
+          <div className="section-title">
+            <span>Lineage result</span>
+            <strong>{lineage?.source_type || 'mock'}</strong>
+          </div>
+          <pre className="json-block">{JSON.stringify(lineage || dataFreshnessMock.sources[0], null, 2)}</pre>
+        </div>
+        <div className="panel">
+          <div className="section-title">
+            <span>Source boundary</span>
+            <strong>official vs synthetic</strong>
+          </div>
+          <p className="panel-copy">official_disclosure_sample 只代表公开披露样本；synthetic_weekly_snapshot 只用于 demo 和回测，不代表真实全市场排名。</p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function AgentTraceView({ analysis }) {
   const [activeTab, setActiveTab] = useState('trace');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('current weekly run');
   const [events, setEvents] = useState(analysis.agent_events || []);
   const [toolCalls, setToolCalls] = useState(analysis.tool_calls || []);
+  const [lineage, setLineage] = useState(null);
 
   async function refreshTrace() {
     if (!analysis.run_id) return;
@@ -131,6 +214,15 @@ export default function AgentTraceView({ analysis }) {
   const planner = analysis.planner_plan || {};
   const verifier = analysis.verification_result || {};
   const guardrail = analysis.guardrail || analysis.compliance_boundary || {};
+  const evidenceIds = analysis.evidence_ids || [];
+
+  async function lookupLineage(evidenceId) {
+    try {
+      setLineage(await getDataLineage(evidenceId));
+    } catch {
+      setLineage({ evidence_id: evidenceId, source_type: 'synthetic_weekly_snapshot', source_name: 'local mock fallback', found: false });
+    }
+  }
 
   return (
     <div className="page-stack">
@@ -148,11 +240,13 @@ export default function AgentTraceView({ analysis }) {
       <div className="tabs">
         <button className={activeTab === 'trace' ? 'active' : ''} onClick={() => setActiveTab('trace')}>Trace</button>
         <button className={activeTab === 'verify' ? 'active' : ''} onClick={() => setActiveTab('verify')}>Verifier / Guardrail</button>
-        <button className={activeTab === 'dpo' ? 'active' : ''} onClick={() => setActiveTab('dpo')}>DPO Style</button>
+        <button className={activeTab === 'lineage' ? 'active' : ''} onClick={() => setActiveTab('lineage')}>Data Lineage</button>
+        <button className={activeTab === 'dpo' ? 'active' : ''} onClick={() => setActiveTab('dpo')}>DPO Alignment</button>
         <button className={activeTab === 'eval' ? 'active' : ''} onClick={() => setActiveTab('eval')}>Advanced Eval</button>
       </div>
       {activeTab === 'eval' ? <AdvancedEval /> : null}
-      {activeTab === 'dpo' ? <DpoPanel dpoTrace={analysis.dpo_trace} /> : null}
+      {activeTab === 'dpo' ? <DpoAlignmentPanel analysis={analysis} /> : null}
+      {activeTab === 'lineage' ? <LineagePanel lineage={lineage} evidenceIds={evidenceIds} onLookup={lookupLineage} /> : null}
       {activeTab === 'verify' ? (
         <section className="split-grid">
           <div className="panel">

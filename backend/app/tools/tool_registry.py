@@ -19,7 +19,6 @@ import numpy as np
 import pandas as pd
 
 from backend.app.agents.valuation_agent import evaluate_valuation
-from backend.app.models.qwen_risk_adapter import QwenRiskClassifier
 from backend.app.tools.data_loader import load_fundamentals, load_nav, load_news as load_news_df, load_products
 from backend.app.tools.metrics import compute_metrics, technical_snapshot
 from backend.app.tools.news_risk import analyze_news, summarize_news
@@ -122,9 +121,37 @@ def load_news(symbol: str) -> dict[str, Any]:
     return {"symbol": symbol, "records": records, "row_count": len(records)}
 
 
+def _qwen_risk_classifier() -> Any:
+    try:
+        from backend.app.models.qwen_risk_adapter import QwenRiskClassifier
+
+        return QwenRiskClassifier()
+    except Exception as exc:  # pragma: no cover - import guard for optional runtime packaging
+        error_type = exc.__class__.__name__
+
+        class _FallbackClassifier:
+            metadata = type(
+                "Metadata",
+                (),
+                {"to_dict": lambda self: {"enabled": False, "mode": "rule-based-fallback", "reason": error_type}},
+            )()
+
+            def predict(self, text: str, symbol: str = "") -> dict[str, Any]:
+                risk = 4 if any(term in str(text) for term in ["违约", "回撤", "风险", "监管"]) else 2
+                return {
+                    "sentiment_score": 3,
+                    "risk_score": risk,
+                    "raw_output": {"symbol": symbol, "fallback_error": error_type},
+                    "model_mode": "rule-based-fallback",
+                    "fallback_required": True,
+                }
+
+        return _FallbackClassifier()
+
+
 def classify_news_risk(symbol: str, news_records: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     df = pd.DataFrame(news_records) if news_records is not None else load_news_df(symbol)
-    classifier = QwenRiskClassifier()
+    classifier = _qwen_risk_classifier()
     signals = analyze_news(df, classifier=classifier, symbol=symbol)
     return {
         "symbol": symbol,

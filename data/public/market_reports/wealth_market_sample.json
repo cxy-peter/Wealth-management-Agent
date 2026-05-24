@@ -1,0 +1,38 @@
+{
+  "records": [
+    {
+      "report_period": "2025-03",
+      "outstanding_products": 31200,
+      "outstanding_aum": 286000.0,
+      "new_products": 720,
+      "new_raising_amount": 4120.0,
+      "wealth_company_share": 0.42,
+      "source_type": "public_market_report",
+      "source_name": "Public wealth market report sample",
+      "source_url_or_file": "data/public/market_reports/wealth_market_sample.json",
+      "fetched_at": "2025-04-04T10:00:00Z",
+      "as_of_date": "2025-03-31",
+      "staleness_days": 4,
+      "confidence_level": "medium",
+      "evidence_id": "ev_public_market_report_202503",
+      "parser_version": "market_report_adapter.v1"
+    },
+    {
+      "report_period": "2025-04",
+      "outstanding_products": 31480,
+      "outstanding_aum": 287500.0,
+      "new_products": 756,
+      "new_raising_amount": 4380.0,
+      "wealth_company_share": 0.43,
+      "source_type": "public_market_report",
+      "source_name": "Public wealth market report sample",
+      "source_url_or_file": "data/public/market_reports/wealth_market_sample.json",
+      "fetched_at": "2025-04-11T10:00:00Z",
+      "as_of_date": "2025-04-11",
+      "staleness_days": 0,
+      "confidence_level": "medium",
+      "evidence_id": "ev_public_market_report_202504",
+      "parser_version": "market_report_adapter.v1"
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 """FastAPI entrypoint for the wealth research assistant."""
 from __future__ import annotations
 
+import base64
+import csv
+import io
+import json
+import os
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +15,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from backend.app.agents.workflow import ResearchRequest, run_workflow
+from backend.app.data_sources.manual_upload.excel_ingestor import preview_excel
+from backend.app.data_sources.manual_upload.pdf_ingestor import preview_pdf
+from backend.app.data_sources.manual_upload.ppt_ingestor import preview_ppt
+from backend.app.data_sources.manual_upload.schema_mapper import suggest_mapping
+from backend.app.data_sources.quality.data_quality_checker import check_required_metadata
+from backend.app.data_sources.quality.freshness_checker import freshness_report
+from backend.app.data_sources.quality.lineage_builder import lineage_for_evidence
+from backend.app.data_sources.source_registry import list_data_sources, refresh_demo
 from backend.app.evaluation import run_evaluation
 from backend.app.storage import (
     add_human_review,
@@ -36,11 +50,20 @@ from backend.app.weekly_report.parsers.weekly_snapshot_parser import list_report
 from backend.app.weekly_report.weekly_report_verifier import verify_weekly_report
 
 ROOT = Path(__file__).resolve().parents[2]
+UPLOAD_INDEX = ROOT / "data" / "uploads" / "upload_index.json"
+UPLOAD_STORE: dict[str, dict[str, Any]] = {}
+
+
+def _allowed_origins() -> list[str]:
+    raw = os.getenv("ALLOWED_ORIGINS", "")
+    configured = [item.strip() for item in raw.split(",") if item.strip()]
+    return configured or ["http://127.0.0.1:5173", "http://localhost:5173"]
+
 
 app = FastAPI(title="wealth-research-agent", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -101,6 +124,72 @@ class ReviewRequest(BaseModel):
     report_markdown: str | None = None
 
 
+class DataUploadRequest(BaseModel):
+    file_name: str
+    content_base64: str | None = None
+    text: str | None = None
+    target_schema: str = "product_weekly_snapshot"
+
+
+class ConfirmMappingRequest(BaseModel):
+    target_schema: str
+    mapping: dict[str, str]
+
+
+class RefreshDemoRequest(BaseModel):
+    as_of_date: str | None = None
+    base_date: str | None = None
+    seed: int = 20260709
+    n_products: int = 96
+
+
+def _write_upload_index() -> None:
+    UPLOAD_INDEX.parent.mkdir(parents=True, exist_ok=True)
+    UPLOAD_INDEX.write_text(json.dumps({"uploads": list(UPLOAD_STORE.values())}, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _decode_upload(req: DataUploadRequest) -> bytes:
+    if req.content_base64:
+        return base64.b64decode(req.content_base64)
+    if req.text is not None:
+        return req.text.encode("utf-8-sig")
+    return b""
+
+
+def _preview_csv(content: bytes, sample_rows: int = 5) -> dict[str, Any]:
+    text = content.decode("utf-8-sig", errors="replace")
+    reader = csv.DictReader(io.StringIO(text))
+    rows = []
+    for _, row in zip(range(sample_rows), reader):
+        rows.append(dict(row))
+    return {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [{"sheet_name": "csv", "columns": reader.fieldnames or [], "sample_rows": rows}],
+    }
+
+
+def _preview_upload(req: DataUploadRequest) -> dict[str, Any]:
+    suffix = Path(req.file_name).suffix.lower()
+    content = _decode_upload(req)
+    if suffix == ".csv":
+        return _preview_csv(content)
+    if suffix in {".xlsx", ".xls"}:
+        return preview_excel(content)
+    if suffix in {".pptx", ".ppt"}:
+        return preview_ppt(content)
+    if suffix == ".pdf":
+        return preview_pdf(content)
+    return {"parser_status": "unsupported_or_optional", "file_type": suffix.lstrip("."), "sheets": []}
+
+
+def _preview_columns(preview: dict[str, Any]) -> list[str]:
+    sheets = preview.get("sheets") or []
+    if sheets:
+        return [str(column) for column in sheets[0].get("columns", [])]
+    return []
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {
@@ -108,6 +197,96 @@ def health() -> dict[str, Any]:
         "service": "wealth-research-agent",
         "data_mode": "sample/mock",
         "workflow": "weekly product research workbench with deterministic fallbacks",
+    }
+
+
+@app.get("/api/data-sources")
+def get_data_sources() -> dict[str, Any]:
+    return {"sources": list_data_sources()}
+
+
+@app.get("/api/data/freshness")
+def get_data_freshness() -> dict[str, Any]:
+    return freshness_report()
+
+
+@app.get("/api/data/lineage/{evidence_id}")
+def get_data_lineage(evidence_id: str) -> dict[str, Any]:
+    lineage = lineage_for_evidence(evidence_id)
+    if not lineage.get("found"):
+        raise HTTPException(status_code=404, detail="evidence_id not found")
+    return lineage
+
+
+@app.post("/api/data/refresh-demo")
+def post_data_refresh_demo(req: RefreshDemoRequest | None = None) -> dict[str, Any]:
+    req = req or RefreshDemoRequest()
+    return refresh_demo(as_of_date=req.as_of_date, base_date=req.base_date, seed=req.seed, n_products=req.n_products)
+
+
+@app.post("/api/data/upload")
+def post_data_upload(req: DataUploadRequest) -> dict[str, Any]:
+    upload_id = f"upload_{uuid.uuid4().hex[:12]}"
+    preview = _preview_upload(req)
+    columns = _preview_columns(preview)
+    mapping = suggest_mapping(columns, req.target_schema)
+    record = {
+        "upload_id": upload_id,
+        "file_name": req.file_name,
+        "target_schema": req.target_schema,
+        "parser_status": preview.get("parser_status"),
+        "schema_preview": preview,
+        "mapping_preview": mapping,
+    }
+    UPLOAD_STORE[upload_id] = record
+    _write_upload_index()
+    return {"upload_id": upload_id, "parser_status": preview.get("parser_status"), "mapping_preview": mapping}
+
+
+@app.get("/api/data/upload/{upload_id}/schema-preview")
+def get_upload_schema_preview(upload_id: str) -> dict[str, Any]:
+    record = UPLOAD_STORE.get(upload_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="upload_id not found")
+    return {
+        "upload_id": upload_id,
+        "file_name": record["file_name"],
+        "target_schema": record["target_schema"],
+        "schema_preview": record["schema_preview"],
+        "mapping_preview": record["mapping_preview"],
+    }
+
+
+@app.post("/api/data/upload/{upload_id}/confirm-mapping")
+def post_upload_confirm_mapping(upload_id: str, req: ConfirmMappingRequest) -> dict[str, Any]:
+    record = UPLOAD_STORE.get(upload_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="upload_id not found")
+    record["target_schema"] = req.target_schema
+    record["confirmed_mapping"] = req.mapping
+    record["mapping_confirmed"] = True
+    _write_upload_index()
+    return {"upload_id": upload_id, "mapping_confirmed": True, "target_schema": req.target_schema}
+
+
+@app.get("/api/data/upload/{upload_id}/quality-report")
+def get_upload_quality_report(upload_id: str) -> dict[str, Any]:
+    record = UPLOAD_STORE.get(upload_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="upload_id not found")
+    preview = record.get("schema_preview", {})
+    rows = []
+    for sheet in preview.get("sheets", []):
+        rows.extend(sheet.get("sample_rows", []))
+    metadata_check = check_required_metadata(rows) if rows else {"valid": False, "failure_count": 0, "failures": []}
+    mapping = record.get("mapping_preview", {})
+    return {
+        "upload_id": upload_id,
+        "parser_status": record.get("parser_status"),
+        "target_schema": record.get("target_schema"),
+        "missing_required_fields": mapping.get("missing_required_fields", []),
+        "metadata_required": metadata_check,
+        "quality_status": "pass" if not mapping.get("missing_required_fields") else "needs_mapping",
     }
 
 

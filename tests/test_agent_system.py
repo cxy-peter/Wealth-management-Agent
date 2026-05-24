@@ -18,6 +18,9 @@ from backend.app.weekly_report.generators.benchmark_report_generator import peer
 from backend.app.weekly_report.generators.weekly_report_generator import generate_weekly_report, weekly_summary
 from backend.app.weekly_report.weekly_report_verifier import verify_weekly_report
 from backend.app.dpo.dpo_dataset_validator import validate_dpo_dataset
+from backend.app.data_sources.base import REQUIRED_SOURCE_FIELDS
+from backend.app.data_sources.quality.lineage_builder import lineage_for_evidence
+from backend.app.models.qwen_risk_adapter import QwenRiskClassifier
 
 
 def test_tool_registry_has_required_tools() -> None:
@@ -240,3 +243,62 @@ def test_dpo_dataset_validator() -> None:
     result = validate_dpo_dataset()
     assert result["valid"] is True
     assert result["pair_count"] >= 20
+
+
+def test_qwen_risk_adapter_is_lightweight_fallback() -> None:
+    classifier = QwenRiskClassifier()
+    result = classifier.predict("信用利差走阔，净值回撤压力上升", symbol="WP0001")
+    assert result["fallback_required"] is True
+    assert result["model_mode"] == "rule-based-fallback"
+    assert result["risk_score"] >= 3
+    assert classifier.metadata.to_dict()["enabled"] is False
+
+
+def test_data_source_metadata_required() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/data/freshness").json()
+    assert payload["sources"]
+    for source in payload["sources"]:
+        assert {"source_type", "source_name", "source_url_or_file", "confidence_level", "adapter_status"}.issubset(source)
+    assert REQUIRED_SOURCE_FIELDS
+
+
+def test_synthetic_data_not_labeled_official() -> None:
+    client = TestClient(app)
+    payload = client.post("/api/data/refresh-demo", json={"as_of_date": "2025-04-11", "base_date": "2025-04-04", "n_products": 8}).json()
+    assert payload["source_type"] == "synthetic_weekly_snapshot"
+    assert "Synthetic demo data only" in payload["disclaimer"]
+    assert "official" not in payload["source_type"].lower()
+
+
+def test_freshness_api() -> None:
+    client = TestClient(app)
+    response = client.get("/api/data/freshness")
+    assert response.status_code == 200
+    rows = response.json()["sources"]
+    assert any(row["source_type"] == "synthetic_weekly_snapshot" for row in rows)
+    assert any(row["source_type"] == "official_disclosure_sample" for row in rows)
+
+
+def test_manual_upload_schema_preview() -> None:
+    client = TestClient(app)
+    csv_text = "report_date,product_code,product_name,product_type,channel,risk_level,product_scale_bn,scale_wow_bn,scale_mom_bn,latest_nav,return_3m,max_drawdown,volatility,sharpe,benchmark_status\n2025-04-04,WPX001,样例,纯固收,个金,R2,1.2,0.1,0.2,1.01,0.01,-0.02,0.03,0.5,in_range\n"
+    uploaded = client.post("/api/data/upload", json={"file_name": "weekly.csv", "text": csv_text, "target_schema": "product_weekly_snapshot"}).json()
+    preview = client.get(f"/api/data/upload/{uploaded['upload_id']}/schema-preview").json()
+    quality = client.get(f"/api/data/upload/{uploaded['upload_id']}/quality-report").json()
+    assert preview["schema_preview"]["parser_status"] == "parsed"
+    assert quality["missing_required_fields"] == []
+
+
+def test_lineage_lookup() -> None:
+    lineage = lineage_for_evidence("ev_snapshot_WP0001_20250404")
+    assert lineage["found"] is True
+    assert lineage["source_type"] == "synthetic_weekly_snapshot"
+
+
+def test_verifier_blocks_fake_realtime_claim() -> None:
+    report = generate_weekly_report()
+    report["report_markdown"] += "\n本报告已接入官网实时数据并覆盖真实全市场产品。"
+    verification = verify_weekly_report(report)
+    assert verification["pass"] is False
+    assert "source_overclaim" in verification["failed_checks"]

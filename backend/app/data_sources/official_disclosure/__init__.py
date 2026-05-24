@@ -1,0 +1,2 @@
+"""Official disclosure sample adapters."""
+

@@ -31,8 +31,12 @@ jobs:
         run: python eval/run_route_optimization.py
       - name: Contextual bandit eval
         run: python eval/run_contextual_bandit.py
+      - name: Build DPO preference data
+        run: python -m backend.app.dpo.dpo_dataset_builder
       - name: DPO style eval
         run: python -m backend.app.dpo.eval_dpo_report_style
+      - name: DPO agent alignment eval
+        run: python -m backend.app.dpo.eval_dpo_agent_alignment
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci

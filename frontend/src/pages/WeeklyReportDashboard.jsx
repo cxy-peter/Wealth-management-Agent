@@ -1,8 +1,8 @@
 import { FileText, Loader2, RefreshCw } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { generateWeeklyReport, getWeeklyProducts, getWeeklyReportDates, getWeeklySummary } from '../api.js';
-import { sampleAnalysis, weeklyMock, weeklyProductsMock } from '../data/mockData.js';
+import { generateWeeklyReport, getDataFreshness, getWeeklyProducts, getWeeklyReportDates, getWeeklySummary } from '../api.js';
+import { dataFreshnessMock, dpoAgentEvalMock, sampleAnalysis, weeklyMock, weeklyProductsMock } from '../data/mockData.js';
 
 function pct(value, digits = 1) {
   return `${(Number(value || 0) * 100).toFixed(digits)}%`;
@@ -114,6 +114,61 @@ function MarketBlock({ market }) {
   );
 }
 
+function DataSourceFreshness({ freshness }) {
+  const sources = freshness?.sources || [];
+  return (
+    <section className="panel">
+      <div className="section-title">
+        <span>数据源与新鲜度</span>
+        <strong>{sources.length} 类来源</strong>
+      </div>
+      <div className="distribution-bars">
+        {sources.slice(0, 6).map((item) => (
+          <div key={`${item.source_type}-${item.source_name}`}>
+            <span>{item.source_type}</span>
+            <div>
+              <i style={{ width: `${Math.max(8, Math.min(100, 100 - Number(item.staleness_days || 0) * 2))}%` }} />
+            </div>
+            <strong>{item.adapter_status}</strong>
+          </div>
+        ))}
+      </div>
+      <p className="panel-copy">系统区分历史样本、公开披露样本、行业报告、手工上传和 synthetic weekly snapshot，不声称拥有全市场实时产品级数据。</p>
+    </section>
+  );
+}
+
+function DpoSummaryCard({ analysis }) {
+  const dpoText = analysis?.dpo_report?.generated_text || analysis?.report_markdown || 'DPO adapter 未配置时使用模板改写，仍进入 verifier 与 guardrail。';
+  const score = dpoAgentEvalMock.variants.dpo_adapter.average_report_score;
+  return (
+    <section className="panel">
+      <div className="section-title">
+        <span>DPO 周报摘要</span>
+        <strong>score {score.toFixed(2)}</strong>
+      </div>
+      <div className="two-column-facts">
+        <div>
+          <span>Template draft</span>
+          <strong>{analysis?.report_markdown?.slice(0, 120) || '基于工具输出生成周报草稿。'}</strong>
+        </div>
+        <div>
+          <span>DPO rewritten draft</span>
+          <strong>{dpoText.slice(0, 180)}</strong>
+        </div>
+        <div>
+          <span>Verifier</span>
+          <strong>{analysis?.verification_result?.pass === false ? 'review' : 'pass/fallback'}</strong>
+        </div>
+        <div>
+          <span>Evidence coverage</span>
+          <strong>{analysis?.evidence_ids?.length || weeklyMock.evidence_ids.length} evidence ids</strong>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
   const [summary, setSummary] = useState(weeklyMock);
   const [products, setProducts] = useState(weeklyProductsMock);
@@ -129,6 +184,7 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
   });
   const [activeTab, setActiveTab] = useState('overview');
   const [source, setSource] = useState('local fallback');
+  const [freshness, setFreshness] = useState(dataFreshnessMock);
   const [loading, setLoading] = useState(false);
 
   const options = summary.filter_options || weeklyMock.filter_options;
@@ -154,6 +210,11 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
       setDates(datePayload.dates || [summaryPayload.report_date]);
       setSummary(summaryPayload);
       setProducts(productsPayload.products || []);
+      try {
+        setFreshness(await getDataFreshness());
+      } catch {
+        setFreshness(dataFreshnessMock);
+      }
       setSource('backend weekly API');
     } catch {
       setSummary(weeklyMock);
@@ -223,6 +284,11 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
         <KpiCard label="需关注产品" value={kpis.attention_product_count || 0} tone="red" />
       </section>
 
+      <section className="split-grid">
+        <DataSourceFreshness freshness={freshness} />
+        <DpoSummaryCard analysis={analysis} />
+      </section>
+
       <div className="tabs">
         <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>周报概览</button>
         <button className={activeTab === 'risk' ? 'active' : ''} onClick={() => setActiveTab('risk')}>风险提示</button>
@@ -245,6 +311,17 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
       ) : (
         <>
           <section className="split-grid triple">
+            <CompactTable
+              title="需关注产品 Top 10"
+              rows={summary.attention_top10 || []}
+              emptyText="当前筛选下暂无需关注样本。"
+              columns={[
+                { key: 'product_name', label: '产品名称' },
+                { key: 'attention_score', label: '关注分', render: (row) => num(row.attention_score, 3) },
+                { key: 'attention_reason_tags', label: '异常原因', render: (row) => (row.attention_reason_tags || []).join(' / ') },
+                { key: 'scale_wow_bn', label: '本周变化', render: (row) => num(row.scale_wow_bn) }
+              ]}
+            />
             <CompactTable
               title="产品规模变化榜"
               rows={summary.scale_change_rank || []}
@@ -279,6 +356,18 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis }) {
               ]}
             />
           </section>
+          <CompactTable
+            title="Weekly Diff：本周 vs 上周"
+            rows={summary.weekly_diff || []}
+            emptyText="暂无显著周度变化。"
+            columns={[
+              { key: 'product_name', label: '产品名称' },
+              { key: 'scale_change_vs_prev_week', label: '规模变化', render: (row) => num(row.scale_change_vs_prev_week) },
+              { key: 'benchmark_status_changed', label: '基准变化', render: (row) => (row.benchmark_status_changed ? `${row.benchmark_status_prev} → ${row.benchmark_status}` : '未变') },
+              { key: 'return_3m_change_vs_prev_week', label: '收益分位/收益变化', render: (row) => pct(row.return_3m_change_vs_prev_week, 2) },
+              { key: 'drawdown_change_vs_prev_week', label: '回撤变化', render: (row) => pct(row.drawdown_change_vs_prev_week, 2) }
+            ]}
+          />
           <MarketBlock market={summary.market_issuance} />
         </>
       )}

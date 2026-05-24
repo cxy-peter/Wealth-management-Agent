@@ -1,183 +1,184 @@
-# wealth-research-agent / 周报型资管产品研究 Agent 系统
+# wealth-research-agent / DPO-aligned 资管产品周报 Agent
 
-面向资管投研、理财产品研究和产品周报工作的可审计 Agent 应用。项目主线从泛投研 demo 收敛为“产品情况周报 + 竞品对标 + 市场/渠道分位 + 风险提示 + 审计追溯”的工作台。
-
-默认只使用 `data/` 下 synthetic/mock 数据。真实接口、外部模型、ReAct LLM 和训练流程均为可配置选项；无 API key、无 GPU 时，后端、前端、评测和报告生成仍可完整运行。
-
-## 业务主线
-
-系统输入周报型产品数据、产品净值、同业产品池和市场发行数据，自动生成：
+面向资管投研、理财产品研究和产品周报工作的可审计 Agent 应用。项目主线不是荐股或交易决策，而是围绕产品周报数据、净值收益、业绩基准、同业产品池、渠道分位和数据源新鲜度，生成：
 
 - 产品情况周报
 - 单产品竞品对标
-- 全市场分位对标
+- 全市场/模拟同业池分位对标
 - 渠道对标
 - 同类绩优产品追踪
 - 风险提示与周报摘要
 
-输出定位为投研辅助、风险摘要、产品对标和报告草稿生成，不作为交易指令或收益承诺。
+默认只使用 `data/` 下 synthetic/mock/sample 数据。真实接口、LLM、MCP 外部进程和 DPO 训练均为可配置选项；无 API key、无 GPU 时仍可完整运行 demo、测试和评测。
 
-## 周报数据结构
+## 核心边界
 
-`scripts/generate_weekly_report_universe.py` 生成周报型 synthetic 数据：
+- 不输出买入、卖出、持有建议，不写推荐配置、保证收益或确定性上涨判断。
+- DPO 不用于生成投资建议，只用于 Planner 工具选择偏好、报告文风、证据覆盖、风险提示和合规措辞对齐。
+- 所有数字仍由 deterministic tools 计算或引用 tool output。
+- 所有报告仍需 verifier 与 guardrail 检查。
+- 不提交 API key、模型权重、adapter 权重、私有语料、真实客户数据或公司内部文件。
 
-- `data/weekly/product_weekly_snapshot.csv`: 96 个模拟产品，10 个周报日期，共 960 条产品周快照。
-- `data/weekly/product_scale_history.csv`: 产品周度规模历史。
-- `data/weekly/product_nav_weekly.csv`: 产品周度 NAV 和 benchmark_nav，共 5,568 条。
-- `data/weekly/product_benchmark_status.csv`: 周度业绩比较基准状态。
-- `data/weekly/market_issuance_weekly.csv`: 市场新发产品周度统计。
-- `data/weekly/market_new_product_detail.csv`: 市场新发产品明细。
-- `data/benchmark/peer_product_universe.csv`: 360 个模拟同业产品。
-- `data/benchmark/peer_product_metrics.csv`: 同业收益、回撤、波动、Sharpe 和分位。
-- `data/benchmark/channel_peer_universe.csv`: 渠道维度同业样本。
-- `data/benchmark/top_peer_products.csv`: 同类绩优产品追踪样本。
-- `data/dpo/weekly_report_preference_pairs.jsonl`: 周报文风 DPO preference pairs。
+## Data Source Strategy
 
-覆盖产品类型：纯固收、固收增强、多资产、混合类、QDII、现金管理、封闭式、最短持有期型、日开型。覆盖期限、渠道、风险等级和基准状态等常见周报字段。
+本项目不声称拥有全市场实时产品级数据。默认数据来源分为：
 
-## 系统架构
+- `historical_business_sample`：历史周报/对标材料仅作为 schema、业务逻辑和回测样本。
+- `official_disclosure_sample`：公开官网披露样本，例如公告标题、公告类型、发布日期和产品关键词。
+- `public_market_report`：公开行业报告中的市场级统计，不用于产品级分位排名。
+- `manual_upload`：用户上传的 Excel/PPT/PDF/CSV，先做 schema preview 和质量检查。
+- `synthetic_weekly_snapshot`：基于历史分布和公开市场统计生成的模拟新周报。
+
+所有治理后的记录都要求带：
+
+```text
+source_type, source_name, source_url_or_file, fetched_at, as_of_date,
+staleness_days, confidence_level, evidence_id, parser_version
+```
+
+相关 API：
+
+- `GET /api/data-sources`
+- `GET /api/data/freshness`
+- `GET /api/data/lineage/{evidence_id}`
+- `POST /api/data/refresh-demo`
+- `POST /api/data/upload`
+- `GET /api/data/upload/{upload_id}/schema-preview`
+- `POST /api/data/upload/{upload_id}/confirm-mapping`
+- `GET /api/data/upload/{upload_id}/quality-report`
+
+## 周报数据
+
+`scripts/generate_weekly_report_universe.py` 生成周报型 synthetic 产品池：
+
+- `data/weekly/product_weekly_snapshot.csv`：96 个模拟产品，10 个周报日期，共 960 条周快照。
+- `data/weekly/product_scale_history.csv`：产品周度规模历史。
+- `data/weekly/product_nav_weekly.csv`：周度 NAV 与 benchmark_nav。
+- `data/weekly/product_benchmark_status.csv`：业绩比较基准状态。
+- `data/weekly/market_issuance_weekly.csv`：市场新发产品周度统计。
+- `data/benchmark/peer_product_universe.csv`：360 个模拟同业产品。
+- `data/benchmark/peer_product_metrics.csv`：同业收益、回撤、波动、Sharpe 和分位。
+
+新增 synthetic live 生成：
+
+```bash
+python scripts/generate_next_week_snapshot.py --as-of-date 2025-04-11 --base-date 2025-04-04 --seed 20260709 --n-products 96
+```
+
+输出到 `data/live/`，不会覆盖历史数据。synthetic 数据仅用于 demo，不代表真实全市场排名。
+
+## 架构
 
 ```mermaid
 flowchart LR
-  UI["Weekly Workbench"] --> API["FastAPI"]
-  API --> Weekly["weekly_report modules"]
-  Weekly --> Parser["parsers"]
-  Weekly --> Metrics["scale/return/percentile/benchmark metrics"]
-  Weekly --> Generator["weekly + benchmark report generators"]
-  Generator --> Verifier["weekly_report_verifier"]
-  Verifier --> Guardrail["guardrail"]
-  Generator --> Trace["tool_call_id / evidence_id trace"]
-  Trace --> SQLite["audit store"]
-  Metrics --> Eval["eval + contextual bandit"]
+  UI["WeeklyReportDashboard / ProductBenchmarkWorkbench / AgentTraceView"] --> API["FastAPI"]
+  API --> DS["data_sources: upload / official sample / market reports / synthetic"]
+  API --> Weekly["weekly_report parsers + metrics"]
+  Weekly --> Tools["Tool Registry"]
+  Tools --> Reports["Weekly / Benchmark Report Generators"]
+  Reports --> DPO["Planner DPO + Report Writer DPO adapters"]
+  DPO --> Verifier["Verifier"]
+  Verifier --> Guardrail["Guardrail"]
+  Guardrail --> Trace["tool_call_id / evidence_id / lineage"]
+  Trace --> Eval["eval + routing baseline"]
 ```
 
-默认 demo 使用 deterministic tool pipeline。配置 `OPENAI_COMPATIBLE_API_KEY` 后，可启用 ReAct-capable agent；MCP server 暴露 sample tools，但默认 workflow 不强依赖外部 MCP 进程。
+默认 workflow 是 deterministic tool pipeline。配置 `OPENAI_COMPATIBLE_API_KEY` 后可以启用 ReAct-capable agent；MCP server 暴露 sample tools，但默认 workflow 不强依赖外部 MCP 进程。
 
-## 指标计算方法
+## DPO 主线
 
-产品周报与对标指标从 `product_nav_weekly.csv` 和同业产品池复算或引用：
+项目实现两类 DPO preference data：
 
-- 规模变化：`scale_wow_bn = 本周规模 - 上周规模`，`scale_mom_bn = 本周规模 - 上月规模`。
-- 收益表现：`return_1m`、`return_3m`、`return_6m`、`return_1y`、`return_ytd`。
-- 风险指标：`max_drawdown`、`volatility`、`sharpe`。
-- 基准状态：实际年化收益与 `benchmark_lower` / `benchmark_upper` 区间比对。
-- 全市场分位：按同类产品 universe 对 `return_3m`、`max_drawdown`、`sharpe` 排名。
-- 渠道对标：按渠道和产品类型统计同业样本数量、3M 收益均值和规模合计。
+- Planner DPO：给定用户任务、产品上下文、可用工具和数据源状态，偏好正确工具选择、正确对标维度、必须进入 verifier/guardrail 的结构化 plan。
+- Report Writer DPO：给定 tool outputs，偏好数字一致、证据充分、风险提示完整、无投资建议措辞、符合资管周报文风的摘要。
 
-每条关键结论必须带 `evidence_id` 或 `tool_call_id`，数值结论由 verifier 复算或从 tool output 引用。
+数据文件：
 
-## API
+- `data/dpo/planner_preference_pairs.jsonl`
+- `data/dpo/report_preference_pairs.jsonl`
+- `data/dpo/hard_negative_rules.yaml`
+- `data/dpo/dpo_eval_cases.jsonl`
 
-核心周报 API：
+hard negatives 覆盖：数值幻觉、分位误读、证据缺失、合规违规、风险提示缺失、任务错配、数据源夸大。
 
-- `GET /api/weekly-report/dates`
-- `GET /api/weekly-report/summary?report_date=...`
-- `GET /api/weekly-report/products?report_date=...`
-- `GET /api/weekly-report/products/{product_code}`
-- `POST /api/weekly-report/generate`
-- `POST /api/benchmark/peer`
-- `POST /api/benchmark/channel`
-- `POST /api/benchmark/top-peers`
+训练脚本默认 dry-run：
 
-保留上一版 demo API：
+```bash
+python -m backend.app.dpo.dpo_dataset_builder
+python -m backend.app.dpo.train_qwen_dpo
+python -m backend.app.dpo.train_qwen_sft
+python -m backend.app.dpo.eval_dpo_agent_alignment
+```
 
-- `GET /health`
-- `POST /api/analyze`
-- `POST /api/analyze/jobs`
-- `GET /api/analyze/jobs/{run_id}`
-- `GET /api/analyze/jobs/{run_id}/events`
-- `GET /api/reports/{run_id}`
-- `POST /api/eval/run`
+只有设置 `ENABLE_DPO_TRAINING=true`，并通过 CLI 或 `.env` 提供模型路径、数据路径和 adapter 输出路径后，才进入训练分支。TRL/PEFT/QLoRA 相关重依赖不在默认 runtime import。
+
+当前无 adapter 时，eval 标注：
+
+```text
+training_status = not_trained
+adapter_available = false
+```
+
+## 指标与 Verifier
+
+周报指标来自 CSV 工具计算或复算：
+
+- `scale_wow_bn = 本周规模 - 上周规模`
+- `scale_mom_bn = 本周规模 - 上月规模`
+- `return_1m / return_3m / return_6m / return_1y / return_ytd`
+- `max_drawdown / volatility / sharpe`
+- `benchmark_status` 按实际年化收益与 `benchmark_lower / benchmark_upper` 判断
+- 模拟同业池分位按同类产品 universe 排名
+- Product Attention Score：基准未达标、规模下降、低收益分位、回撤恶化、缺失数据加权得到
+
+Verifier 检查：
+
+- 规模变化、收益、回撤、波动是否可由底层数据复算。
+- 市场/同业分位是否来自同类 universe。
+- 报告数字是否和 tool output 一致。
+- 关键结论是否缺少 `evidence_id`。
+- synthetic 数据是否被误写成真实全市场数据。
+- official disclosure adapter 失败时，报告不得声称“已接入官网实时数据”。
+- 是否出现投资建议、收益承诺或确定性判断。
 
 ## 前端
 
-顶层导航收敛为三页：
+顶层导航是三页：
 
-- `WeeklyReportDashboard`: 周报日期、产品系列、产品类型、渠道、风险等级、基准状态筛选；展示总规模、周/月变化、基准达标率、低分位产品和需关注产品。
-- `ProductBenchmarkWorkbench`: 竞品对标、全市场分位、渠道对标、同类绩优产品；详情抽屉展示 NAV 曲线、benchmark 曲线、风险事件和指标追溯。
-- `AgentTraceView`: 展示 run_id、planner plan、tool calls、evidence_id、verifier、guardrail、DPO chosen/rejected 和 contextual bandit eval。
+- 产品周报：对应 `WeeklyReportDashboard`，展示 KPI、需关注产品 Top 10、Weekly Diff、市场新发、数据源与新鲜度、DPO 周报摘要。
+- 产品对标：对应 `ProductBenchmarkWorkbench`，展示竞品/全市场/渠道/同类绩优产品，详情 drawer 包含 NAV、benchmark、风险事件、字段来源矩阵和 Peer Universe Explainer。
+- 审计追踪：对应 `AgentTraceView`，展示 planner plan、tool calls、evidence_id、verifier、guardrail、Data Lineage、DPO Alignment 和 Advanced Eval。
 
-Human review 只在 `pending_review` 时作为 drawer/modal 出现，不再作为顶层页面。
+`HumanReviewDrawer` 只在 `pending_review` 时出现，不作为顶层导航。
 
-## Verifier
-
-`backend/app/weekly_report/weekly_report_verifier.py` 校验：
-
-- 周规模和月规模变化是否能由规模历史复算。
-- `return_3m`、`max_drawdown`、`volatility` 是否来自周度 NAV。
-- 市场分位是否来自同类产品 universe。
-- `benchmark_status` 是否符合基准上下限规则。
-- 报告数字是否和 tool output 一致。
-- 是否缺少 `evidence_id`。
-- 是否出现配置导向、收益承诺或确定性未来判断。
-
-## DPO Preference Data
-
-DPO 在本项目中只定位为“周报文风对齐”的数据准备与校验，不默认训练。
-
-示例结构：
-
-```json
-{
-  "prompt": {"tool_output": {"product_code": "WP0001", "return_3m": 0.006, "evidence_id": "ev_snapshot_WP0001_20250404"}},
-  "chosen": "规模变化、收益、基准状态和风险提示均来自 tool output。[evidence_id=ev_snapshot_WP0001_20250404]",
-  "rejected": "泛泛描述，缺少数字来源和风险提示。"
-}
-```
-
-运行：
-
-```bash
-python -m backend.app.dpo.eval_dpo_report_style
-python -m backend.app.dpo.train_qwen_dpo
-```
-
-`train_qwen_dpo.py` 默认只验证数据集；设置 `ENABLE_DPO_TRAINING=true` 且通过 CLI 或 `.env` 提供模型路径、adapter 输出路径后，才进入训练 hook。仓库不提交模型权重。
-
-## Contextual Bandit
-
-周报路由 action：
-
-- `fast_weekly_snapshot`
-- `standard_weekly_report`
-- `deep_product_review`
-- `benchmark_only`
-- `market_update_only`
-
-上下文特征包括周报任务类型、基准未达标数量、规模下降数量、产品池规模、收益/回撤分位、缺失 NAV 比例、市场新发数量、延迟预算和人工复核需求。
-
-`eval/run_contextual_bandit.py` 实现 LinUCB，并与 fixed baseline、epsilon-greedy 对比。当前结果写入 `eval/contextual_bandit_results.json`：
-
-- case_count: 96
-- best_policy: `linucb_contextual_bandit`
-- fixed baseline average_reward: 0.7482
-- epsilon_greedy average_reward: 0.7059
-- linucb_contextual_bandit average_reward: 0.7659
-
-Reward:
+## API 快速入口
 
 ```text
-0.20 * tool_call_success
-+ 0.20 * metric_consistency
-+ 0.15 * risk_warning_coverage
-+ 0.15 * evidence_coverage
-+ 0.10 * report_format_pass
-+ 0.10 * route_match_score
-- 0.10 * latency_penalty
-- 0.15 * unnecessary_tool_penalty
-- 1.00 * forbidden_wording_hit
+GET  /health
+GET  /api/weekly-report/dates
+GET  /api/weekly-report/summary
+GET  /api/weekly-report/products
+GET  /api/weekly-report/products/{product_code}
+POST /api/weekly-report/generate
+POST /api/benchmark/peer
+POST /api/benchmark/channel
+POST /api/benchmark/top-peers
+POST /api/eval/run
 ```
 
-## Run
+保留旧 demo endpoint：`POST /api/analyze`、`POST /api/analyze/jobs`、`GET /api/reports/{run_id}`。
+
+## 运行
 
 ```bash
 pip install -r requirements.txt
 python scripts/generate_weekly_report_universe.py
-python eval/run_eval.py
-python eval/run_route_optimization.py
-python eval/run_contextual_bandit.py
-python -m backend.app.dpo.eval_dpo_report_style
+python -m backend.app.dpo.dpo_dataset_builder
+python scripts/run_weekly_demo.py --report-date 2025-03-19
+python scripts/run_product_benchmark_demo.py --product-code WP0001
 ```
+
+`2025-03-19` 不是样例周五报告日时，demo 会自动落到最近的前序周报日期。
 
 Backend:
 
@@ -189,24 +190,68 @@ Frontend:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`.
+打开 `http://127.0.0.1:5173`。
 
-## Compliance Boundary
+## Vercel
 
-- 默认数据全部为 synthetic/mock。
-- 不提交 API key、模型权重、私有数据、真实客户数据或公司内部文件。
-- 真实接口只能通过 `.env` 或 CLI 参数配置。
-- 周报输出只用于投研辅助、风险摘要、产品对标和报告草稿。
-- 数字结论必须来自 tool output 或 verifier 复算。
-- 关键结论必须带 `evidence_id` 或 `tool_call_id`。
-- 正式业务使用前需要人工复核和合规复核。
+前端已提供 `frontend/vercel.json` SPA rewrite。Vercel 项目建议配置：
 
-## Resume Bullets
+```text
+Root Directory = frontend
+Framework Preset = Vite
+Install Command = npm ci
+Build Command = npm run build
+Output Directory = dist
+```
 
-- 构建资管投研辅助 Agent 系统，基于 Planner + conditional LangGraph 串联产品数据、指标计算、新闻风险、产品对标、Verifier 与 Guardrail，并通过 tool_call_id/evidence_id 实现报告结论可追溯。
-- 扩展 100+ 模拟理财产品池与周度净值序列，计算收益、波动、最大回撤、Sharpe、Calmar、benchmark excess 等指标，支持多资产类别、风险等级、期限和渠道筛选。
-- 实现 contextual bandit 路由优化，在 fast snapshot、standard research、deep review、product compare、risk-only 等分析路径间动态选择，基于指标一致率、证据覆盖率、风险提示、延迟和合规失败率构建 reward 评估。
+如果后端未部署，前端保留 mock fallback；如果后端已部署，设置：
+
+```text
+VITE_WEALTH_AGENT_API_BASE=https://your-backend.example.com
+```
+
+后端 serverless 入口为 `api/index.py`；CORS 使用 `ALLOWED_ORIGINS` 环境变量。
+
+## CI
+
+`.github/workflows/ci.yml` 执行：
+
+```bash
+python -m compileall backend scripts eval
+python scripts/generate_weekly_report_universe.py
+pytest
+python eval/run_eval.py
+python eval/run_route_optimization.py
+python eval/run_contextual_bandit.py
+python -m backend.app.dpo.dpo_dataset_builder
+python -m backend.app.dpo.eval_dpo_report_style
+python -m backend.app.dpo.eval_dpo_agent_alignment
+cd frontend && npm ci && npm run build
+```
+
+## Routing Baseline
+
+Contextual bandit 仅作为 routing baseline，不是项目主卖点。当前 action：
+
+- `fast_weekly_snapshot`
+- `standard_weekly_report`
+- `deep_product_review`
+- `benchmark_only`
+- `market_update_only`
+
+结果写入 `eval/contextual_bandit_results.json`，用于展示固定路由、epsilon-greedy 与 LinUCB 的对比。
+
+## 简历 Bullet
+
+- 构建 DPO-aligned 周报型资管产品研究 Agent，基于产品规模、净值收益、业绩基准、同业产品池和渠道分位数据，自动生成产品周报、竞品对标和全市场分位报告。
+- 设计 Planner DPO 与 Report Writer DPO 两类偏好数据：前者对齐工具调用计划和审核路径，后者对齐数字一致性、证据覆盖、风险提示、禁用投资建议措辞和资管周报文风。
+- 基于 hard negative 构造数值幻觉、分位误读、证据缺失、风险提示缺失、合规违规和数据源夸大样本，使用 Qwen LoRA/QLoRA + TRL DPOTrainer 预留偏好优化训练流程。
+- 构建 DPO eval，对比 template / base 或 SFT / DPO 输出在 numeric consistency、evidence coverage、verifier pass rate、forbidden wording rate 和 preference win rate 上的差异。
+
+## 附录：股票研究 Demo
+
+早期股票研究 demo 保留在 `POST /api/analyze` 与相关 sample CSV 中，用于展示 LangGraph/Tool Registry/Verifier 的通用能力；README 主线不再以 `600519` 或贵州茅台作为默认示例。

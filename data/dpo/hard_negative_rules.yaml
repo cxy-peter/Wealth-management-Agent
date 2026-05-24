@@ -1,0 +1,8 @@
+hard_negative_rules:
+  numeric_hallucination: 篡改收益率、分位数、回撤或规模变化
+  percentile_misinterpretation: 把低分位写成表现领先或误读回撤分位
+  missing_evidence: 删除 evidence_id 或 tool_call_id
+  compliance_violation: 加入投资建议、收益承诺或确定性判断
+  missing_risk: 只写收益不写回撤、波动、基准或风险提示
+  task_mismatch: 对标维度与用户任务不一致
+  source_overclaim: 把 synthetic/mock 数据写成真实全市场数据

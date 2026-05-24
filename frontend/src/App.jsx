@@ -8,9 +8,9 @@ import WeeklyReportDashboard from './pages/WeeklyReportDashboard.jsx';
 import { sampleAnalysis } from './data/mockData.js';
 
 const pages = [
-  { id: 'weekly', label: 'WeeklyReportDashboard', icon: FileText },
-  { id: 'benchmark', label: 'ProductBenchmarkWorkbench', icon: BarChart3 },
-  { id: 'trace', label: 'AgentTraceView', icon: GitBranch }
+  { id: 'weekly', label: '产品周报', icon: FileText },
+  { id: 'benchmark', label: '产品对标', icon: BarChart3 },
+  { id: 'trace', label: '审计追踪', icon: GitBranch }
 ];
 
 export default function App() {
@@ -38,7 +38,7 @@ export default function App() {
           </div>
           <div>
             <div className="brand-title">wealth-research-agent</div>
-            <div className="brand-subtitle">周报型资管产品研究 Agent 系统</div>
+            <div className="brand-subtitle">DPO-aligned 周报型资管产品研究 Agent</div>
           </div>
         </div>
 

@@ -1,73 +1,73 @@
-report_date,rank,peer_product_code,peer_product_name,product_type,return_3m,return_percentile,max_drawdown,sharpe,tracking_reason,evidence_id
-2025-04-04,1,PR0124,纯固收同业样例124,纯固收,0.045523,1.0,-0.016181,7.591657,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0124
-2025-04-04,2,PR0082,纯固收同业样例082,纯固收,0.032474,0.9756,-0.035661,5.223009,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0082
-2025-04-04,3,PR0106,纯固收同业样例106,纯固收,0.031207,0.9512,-0.014577,8.709083,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0106
-2025-04-04,4,PR0142,纯固收同业样例142,纯固收,0.026771,0.9268,-0.013133,3.872982,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0142
-2025-04-04,5,PR0133,纯固收同业样例133,纯固收,0.026694,0.9024,-0.029958,4.091878,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0133
-2025-04-04,6,PR0019,纯固收同业样例019,纯固收,0.020852,0.878,-0.009991,4.919204,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0019
-2025-04-04,7,PR0097,纯固收同业样例097,纯固收,0.020711,0.8537,-0.025157,3.533072,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0097
-2025-04-04,8,PR0178,纯固收同业样例178,纯固收,0.018858,0.8293,-0.034694,3.134158,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0178
-2025-04-04,1,PR0065,固收增强同业样例065,固收增强,0.048197,1.0,-0.040919,3.73647,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0065
-2025-04-04,2,PR0092,固收增强同业样例092,固收增强,0.04669,0.9756,-0.038295,2.321613,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0092
-2025-04-04,3,PR0179,固收增强同业样例179,固收增强,0.042343,0.9512,-0.036847,4.908166,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0179
-2025-04-04,4,PR0275,固收增强同业样例275,固收增强,0.039778,0.9268,-0.02759,2.693353,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0275
-2025-04-04,5,PR0161,固收增强同业样例161,固收增强,0.03655,0.9024,-0.057137,2.167623,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0161
-2025-04-04,6,PR0083,固收增强同业样例083,固收增强,0.033978,0.878,-0.026674,2.128964,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0083
-2025-04-04,7,PR0257,固收增强同业样例257,固收增强,0.032933,0.8537,-0.041384,3.339406,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0257
-2025-04-04,8,PR0194,固收增强同业样例194,固收增强,0.031201,0.8293,-0.024245,2.83893,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0194
-2025-04-04,1,PR0276,多资产同业样例276,多资产,0.072735,1.0,-0.080532,5.432705,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0276
-2025-04-04,2,PR0327,多资产同业样例327,多资产,0.068935,0.9756,-0.074961,4.807792,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0327
-2025-04-04,3,PR0084,多资产同业样例084,多资产,0.055451,0.9512,-0.081239,2.975086,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0084
-2025-04-04,4,PR0231,多资产同业样例231,多资产,0.054832,0.9268,-0.084699,2.126837,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0231
-2025-04-04,5,PR0039,多资产同业样例039,多资产,0.050978,0.9024,-0.081736,1.665133,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0039
-2025-04-04,6,PR0003,多资产同业样例003,多资产,0.048866,0.878,-0.047319,2.189626,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0003
-2025-04-04,7,PR0180,多资产同业样例180,多资产,0.043374,0.8537,-0.069564,2.26289,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0180
-2025-04-04,8,PR0099,多资产同业样例099,多资产,0.042468,0.8293,-0.04543,1.390871,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0099
-2025-04-04,1,PR0118,混合类同业样例118,混合类,0.059848,1.0,-0.093664,1.654526,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0118
-2025-04-04,2,PR0328,混合类同业样例328,混合类,0.053148,0.9756,-0.097569,3.150839,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0328
-2025-04-04,3,PR0136,混合类同业样例136,混合类,0.048891,0.9512,-0.09659,1.593706,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0136
-2025-04-04,4,PR0232,混合类同业样例232,混合类,0.048276,0.9268,-0.096417,1.426961,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0232
-2025-04-04,5,PR0310,混合类同业样例310,混合类,0.045743,0.9024,-0.09995,1.541429,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0310
-2025-04-04,6,PR0085,混合类同业样例085,混合类,0.042787,0.878,-0.12149,2.425893,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0085
-2025-04-04,7,PR0040,混合类同业样例040,混合类,0.040713,0.8537,-0.096203,2.287709,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0040
-2025-04-04,8,PR0277,混合类同业样例277,混合类,0.040234,0.8293,-0.122345,1.627115,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0277
-2025-04-04,1,PR0059,QDII同业样例059,QDII,0.257832,1.0,-0.255585,4.015604,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0059
-2025-04-04,2,PR0155,QDII同业样例155,QDII,0.240279,0.9756,-0.236608,3.763959,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0155
-2025-04-04,3,PR0347,QDII同业样例347,QDII,0.23994,0.9512,-0.243193,4.541046,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0347
-2025-04-04,4,PR0251,QDII同业样例251,QDII,0.236167,0.9268,-0.246251,6.582989,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0251
-2025-04-04,5,PR0164,QDII同业样例164,QDII,0.095853,0.9024,-0.136727,3.060218,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0164
-2025-04-04,6,PR0068,QDII同业样例068,QDII,0.094021,0.878,-0.139843,2.501463,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0068
-2025-04-04,7,PR0356,QDII同业样例356,QDII,0.081258,0.8537,-0.142511,1.894013,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0356
-2025-04-04,8,PR0260,QDII同业样例260,QDII,0.078328,0.8293,-0.135179,2.042424,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0260
-2025-04-04,1,PR0348,现金管理同业样例348,现金管理,0.035675,1.0,-0.009536,44.808637,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0348
-2025-04-04,2,PR0312,现金管理同业样例312,现金管理,0.026156,0.9756,-0.007159,11.847306,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0312
-2025-04-04,3,PR0051,现金管理同业样例051,现金管理,0.025564,0.9512,-0.01328,20.758792,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0051
-2025-04-04,4,PR0033,现金管理同业样例033,现金管理,0.024281,0.9268,-0.012426,22.35887,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0033
-2025-04-04,5,PR0069,现金管理同业样例069,现金管理,0.021927,0.9024,-0.005197,8.009502,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0069
-2025-04-04,6,PR0129,现金管理同业样例129,现金管理,0.021673,0.878,-0.009627,11.494427,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0129
-2025-04-04,7,PR0165,现金管理同业样例165,现金管理,0.02055,0.8537,-0.005747,9.230927,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0165
-2025-04-04,8,PR0087,现金管理同业样例087,现金管理,0.018732,0.8293,-0.012715,17.330315,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0087
-2025-04-04,1,PR0340,封闭式同业样例340,封闭式,0.057111,1.0,-0.106619,3.292356,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0340
-2025-04-04,2,PR0052,封闭式同业样例052,封闭式,0.051842,0.9737,-0.103769,3.243098,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0052
-2025-04-04,3,PR0349,封闭式同业样例349,封闭式,0.048283,0.9474,-0.02381,3.168936,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0349
-2025-04-04,4,PR0121,封闭式同业样例121,封闭式,0.047878,0.9211,-0.052706,2.171148,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0121
-2025-04-04,5,PR0148,封闭式同业样例148,封闭式,0.040419,0.8947,-0.108778,2.300605,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0148
-2025-04-04,6,PR0217,封闭式同业样例217,封闭式,0.029814,0.8684,-0.059408,1.420125,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0217
-2025-04-04,7,PR0025,封闭式同业样例025,封闭式,0.029329,0.8421,-0.056692,1.729776,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0025
-2025-04-04,8,PR0313,封闭式同业样例313,封闭式,0.028814,0.8158,-0.053489,1.428692,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0313
-2025-04-04,1,PR0122,最短持有期型同业样例122,最短持有期型,0.056781,1.0,-0.028623,5.325294,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0122
-2025-04-04,2,PR0089,最短持有期型同业样例089,最短持有期型,0.049302,0.9737,-0.014091,5.756672,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0089
-2025-04-04,3,PR0314,最短持有期型同业样例314,最短持有期型,0.040755,0.9474,-0.014008,5.357406,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0314
-2025-04-04,4,PR0245,最短持有期型同业样例245,最短持有期型,0.036492,0.9211,-0.040234,5.414683,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0245
-2025-04-04,5,PR0263,最短持有期型同业样例263,最短持有期型,0.033818,0.8947,-0.01262,4.035738,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0263
-2025-04-04,6,PR0176,最短持有期型同业样例176,最短持有期型,0.032687,0.8684,-0.019962,2.999507,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0176
-2025-04-04,7,PR0071,最短持有期型同业样例071,最短持有期型,0.02794,0.8421,-0.015709,3.712929,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0071
-2025-04-04,8,PR0167,最短持有期型同业样例167,最短持有期型,0.025962,0.8158,-0.018852,2.835438,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0167
-2025-04-04,1,PR0123,日开型同业样例123,日开型,0.033186,1.0,-0.011301,15.940938,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0123
-2025-04-04,2,PR0255,日开型同业样例255,日开型,0.032146,0.9737,-0.00469,14.719175,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0255
-2025-04-04,3,PR0315,日开型同业样例315,日开型,0.025329,0.9474,-0.013104,8.70905,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0315
-2025-04-04,4,PR0114,日开型同业样例114,日开型,0.023862,0.9211,-0.010516,11.12211,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0114
-2025-04-04,5,PR0054,日开型同业样例054,日开型,0.01964,0.8947,-0.00187,7.770053,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0054
-2025-04-04,6,PR0210,日开型同业样例210,日开型,0.019233,0.8684,-0.006062,9.881047,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0210
-2025-04-04,7,PR0297,日开型同业样例297,日开型,0.019062,0.8421,-0.011015,5.664132,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0297
-2025-04-04,8,PR0273,日开型同业样例273,日开型,0.015055,0.8158,-0.020246,4.553196,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0273
+report_date,rank,peer_product_code,peer_product_name,product_type,return_3m,return_percentile,max_drawdown,sharpe,tracking_reason,evidence_id,source_type,source_name,source_url_or_file,fetched_at,as_of_date,staleness_days,confidence_level,parser_version
+2025-04-04,1,PR0124,纯固收同业样例124,纯固收,0.045523,1.0,-0.016181,7.591657,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0124,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0082,纯固收同业样例082,纯固收,0.032474,0.9756,-0.035661,5.223009,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0082,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0106,纯固收同业样例106,纯固收,0.031207,0.9512,-0.014577,8.709083,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0106,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0142,纯固收同业样例142,纯固收,0.026771,0.9268,-0.013133,3.872982,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0142,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0133,纯固收同业样例133,纯固收,0.026694,0.9024,-0.029958,4.091878,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0133,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0019,纯固收同业样例019,纯固收,0.020852,0.878,-0.009991,4.919204,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0019,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0097,纯固收同业样例097,纯固收,0.020711,0.8537,-0.025157,3.533072,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0097,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0178,纯固收同业样例178,纯固收,0.018858,0.8293,-0.034694,3.134158,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0178,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0065,固收增强同业样例065,固收增强,0.048197,1.0,-0.040919,3.73647,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0065,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0092,固收增强同业样例092,固收增强,0.04669,0.9756,-0.038295,2.321613,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0092,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0179,固收增强同业样例179,固收增强,0.042343,0.9512,-0.036847,4.908166,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0179,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0275,固收增强同业样例275,固收增强,0.039778,0.9268,-0.02759,2.693353,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0275,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0161,固收增强同业样例161,固收增强,0.03655,0.9024,-0.057137,2.167623,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0161,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0083,固收增强同业样例083,固收增强,0.033978,0.878,-0.026674,2.128964,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0083,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0257,固收增强同业样例257,固收增强,0.032933,0.8537,-0.041384,3.339406,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0257,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0194,固收增强同业样例194,固收增强,0.031201,0.8293,-0.024245,2.83893,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0194,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0276,多资产同业样例276,多资产,0.072735,1.0,-0.080532,5.432705,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0276,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0327,多资产同业样例327,多资产,0.068935,0.9756,-0.074961,4.807792,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0327,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0084,多资产同业样例084,多资产,0.055451,0.9512,-0.081239,2.975086,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0084,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0231,多资产同业样例231,多资产,0.054832,0.9268,-0.084699,2.126837,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0231,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0039,多资产同业样例039,多资产,0.050978,0.9024,-0.081736,1.665133,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0039,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0003,多资产同业样例003,多资产,0.048866,0.878,-0.047319,2.189626,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0003,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0180,多资产同业样例180,多资产,0.043374,0.8537,-0.069564,2.26289,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0180,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0099,多资产同业样例099,多资产,0.042468,0.8293,-0.04543,1.390871,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0099,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0118,混合类同业样例118,混合类,0.059848,1.0,-0.093664,1.654526,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0118,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0328,混合类同业样例328,混合类,0.053148,0.9756,-0.097569,3.150839,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0328,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0136,混合类同业样例136,混合类,0.048891,0.9512,-0.09659,1.593706,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0136,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0232,混合类同业样例232,混合类,0.048276,0.9268,-0.096417,1.426961,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0232,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0310,混合类同业样例310,混合类,0.045743,0.9024,-0.09995,1.541429,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0310,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0085,混合类同业样例085,混合类,0.042787,0.878,-0.12149,2.425893,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0085,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0040,混合类同业样例040,混合类,0.040713,0.8537,-0.096203,2.287709,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0040,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0277,混合类同业样例277,混合类,0.040234,0.8293,-0.122345,1.627115,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0277,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0059,QDII同业样例059,QDII,0.257832,1.0,-0.255585,4.015604,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0059,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0155,QDII同业样例155,QDII,0.240279,0.9756,-0.236608,3.763959,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0155,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0347,QDII同业样例347,QDII,0.23994,0.9512,-0.243193,4.541046,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0347,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0251,QDII同业样例251,QDII,0.236167,0.9268,-0.246251,6.582989,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0251,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0164,QDII同业样例164,QDII,0.095853,0.9024,-0.136727,3.060218,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0164,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0068,QDII同业样例068,QDII,0.094021,0.878,-0.139843,2.501463,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0068,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0356,QDII同业样例356,QDII,0.081258,0.8537,-0.142511,1.894013,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0356,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0260,QDII同业样例260,QDII,0.078328,0.8293,-0.135179,2.042424,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0260,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0348,现金管理同业样例348,现金管理,0.035675,1.0,-0.009536,44.808637,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0348,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0312,现金管理同业样例312,现金管理,0.026156,0.9756,-0.007159,11.847306,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0312,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0051,现金管理同业样例051,现金管理,0.025564,0.9512,-0.01328,20.758792,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0051,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0033,现金管理同业样例033,现金管理,0.024281,0.9268,-0.012426,22.35887,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0033,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0069,现金管理同业样例069,现金管理,0.021927,0.9024,-0.005197,8.009502,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0069,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0129,现金管理同业样例129,现金管理,0.021673,0.878,-0.009627,11.494427,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0129,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0165,现金管理同业样例165,现金管理,0.02055,0.8537,-0.005747,9.230927,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0165,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0087,现金管理同业样例087,现金管理,0.018732,0.8293,-0.012715,17.330315,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0087,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0340,封闭式同业样例340,封闭式,0.057111,1.0,-0.106619,3.292356,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0340,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0052,封闭式同业样例052,封闭式,0.051842,0.9737,-0.103769,3.243098,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0052,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0349,封闭式同业样例349,封闭式,0.048283,0.9474,-0.02381,3.168936,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0349,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0121,封闭式同业样例121,封闭式,0.047878,0.9211,-0.052706,2.171148,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0121,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0148,封闭式同业样例148,封闭式,0.040419,0.8947,-0.108778,2.300605,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0148,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0217,封闭式同业样例217,封闭式,0.029814,0.8684,-0.059408,1.420125,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0217,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0025,封闭式同业样例025,封闭式,0.029329,0.8421,-0.056692,1.729776,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0025,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0313,封闭式同业样例313,封闭式,0.028814,0.8158,-0.053489,1.428692,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0313,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0122,最短持有期型同业样例122,最短持有期型,0.056781,1.0,-0.028623,5.325294,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0122,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0089,最短持有期型同业样例089,最短持有期型,0.049302,0.9737,-0.014091,5.756672,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0089,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0314,最短持有期型同业样例314,最短持有期型,0.040755,0.9474,-0.014008,5.357406,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0314,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0245,最短持有期型同业样例245,最短持有期型,0.036492,0.9211,-0.040234,5.414683,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0245,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0263,最短持有期型同业样例263,最短持有期型,0.033818,0.8947,-0.01262,4.035738,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0263,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0176,最短持有期型同业样例176,最短持有期型,0.032687,0.8684,-0.019962,2.999507,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0176,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0071,最短持有期型同业样例071,最短持有期型,0.02794,0.8421,-0.015709,3.712929,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0071,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0167,最短持有期型同业样例167,最短持有期型,0.025962,0.8158,-0.018852,2.835438,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0167,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,1,PR0123,日开型同业样例123,日开型,0.033186,1.0,-0.011301,15.940938,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0123,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,2,PR0255,日开型同业样例255,日开型,0.032146,0.9737,-0.00469,14.719175,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0255,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,3,PR0315,日开型同业样例315,日开型,0.025329,0.9474,-0.013104,8.70905,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0315,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,4,PR0114,日开型同业样例114,日开型,0.023862,0.9211,-0.010516,11.12211,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0114,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,5,PR0054,日开型同业样例054,日开型,0.01964,0.8947,-0.00187,7.770053,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0054,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,6,PR0210,日开型同业样例210,日开型,0.019233,0.8684,-0.006062,9.881047,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0210,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,7,PR0297,日开型同业样例297,日开型,0.019062,0.8421,-0.011015,5.664132,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0297,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2
+2025-04-04,8,PR0273,日开型同业样例273,日开型,0.015055,0.8158,-0.020246,4.553196,同类收益分位和风险调整指标靠前，用于周报跟踪样例。,ev_top_peer_PR0273,synthetic_weekly_snapshot,Synthetic top peer products,scripts/generate_weekly_report_universe.py,2025-04-04T10:00:00Z,2025-04-04,0,medium,weekly_snapshot_generator.v2

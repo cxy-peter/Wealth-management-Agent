@@ -1,0 +1,23 @@
+base_model: Qwen/Qwen2.5-0.5B-Instruct
+supported_small_models:
+  - Qwen/Qwen2.5-0.5B-Instruct
+  - Qwen/Qwen2.5-1.5B-Instruct
+  - Qwen/Qwen3-0.6B
+adapter_type: LoRA
+qlora_optional: true
+lora_rank: 8
+target_modules:
+  - q_proj
+  - v_proj
+beta: 0.1
+learning_rate: 0.00005
+default_mode: dry_run
+training_gate_env: ENABLE_DPO_TRAINING
+datasets:
+  planner: data/dpo/planner_preference_pairs.jsonl
+  report_writer: data/dpo/report_preference_pairs.jsonl
+no_shipped_artifacts:
+  - model weights
+  - adapter weights
+  - private corpus
+  - api keys

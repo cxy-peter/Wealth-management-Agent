@@ -110,6 +110,18 @@ export async function getJobEvents(runId) {
   return response.json();
 }
 
+export async function getDataFreshness() {
+  const response = await fetch(`${API_BASE}/api/data/freshness`);
+  if (!response.ok) throw new Error(`data freshness returned ${response.status}`);
+  return response.json();
+}
+
+export async function getDataLineage(evidenceId) {
+  const response = await fetch(`${API_BASE}/api/data/lineage/${encodeURIComponent(evidenceId)}`);
+  if (!response.ok) throw new Error(`data lineage returned ${response.status}`);
+  return response.json();
+}
+
 export async function getReport(runId) {
   const response = await fetch(`${API_BASE}/api/reports/${runId}`);
   if (!response.ok) throw new Error(`report returned ${response.status}`);

@@ -18,7 +18,14 @@ FORBIDDEN_PATTERNS = [
     r"推荐\s*配置",
     r"保证收益",
     r"确定性?\s*(上涨|增长|延续)",
+    r"收益稳定可期",
     r"稳赚",
+]
+REALTIME_OVERCLAIM_PATTERNS = [
+    r"真实全市场",
+    r"全市场实时",
+    r"官网实时数据",
+    r"已接入官网实时数据",
 ]
 
 
@@ -126,6 +133,18 @@ def verify_weekly_report(payload: dict[str, Any], sample_size: int = 20) -> dict
     forbidden = _forbidden_hits(text)
     if forbidden:
         failed_checks.append("forbidden_wording")
+    source_overclaim = [pattern for pattern in REALTIME_OVERCLAIM_PATTERNS if re.search(pattern, text)]
+    if source_overclaim:
+        failed_checks.append("source_overclaim")
+    source_types = payload.get("source_types") or ["synthetic_weekly_snapshot"]
+    if "synthetic_weekly_snapshot" in source_types and "分位" in text and "模拟同业池分位" not in text:
+        failed_checks.append("synthetic_percentile_not_labeled")
+    if payload.get("official_disclosure_adapter_status") == "failed" and re.search(r"官网|官方披露", text) and not re.search(r"样本|局部|失败|未接入", text):
+        failed_checks.append("official_disclosure_overclaim")
+    for record in payload.get("official_disclosure_records", []):
+        if record.get("source_type") == "official_disclosure_sample" and not (record.get("source_url_or_file") or record.get("source_name")):
+            failed_checks.append("official_record_missing_source")
+            missing_evidence.append(str(record.get("evidence_id", "official_record")))
     if "evidence_id=" not in text and payload.get("report_markdown"):
         failed_checks.append("report_missing_evidence_id")
         missing_evidence.append("report_markdown")
@@ -146,5 +165,7 @@ def verify_weekly_report(payload: dict[str, Any], sample_size: int = 20) -> dict
         "missing_evidence": missing_evidence,
         "forbidden_wording": bool(forbidden),
         "forbidden_patterns": forbidden,
+        "source_overclaim": bool(source_overclaim),
+        "source_overclaim_patterns": source_overclaim,
         "confidence_score": round(confidence, 4),
     }

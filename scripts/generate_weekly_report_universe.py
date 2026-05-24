@@ -10,7 +10,7 @@ import csv
 import json
 import math
 import random
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +31,7 @@ RISK_LEVELS = ["R1", "R2", "R3", "R4", "R5"]
 OPEN_TYPES = ["日开", "7天", "14天", "21天", "30天", "60天", "90天", "120天", "180天", "270天", "360天", "1年封闭"]
 INVESTMENT_NATURE = ["固定收益类", "混合类", "权益类", "商品及金融衍生品类", "QDII"]
 BENCHMARK_STATUS = ["above_upper", "in_range", "below_lower"]
+FETCHED_AT = "2025-04-04T10:00:00Z"
 
 TYPE_CONFIG = {
     "现金管理": {"risk": ["R1"], "return": 0.018, "vol": 0.004, "dd": 0.002},
@@ -85,6 +86,59 @@ def _percentile(values: list[float], value: float, higher_is_better: bool = True
     if higher_is_better:
         return sum(1 for item in values if item <= value) / len(values)
     return sum(1 for item in values if item >= value) / len(values)
+
+
+def _source_metadata(
+    row: dict[str, object],
+    *,
+    source_type: str,
+    source_name: str,
+    source_url_or_file: str,
+    as_of_date: str,
+    evidence_id: str,
+    parser_version: str,
+    confidence_level: str = "medium",
+) -> dict[str, object]:
+    return {
+        **row,
+        "source_type": source_type,
+        "source_name": source_name,
+        "source_url_or_file": source_url_or_file,
+        "fetched_at": FETCHED_AT,
+        "as_of_date": as_of_date,
+        "staleness_days": max(0, (datetime.fromisoformat(FETCHED_AT.replace("Z", "+00:00")).date() - date.fromisoformat(as_of_date)).days),
+        "confidence_level": confidence_level,
+        "evidence_id": evidence_id,
+        "parser_version": parser_version,
+    }
+
+
+def _with_source_metadata(
+    rows: list[dict[str, object]],
+    *,
+    source_type: str,
+    source_name: str,
+    source_url_or_file: str,
+    date_field: str,
+    evidence_field: str,
+    parser_version: str,
+) -> list[dict[str, object]]:
+    enriched = []
+    for index, row in enumerate(rows, 1):
+        as_of = str(row.get(date_field) or REPORT_DATES[-1].isoformat())[:10]
+        evidence = str(row.get(evidence_field) or row.get("evidence_id") or f"ev_generated_{index:05d}")
+        enriched.append(
+            _source_metadata(
+                row,
+                source_type=source_type,
+                source_name=source_name,
+                source_url_or_file=source_url_or_file,
+                as_of_date=as_of,
+                evidence_id=evidence,
+                parser_version=parser_version,
+            )
+        )
+    return enriched
 
 
 def _make_products(rng: random.Random) -> list[dict[str, object]]:
@@ -439,6 +493,97 @@ def main() -> None:
     market_weekly, market_details = _market_issuance(rng)
     peers, peer_metrics, channel_peers, top_peers = _peer_universe(snapshot_rows, rng)
     dpo_pairs = _dpo_pairs(snapshot_rows)
+
+    snapshot_rows = _with_source_metadata(
+        snapshot_rows,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic weekly product snapshot",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    scale_rows = _with_source_metadata(
+        scale_rows,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic product scale history",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="scale_evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    nav_rows = _with_source_metadata(
+        nav_rows,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic product NAV weekly",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="nav_date",
+        evidence_field="nav_evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    benchmark_rows = _with_source_metadata(
+        benchmark_rows,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic benchmark status",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    market_weekly = _with_source_metadata(
+        market_weekly,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic market issuance weekly",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    market_details = _with_source_metadata(
+        market_details,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic market new product detail",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    peers = _with_source_metadata(
+        peers,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic peer product universe",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="inception_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    peer_metrics = _with_source_metadata(
+        peer_metrics,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic peer product metrics",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    channel_peers = _with_source_metadata(
+        channel_peers,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic channel peer universe",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
+    top_peers = _with_source_metadata(
+        top_peers,
+        source_type="synthetic_weekly_snapshot",
+        source_name="Synthetic top peer products",
+        source_url_or_file="scripts/generate_weekly_report_universe.py",
+        date_field="report_date",
+        evidence_field="evidence_id",
+        parser_version="weekly_snapshot_generator.v2",
+    )
 
     _write_csv(WEEKLY / "product_weekly_snapshot.csv", snapshot_rows)
     _write_csv(WEEKLY / "product_scale_history.csv", scale_rows)
