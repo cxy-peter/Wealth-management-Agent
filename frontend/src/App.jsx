@@ -3,25 +3,31 @@ import {
   BarChart3,
   FileText,
   Gauge,
+  GitBranch,
   Landmark,
   Newspaper,
+  UserCheck,
   ShieldCheck,
   SlidersHorizontal
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import EvaluationPanel from './pages/EvaluationPanel.jsx';
+import HumanReview from './pages/HumanReview.jsx';
 import NewsRiskPanel from './pages/NewsRiskPanel.jsx';
 import PaperReplay from './pages/PaperReplay.jsx';
 import ProductBenchmark from './pages/ProductBenchmark.jsx';
 import ResearchDashboard from './pages/ResearchDashboard.jsx';
+import TraceView from './pages/TraceView.jsx';
 import { sampleAnalysis } from './data/mockData.js';
 
 const pages = [
   { id: 'research', label: 'ResearchDashboard', icon: FileText },
   { id: 'benchmark', label: 'ProductBenchmark', icon: BarChart3 },
   { id: 'news', label: 'NewsRiskPanel', icon: Newspaper },
+  { id: 'trace', label: 'TraceView', icon: GitBranch },
   { id: 'eval', label: 'EvaluationPanel', icon: ShieldCheck },
+  { id: 'review', label: 'HumanReview', icon: UserCheck },
   { id: 'replay', label: 'PaperReplay', icon: Activity }
 ];
 
@@ -94,7 +100,9 @@ export default function App() {
         {activePage === 'research' ? <ResearchDashboard analysis={analysis} onAnalysis={setAnalysis} /> : null}
         {activePage === 'benchmark' ? <ProductBenchmark analysis={analysis} onAnalysis={setAnalysis} /> : null}
         {activePage === 'news' ? <NewsRiskPanel analysis={analysis} /> : null}
+        {activePage === 'trace' ? <TraceView analysis={analysis} /> : null}
         {activePage === 'eval' ? <EvaluationPanel /> : null}
+        {activePage === 'review' ? <HumanReview analysis={analysis} onAnalysis={setAnalysis} /> : null}
         {activePage === 'replay' ? <PaperReplay analysis={analysis} /> : null}
       </main>
     </div>

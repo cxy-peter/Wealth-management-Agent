@@ -15,6 +15,8 @@ def report_agent(state: dict[str, Any]) -> dict[str, Any]:
         "symbol": request["symbol"],
         "company": request["company"],
         "analysis_type": request.get("analysis_type", "full"),
+        "run_id": state.get("run_id"),
+        "planner_plan": state.get("planner_plan", {}),
         "data_profile": state.get("data_profile", {}),
         "metrics": state.get("metrics", {}),
         "fundamental_analysis": state.get("fundamental_analysis", {}),
@@ -25,6 +27,7 @@ def report_agent(state: dict[str, Any]) -> dict[str, Any]:
         "peer_summary": state.get("peer_summary", {}),
         "risk_flags": state.get("risk_flags", []),
         "tool_calls": state.get("tool_calls", []),
+        "agent_events": state.get("agent_events", []),
         "model_metadata": state.get("model_metadata", {}),
         "compliance_boundary": state.get("compliance_boundary", {}),
     }
@@ -40,10 +43,14 @@ def report_agent(state: dict[str, Any]) -> dict[str, Any]:
     tool_calls = list(state.get("tool_calls", []))
     tool_calls.append(
         {
-            "tool": "render_markdown_report",
-            "agent": "report_agent",
+            "tool_call_id": "tc_report_render_local",
+            "tool_name": "render_markdown_report",
+            "input_args": {"run_id": state.get("run_id")},
+            "output": {"report_path": display_path},
+            "evidence_ids": ["ev_report_snapshot"],
+            "latency_ms": 0.0,
             "success": True,
-            "rows": 1,
+            "error_type": None,
         }
     )
     result["tool_calls"] = tool_calls
@@ -53,4 +60,12 @@ def report_agent(state: dict[str, Any]) -> dict[str, Any]:
         **state,
         "result": result,
         "tool_calls": tool_calls,
+        "agent_events": [
+            *state.get("agent_events", []),
+            {
+                "event_type": "agent_final",
+                "agent_name": "report_agent",
+                "payload": {"report_path": display_path},
+            },
+        ],
     }

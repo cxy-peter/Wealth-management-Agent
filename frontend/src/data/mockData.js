@@ -1,7 +1,16 @@
 export const sampleAnalysis = {
+  run_id: 'run_mock_preview',
   symbol: '600519',
   company: '贵州茅台',
   workflow_engine: 'mock-preview',
+  planner_plan: {
+    task_type: 'standard_research',
+    analysis_depth: 'standard',
+    required_tools: ['load_price_series', 'calculate_metrics', 'load_fundamental_snapshot', 'load_valuation_snapshot', 'load_news', 'classify_news_risk', 'product_benchmark'],
+    skipped_tools: [],
+    risk_level: 'medium',
+    human_review_required: false
+  },
   metrics: {
     observations: 25,
     total_return: 0.024,
@@ -144,8 +153,37 @@ export const sampleAnalysis = {
     '产品池包含较高风险等级样例，展示收益指标时必须同步展示波动、回撤和风险等级。',
     '输出仅用于投研辅助、风险摘要、产品对标和研究报告生成，正式使用前保留人工复核与合规校验。'
   ],
+  tool_calls: [
+    { tool_call_id: 'tc_mock_price', tool_name: 'load_price_series', success: true, latency_ms: 5.1, evidence_ids: ['ev_sample_nav_600519'] },
+    { tool_call_id: 'tc_mock_metrics', tool_name: 'calculate_metrics', success: true, latency_ms: 6.8, evidence_ids: ['ev_metrics_600519'] },
+    { tool_call_id: 'tc_mock_news', tool_name: 'classify_news_risk', success: true, latency_ms: 4.7, evidence_ids: ['ev_news_risk_600519'] },
+    { tool_call_id: 'tc_mock_products', tool_name: 'product_benchmark', success: true, latency_ms: 3.2, evidence_ids: ['ev_product_benchmark_5'] }
+  ],
+  agent_events: [
+    { event_type: 'planner_output', agent_name: 'planner_agent', payload: { task_type: 'standard_research' } },
+    { event_type: 'agent_final', agent_name: 'technical_react_agent', payload: { trend_label: '样本内短期趋势偏强' } },
+    { event_type: 'verification_result', agent_name: 'verifier_agent', payload: { pass: true, confidence_score: 1 } }
+  ],
+  verification_result: {
+    pass: true,
+    failed_checks: [],
+    metric_mismatches: [],
+    missing_evidence: [],
+    forbidden_wording: false,
+    confidence_score: 1
+  },
+  human_review: {
+    status: 'auto_cleared',
+    interrupt_available: true
+  },
   report_markdown: '# 资管投研辅助 Agent 报告\n\n本报告仅用于投研辅助、风险摘要、产品对标和研究报告生成，不构成投资建议。'
 };
+
+export const instrumentOptions = [
+  { symbol: '600519', company: '贵州茅台', label: '贵州茅台 / 600519' },
+  { symbol: 'P001', company: '固收+稳健一号', label: '固收+稳健一号 / P001' },
+  { symbol: 'P002', company: '多资产平衡二号', label: '多资产平衡二号 / P002' }
+];
 
 export const evalResults = {
   metrics: {
@@ -163,6 +201,24 @@ export const evalResults = {
       workflow_engine: 'langgraph',
       latency_ms: 119.23
     }
+  ]
+};
+
+export const routeOptimizationResults = {
+  average_reward: 0.9386,
+  policy: {
+    values: {
+      fast_snapshot: 0,
+      standard_research: 0.9328,
+      deep_review: 0,
+      product_compare: 0.9435,
+      risk_only: 0.9394
+    }
+  },
+  evaluations: [
+    { action: 'standard_research', reward: 0.9328, planner_task_type: 'standard_research' },
+    { action: 'risk_only', reward: 0.9394, planner_task_type: 'risk_only' },
+    { action: 'product_compare', reward: 0.9435, planner_task_type: 'product_compare' }
   ]
 };
 

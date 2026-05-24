@@ -1,81 +1,63 @@
 # wealth-research-agent / 资管投研辅助 Agent 系统
 
-面向金融算法、资管投研、理财产品研究实习投递的完整 demo。系统把 sample 行情/净值、模拟基本面与估值字段、新闻风险文本、产品对标表和合规 guardrail 串成一个可运行的投研辅助工作流，用于生成可追溯 Markdown 研究报告。
+面向金融算法、资管投研、理财产品研究实习投递的生产级雏形 demo。系统默认只使用 `data/` 下 sample/mock 数据，真实接口和模型 adapter 只作为 `.env` 可配置选项；无外部 API key、无 GPU 时仍可完整运行。
 
-本项目不是交易系统，不连接真实账户，不输出交易方向，不承诺收益。默认数据全部来自 `data/` 下的 sample/mock CSV，真实接口只作为可配置扩展。
+项目定位：投研辅助、风险摘要、产品对标、研究报告生成。它不是交易系统，也不输出交易方向或收益承诺。
 
-## 业务背景
-
-资管和财富管理投研流程通常需要把多类信息拼在一起：价格/净值表现、基本面质量、相对估值、新闻风险、产品同业对标、报告格式与合规检查。手工整理容易出现口径不一致、指标不可追溯、报告结构不稳定的问题。
-
-`wealth-research-agent` 的定位是把这些步骤拆成可审计工具与 Agent 节点：每个结论都能回到样例数据、指标计算、新闻命中证据或 guardrail 检查。
-
-## 系统架构
+## Architecture
 
 ```mermaid
 flowchart LR
-  A["POST /api/analyze"] --> B["LangGraph workflow"]
-  B --> C["data_extraction_agent"]
-  C --> D["fundamental_agent"]
-  D --> E["technical_agent"]
-  E --> F["news_risk_agent"]
-  F --> G["product_benchmark_agent"]
-  G --> H["risk_guardrail_agent"]
-  H --> I["report_agent"]
-  I --> J["Markdown report"]
-
-  C --> K["sample/mock CSV"]
-  F --> L["Qwen LoRA adapter optional"]
-  F --> M["rule-based fallback"]
-  G --> N["product benchmark table"]
-  H --> O["compliance checks"]
+  API["FastAPI"] --> Planner["Planner"]
+  Planner --> Router["Conditional LangGraph"]
+  Router --> ReactAgents["ReAct/MCP tool agents"]
+  ReactAgents --> Registry["Tool Registry + sample/mock tools"]
+  Registry --> Guardrail["Guardrail"]
+  Guardrail --> Report["Report"]
+  Report --> Verifier["Verifier"]
+  Verifier --> Review["Human Review"]
+  Verifier --> Eval["Eval-driven Routing Optimization"]
+  Registry --> SQLite["SQLite audit store"]
 ```
 
-后端核心目录：
+Core backend:
 
-```text
-backend/app/
-  agents/
-    workflow.py
-    data_extraction_agent.py
-    fundamental_agent.py
-    technical_agent.py
-    valuation_agent.py
-    news_risk_agent.py
-    product_benchmark_agent.py
-    risk_guardrail_agent.py
-    report_agent.py
-  models/qwen_risk_adapter.py
-  tools/
-    data_loader.py
-    metrics.py
-    news_risk.py
-    product_benchmark.py
-  evaluation.py
-  main.py
-frontend/src/pages/
-  ResearchDashboard.jsx
-  ProductBenchmark.jsx
-  NewsRiskPanel.jsx
-  EvaluationPanel.jsx
-  PaperReplay.jsx
-```
+- `backend/app/tools/tool_registry.py`: auditable local tool registry.
+- `backend/app/mcp/local_server.py`: local MCP server for sample/mock tools.
+- `backend/app/mcp/client.py`: `langchain_mcp_adapters` client helper.
+- `backend/app/agents/workflow.py`: Planner + conditional LangGraph workflow.
+- `backend/app/agents/*_react_agent.py`: ReAct-capable agents with deterministic fallback.
+- `backend/app/agents/verifier_agent.py`: metrics/evidence/report verifier.
+- `backend/app/agents/human_review_agent.py`: pending-review state.
+- `backend/app/storage.py`: SQLite audit persistence.
+- `backend/app/optimization/`: reward and routing policy.
 
-## 运行方式
+Frontend pages:
+
+- `ResearchDashboard`
+- `ProductBenchmark`
+- `NewsRiskPanel`
+- `TraceView`
+- `EvaluationPanel`
+- `HumanReview`
+- `PaperReplay`
+
+## Run
 
 ```bash
 pip install -r requirements.txt
 python scripts/run_demo.py --symbol 600519 --company 贵州茅台
 python eval/run_eval.py
+python eval/run_route_optimization.py
 ```
 
-启动 API：
+Backend:
 
 ```bash
 uvicorn backend.app.main:app --reload --port 8000
 ```
 
-启动前端：
+Frontend:
 
 ```bash
 cd frontend
@@ -83,85 +65,103 @@ npm install
 npm run dev
 ```
 
-默认前端会访问 `http://127.0.0.1:8000`。如果后端未启动，页面会回退到本地 mock 预览。
+Frontend default URL: `http://127.0.0.1:5173`
+
+Backend default URL: `http://127.0.0.1:8000`
 
 ## API
 
 - `GET /health`
 - `POST /api/analyze`
+- `POST /api/analyze/jobs`
+- `GET /api/analyze/jobs/{run_id}`
+- `GET /api/analyze/jobs/{run_id}/events`
+- `GET /api/reports/{run_id}`
 - `POST /api/product-benchmark`
 - `POST /api/eval/run`
+- `POST /api/reviews/{run_id}/approve`
+- `POST /api/reviews/{run_id}/edit`
+- `POST /api/reviews/{run_id}/reject`
 
-`POST /api/analyze` 示例：
+`POST /api/analyze`:
 
 ```json
 {
   "symbol": "600519",
   "company": "贵州茅台",
-  "analysis_type": "full"
+  "analysis_type": "full",
+  "risk_preference": "balanced"
 }
 ```
 
-## 样例报告
+## Tool Trace Contract
 
-运行 demo 后会生成：
+Every registered tool returns:
+
+```json
+{
+  "tool_call_id": "tc_calculate_metrics_xxx",
+  "tool_name": "calculate_metrics",
+  "input_args": {},
+  "output": {},
+  "evidence_ids": ["ev_metrics_600519"],
+  "latency_ms": 12.3,
+  "success": true,
+  "error_type": null
+}
+```
+
+Reports include inline `tool_call_id` or `evidence_id` references, and verifier checks numeric consistency against tool output.
+
+## Eval
+
+Report eval output:
 
 ```text
-reports/demo_report.md
+eval/results.json
 ```
 
-报告包含：
+Route optimization output:
 
-- 数据与工具调用摘要
-- 核心量化指标
-- 基本面与估值摘要
-- 技术面风险观察
-- 同业产品对比样例
-- 新闻情绪与风险信号
-- 风险提示与可追溯结论
-
-样例片段：
-
-```md
-## 7. 风险提示与可追溯结论
-
-- 相对估值样例高于同业中位数，需要拆分质量溢价、成长预期和估值回撤风险。
-- 产品池包含较高风险等级样例，展示收益指标时必须同步展示波动、回撤和风险等级。
-- 输出仅用于投研辅助、风险摘要、产品对标和研究报告生成，正式使用前保留人工复核与合规校验。
+```text
+eval/route_optimization_results.json
 ```
 
-## 评测指标
+Reward:
 
-`python eval/run_eval.py` 会写入 `eval/results.json`。当前评测维度：
+```text
+0.25 * tool_call_success
++ 0.25 * metric_consistency
++ 0.20 * risk_warning_coverage
++ 0.15 * evidence_coverage
++ 0.10 * report_format_pass
+- 0.10 * latency_penalty
+- 1.00 * forbidden_wording_hit
+```
 
-| 指标 | 含义 |
-|---|---|
-| tool_call_success | 数据加载、指标计算、新闻风险、产品对标、报告生成是否成功 |
-| report_format_pass | 报告是否包含要求的结构化章节 |
-| metric_consistency | 核心量化字段是否完整且为有限数值 |
-| risk_warning_coverage | 是否覆盖风险提示 |
-| forbidden_wording_fail_rate | 禁用交易方向、收益承诺、确定性措辞的命中失败率 |
-| avg_latency_ms | 单 case 端到端耗时 |
+## Docker
 
-## Qwen LoRA 风险/情绪 adapter
+```bash
+docker compose up --build
+```
 
-`backend/app/models/qwen_risk_adapter.py` 提供可选的本地 Qwen LoRA 推理 wrapper：
-
-- 通过 `QWEN_BASE_MODEL_PATH` 和 `QWEN_RISK_ADAPTER_PATH` 配置；
-- 本地模型不可用时自动使用规则兜底；
-- 输出固定为 `sentiment_score`、`risk_score`、`raw_output`、`model_mode`；
-- demo 默认不需要 GPU、外部服务或密钥。
-
-## 合规边界
+## Compliance Boundary
 
 - 默认只使用 sample/mock 数据。
-- 不提交密钥、私有数据、真实客户数据或公司内部文件。
-- 报告定位为投研辅助、风险摘要、产品对标和研究报告生成。
-- 指标、新闻标签和报告结论分层生成，便于人工复核。
-- 真实数据接口、券商接口或公司内部资料只能作为用户本地可配置扩展，不进入仓库。
+- 不提交密钥、模型权重、私有数据、真实客户数据或公司内部文件。
+- 真实接口只能通过 `.env` 或外部环境变量启用。
+- 所有数值结论由 verifier 复核或从 tool output 引用。
+- 所有报告结论必须带 `tool_call_id` 或 `evidence_id`。
 
-## 简历 bullet
+See:
 
-- 构建 LangGraph 多 Agent 投研辅助系统，串联数据抽取、基本面、估值、技术指标、新闻风险、产品对标、合规 guardrail 与 Markdown 报告生成。
-- 实现 FastAPI 服务与 React/Vite 前端工作台，覆盖研究仪表盘、产品对标、新闻风险、评测面板和教学回放页面。
-- 设计 sample/mock 数据与自动化评测，统计 tool call success、报告格式、指标一致性、风险提示覆盖和 guardrail 命中率，保证 demo 可离线运行。
+- `docs/MIGRATION_REPORT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/EVAL_METHOD.md`
+- `docs/COMPLIANCE_BOUNDARY.md`
+
+## Resume Bullets
+
+- 构建 Planner + conditional LangGraph + ReAct/MCP tool agents 的资管投研辅助系统，统一工具调用 trace、证据编号、Verifier 复核和 Human Review 状态。
+- 实现 FastAPI + SQLite 审计存储 + React/Vite 工作台，支持研究报告、产品对标、新闻风险、TraceView、评测和审核流。
+- 设计 eval-driven routing optimization，使用 reward 评估 fast snapshot、standard research、deep review、product compare、risk-only 等路由策略。

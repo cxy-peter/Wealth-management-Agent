@@ -2,7 +2,7 @@ import { CheckCircle2, Loader2, PlayCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { runEvaluation } from '../api.js';
-import { evalResults } from '../data/mockData.js';
+import { evalResults, routeOptimizationResults } from '../data/mockData.js';
 
 function pct(value) {
   return `${(Number(value || 0) * 100).toFixed(1)}%`;
@@ -38,6 +38,7 @@ export default function EvaluationPanel() {
 
   const metrics = results.metrics || {};
   const cases = results.cases || [];
+  const routeRows = routeOptimizationResults.evaluations || [];
 
   return (
     <div className="page-stack">
@@ -93,6 +94,29 @@ export default function EvaluationPanel() {
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section className="split-grid">
+        <div className="panel">
+          <div className="section-title">
+            <span>Route optimization reward</span>
+            <strong>{Number(routeOptimizationResults.average_reward || 0).toFixed(4)}</strong>
+          </div>
+          <div className="evidence-list">
+            {routeRows.map((item) => (
+              <div className="evidence-row" key={item.action}>
+                {item.action}: reward {Number(item.reward || 0).toFixed(4)} / planner {item.planner_task_type}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="panel">
+          <div className="section-title">
+            <span>Policy values</span>
+            <strong>epsilon-greedy</strong>
+          </div>
+          <pre className="json-block">{JSON.stringify(routeOptimizationResults.policy?.values || {}, null, 2)}</pre>
+        </div>
       </section>
     </div>
   );

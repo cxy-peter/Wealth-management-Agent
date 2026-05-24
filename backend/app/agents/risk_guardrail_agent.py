@@ -1,6 +1,8 @@
 """Compliance and risk guardrail node."""
 from __future__ import annotations
 
+import time
+import uuid
 from typing import Any
 
 
@@ -55,24 +57,49 @@ def build_risk_flags(state: dict[str, Any]) -> list[str]:
 
 
 def risk_guardrail_agent(state: dict[str, Any]) -> dict[str, Any]:
+    started = time.perf_counter()
     risk_flags = build_risk_flags(state)
+    guardrail_call_id = f"tc_risk_guardrail_{uuid.uuid4().hex[:10]}"
+    evidence_ids = [
+        item
+        for section in (
+            state.get("metrics", {}).get("evidence_ids", []),
+            state.get("news_summary", {}).get("evidence_ids", []),
+            state.get("valuation_analysis", {}).get("evidence_ids", []),
+            state.get("peer_summary", {}).get("evidence_ids", []),
+        )
+        for item in section
+    ]
     tool_calls = list(state.get("tool_calls", []))
     tool_calls.append(
         {
-            "tool": "risk_guardrail_check",
-            "agent": "risk_guardrail_agent",
+            "tool_call_id": guardrail_call_id,
+            "tool_name": "risk_guardrail_check",
+            "input_args": {"run_id": state.get("run_id"), "sections": ["metrics", "news", "valuation", "products"]},
+            "output": {"risk_flags": risk_flags, "forbidden_wording_found": False},
+            "evidence_ids": evidence_ids or ["ev_guardrail_policy"],
+            "latency_ms": round((time.perf_counter() - started) * 1000, 2),
             "success": True,
-            "rows": len(risk_flags),
-            "forbidden_wording_found": False,
+            "error_type": None,
         }
     )
+    guardrail = {
+        "positioning": "投研辅助、风险摘要、产品对标、研究报告生成",
+        "data_policy": "sample/mock data only; real connectors are configurable options",
+        "forbidden_wording_found": False,
+        "risk_flags": risk_flags,
+        "source_tool_call_id": guardrail_call_id,
+        "evidence_ids": evidence_ids or ["ev_guardrail_policy"],
+    }
+    event = {
+        "event_type": "guardrail_result",
+        "agent_name": "risk_guardrail_agent",
+        "payload": guardrail,
+    }
     return {
         **state,
         "risk_flags": risk_flags,
-        "compliance_boundary": {
-            "positioning": "投研辅助、风险摘要、产品对标、研究报告生成",
-            "data_policy": "sample/mock data only; real connectors are configurable options",
-            "forbidden_wording_found": False,
-        },
+        "compliance_boundary": guardrail,
         "tool_calls": tool_calls,
+        "agent_events": [*state.get("agent_events", []), event],
     }

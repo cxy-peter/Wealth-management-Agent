@@ -2,7 +2,7 @@ import { FileText, Loader2, Play, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 import { runAnalyze } from '../api.js';
-import { sampleAnalysis } from '../data/mockData.js';
+import { instrumentOptions, sampleAnalysis } from '../data/mockData.js';
 
 function pct(value) {
   return `${(Number(value || 0) * 100).toFixed(2)}%`;
@@ -24,6 +24,7 @@ function MetricTile({ label, value, tone = 'neutral' }) {
 export default function ResearchDashboard({ analysis, onAnalysis }) {
   const [symbol, setSymbol] = useState(analysis.symbol || '600519');
   const [company, setCompany] = useState(analysis.company || '贵州茅台');
+  const [selectedInstrument, setSelectedInstrument] = useState(analysis.symbol || '600519');
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('mock preview');
   const [error, setError] = useState('');
@@ -44,6 +45,15 @@ export default function ResearchDashboard({ analysis, onAnalysis }) {
     }
   }
 
+  function handleSelectInstrument(value) {
+    setSelectedInstrument(value);
+    const option = instrumentOptions.find((item) => item.symbol === value);
+    if (option) {
+      setSymbol(option.symbol);
+      setCompany(option.company);
+    }
+  }
+
   const metrics = analysis.metrics || {};
   const fundamental = analysis.fundamental_analysis || {};
   const valuation = analysis.valuation_analysis || {};
@@ -52,6 +62,16 @@ export default function ResearchDashboard({ analysis, onAnalysis }) {
   return (
     <div className="page-stack">
       <section className="control-band">
+        <div className="field-group">
+          <label htmlFor="instrument">样例选项</label>
+          <select id="instrument" value={selectedInstrument} onChange={(event) => handleSelectInstrument(event.target.value)}>
+            {instrumentOptions.map((item) => (
+              <option key={item.symbol} value={item.symbol}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="field-group">
           <label htmlFor="symbol">Symbol</label>
           <input id="symbol" value={symbol} onChange={(event) => setSymbol(event.target.value)} />

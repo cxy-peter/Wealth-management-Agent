@@ -1,0 +1,17 @@
+[
+  {
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "preferred_action": "standard_research"
+  },
+  {
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "preferred_action": "risk_only"
+  },
+  {
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "preferred_action": "product_compare"
+  }
+]

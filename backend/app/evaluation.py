@@ -10,6 +10,7 @@ from typing import Any
 
 from backend.app.agents.risk_guardrail_agent import FORBIDDEN_PHRASES, contains_forbidden_wording
 from backend.app.agents.workflow import ResearchRequest, run_workflow
+from backend.app.storage import add_eval_result
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CASES_PATH = ROOT / "eval" / "eval_cases.json"
@@ -53,6 +54,7 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
     risk_warning_coverage = len(result.get("risk_flags", [])) >= case.get("min_risk_flags", 1)
     tool_call_success = all(item.get("success") for item in result.get("tool_calls", []))
     forbidden_wording_fail = contains_forbidden_wording(report)
+    evidence_coverage = not result.get("verification_result", {}).get("missing_evidence")
 
     return {
         "symbol": case["symbol"],
@@ -62,7 +64,10 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
         "report_format_pass": report_format_pass,
         "metric_consistency": metric_consistency,
         "risk_warning_coverage": risk_warning_coverage,
+        "evidence_coverage": evidence_coverage,
         "forbidden_wording_fail": forbidden_wording_fail,
+        "verification_pass": result.get("verification_result", {}).get("pass", False),
+        "run_id": result.get("run_id"),
         "workflow_engine": result.get("workflow_engine"),
         "report_path": result.get("report_path"),
         "passed": all(
@@ -71,6 +76,7 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
                 report_format_pass,
                 metric_consistency,
                 risk_warning_coverage,
+                evidence_coverage,
                 not forbidden_wording_fail,
             ]
         ),
@@ -97,6 +103,7 @@ def run_evaluation(
             "report_format_pass": _rate(case_results, "report_format_pass"),
             "metric_consistency": _rate(case_results, "metric_consistency"),
             "risk_warning_coverage": _rate(case_results, "risk_warning_coverage"),
+            "evidence_coverage": _rate(case_results, "evidence_coverage"),
             "forbidden_wording_fail_rate": _rate(case_results, "forbidden_wording_fail"),
             "avg_latency_ms": round(
                 sum(item["latency_ms"] for item in case_results) / len(case_results), 2
@@ -111,6 +118,7 @@ def run_evaluation(
     path = Path(output_path) if output_path else DEFAULT_RESULTS_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    add_eval_result("report_eval", payload)
     try:
         payload["results_path"] = path.resolve().relative_to(ROOT).as_posix()
     except ValueError:

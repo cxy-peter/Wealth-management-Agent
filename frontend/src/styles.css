@@ -175,10 +175,19 @@ button {
 
 .control-band {
   display: grid;
-  grid-template-columns: 160px minmax(220px, 1fr) auto auto;
+  grid-template-columns: minmax(150px, 220px) minmax(120px, 160px) minmax(220px, 1fr) auto auto;
   align-items: end;
   gap: 12px;
   padding: 14px;
+}
+
+.trace-control,
+.review-actions {
+  grid-template-columns: auto minmax(240px, 1fr);
+}
+
+.review-actions {
+  grid-template-columns: repeat(3, minmax(0, 160px));
 }
 
 .field-group {
@@ -220,6 +229,14 @@ button {
   background: #22776f;
   color: #ffffff;
   font-weight: 800;
+}
+
+.primary-btn.secondary {
+  background: #415b76;
+}
+
+.primary-btn.danger {
+  background: #a9433e;
 }
 
 .primary-btn:disabled {
@@ -369,6 +386,53 @@ button {
   padding: 14px;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.json-block,
+.timeline-item pre {
+  max-height: 300px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background: #f7f2e8;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.timeline-list {
+  display: grid;
+  gap: 10px;
+}
+
+.timeline-item {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.timeline-item span {
+  color: #667176;
+  font-size: 12px;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
+  border: 1px solid #d7cfbf;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffef9;
+  color: #182026;
+  line-height: 1.5;
+}
+
+.review-textarea.small {
+  min-height: 96px;
 }
 
 .table-panel {
@@ -526,7 +590,9 @@ td span {
     font-size: 11px;
   }
 
-  .control-band,
+    .control-band,
+    .trace-control,
+    .review-actions,
   .metric-grid,
   .metric-grid.compact,
   .split-grid,

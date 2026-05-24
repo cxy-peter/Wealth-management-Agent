@@ -3,26 +3,28 @@ from __future__ import annotations
 
 from typing import Any
 
-from backend.app.tools.product_benchmark import peer_summary
+from backend.app.agents.react_common import call_registry_tool, final_event
 
 
 def product_benchmark_agent(state: dict[str, Any]) -> dict[str, Any]:
     request = state["request"]
     filters = request.get("product_filters") or {}
-    peer = peer_summary(state["products_df"], filters=filters)
-
-    tool_calls = list(state.get("tool_calls", []))
-    tool_calls.append(
-        {
-            "tool": "peer_summary",
-            "agent": "product_benchmark_agent",
-            "success": True,
-            "rows": int(peer.get("product_count", 0)),
-        }
+    call = call_registry_tool(
+        state,
+        "product_benchmark_agent",
+        "product_benchmark",
+        asset_class=filters.get("asset_class"),
+        risk_level=filters.get("risk_level"),
+        channel=filters.get("channel"),
     )
+    record = call["record"]
+    peer = record.get("output", {})
+    peer["source_tool_call_id"] = record["tool_call_id"]
+    peer["evidence_ids"] = record.get("evidence_ids", [])
 
     return {
         **state,
         "peer_summary": peer,
-        "tool_calls": tool_calls,
+        "tool_calls": call["tool_calls"],
+        "agent_events": [*call["agent_events"], final_event("product_benchmark_agent", peer)],
     }
