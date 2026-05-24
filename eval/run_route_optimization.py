@@ -25,6 +25,7 @@ def evaluate_route(case: dict, action: str) -> dict:
             company=case["company"],
             analysis_type=params["analysis_type"],
             risk_preference=params["risk_preference"],
+            product_filters=case.get("product_filters", {}),
             output_path=str(Path("reports") / f"route_{action}_{case['symbol']}.md"),
         )
     )
@@ -36,7 +37,9 @@ def evaluate_route(case: dict, action: str) -> dict:
         "risk_warning_coverage": 1.0 if result.get("risk_flags") else 0.0,
         "evidence_coverage": 1.0 if not result.get("verification_result", {}).get("missing_evidence") else 0.0,
         "report_format_pass": 1.0 if all(section in report for section in REQUIRED_SECTIONS) else 0.0,
+        "route_match_score": 1.0 if action == case.get("preferred_action", action) else 0.5,
         "latency_ms": latency_ms,
+        "unnecessary_tool_penalty": 0.0 if action == case.get("preferred_action", action) else 0.25,
         "forbidden_wording_hit": 1.0 if contains_forbidden_wording(report) else 0.0,
     }
     reward = compute_reward(metrics)

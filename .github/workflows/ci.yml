@@ -27,6 +27,8 @@ jobs:
         run: python eval/run_eval.py
       - name: Route optimization eval
         run: python eval/run_route_optimization.py
+      - name: Contextual bandit eval
+        run: python eval/run_contextual_bandit.py
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci

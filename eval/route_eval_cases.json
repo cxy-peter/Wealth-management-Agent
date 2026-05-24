@@ -1,17 +1,163 @@
 [
   {
+    "case_id": "route_01",
     "symbol": "600519",
     "company": "贵州茅台",
-    "preferred_action": "standard_research"
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "preferred_action": "standard_research",
+    "product_filters": {}
   },
   {
+    "case_id": "route_02",
     "symbol": "600519",
     "company": "贵州茅台",
-    "preferred_action": "risk_only"
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "preferred_action": "risk_only",
+    "product_filters": {
+      "asset_class": "现金管理"
+    }
   },
   {
+    "case_id": "route_03",
     "symbol": "600519",
     "company": "贵州茅台",
-    "preferred_action": "product_compare"
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "preferred_action": "product_compare",
+    "product_filters": {
+      "asset_class": "固收+"
+    }
+  },
+  {
+    "case_id": "route_04",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "preferred_action": "fast_snapshot",
+    "product_filters": {
+      "risk_level": "R4"
+    }
+  },
+  {
+    "case_id": "route_05",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "deep",
+    "risk_preference": "strict",
+    "preferred_action": "deep_review",
+    "product_filters": {
+      "channel": "银行渠道"
+    }
+  },
+  {
+    "case_id": "route_06",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "preferred_action": "standard_research",
+    "product_filters": {
+      "duration_bucket": "6-12M"
+    }
+  },
+  {
+    "case_id": "route_07",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "preferred_action": "risk_only",
+    "product_filters": {
+      "liquidity_type": "每月开放"
+    }
+  },
+  {
+    "case_id": "route_08",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "preferred_action": "product_compare",
+    "product_filters": {
+      "strategy_type": "指数增强"
+    }
+  },
+  {
+    "case_id": "route_09",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "preferred_action": "fast_snapshot",
+    "product_filters": {
+      "asset_class": "不存在资产类别"
+    }
+  },
+  {
+    "case_id": "route_10",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "deep",
+    "risk_preference": "strict",
+    "preferred_action": "deep_review",
+    "product_filters": {}
+  },
+  {
+    "case_id": "route_11",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "preferred_action": "standard_research",
+    "product_filters": {
+      "asset_class": "现金管理"
+    }
+  },
+  {
+    "case_id": "route_12",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "preferred_action": "risk_only",
+    "product_filters": {
+      "asset_class": "固收+"
+    }
+  },
+  {
+    "case_id": "route_13",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "preferred_action": "product_compare",
+    "product_filters": {
+      "risk_level": "R4"
+    }
+  },
+  {
+    "case_id": "route_14",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "preferred_action": "fast_snapshot",
+    "product_filters": {
+      "channel": "银行渠道"
+    }
+  },
+  {
+    "case_id": "route_15",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "deep",
+    "risk_preference": "strict",
+    "preferred_action": "deep_review",
+    "product_filters": {
+      "duration_bucket": "6-12M"
+    }
   }
 ]

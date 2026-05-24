@@ -1,21 +1,21 @@
 {
-  "case_count": 3,
-  "average_reward": 0.938,
+  "case_count": 15,
+  "average_reward": 0.8657,
   "policy": {
     "epsilon": 0.15,
     "values": {
-      "fast_snapshot": 0.0,
-      "standard_research": 0.9318,
-      "deep_review": 0.0,
-      "product_compare": 0.9433,
-      "risk_only": 0.9388
+      "fast_snapshot": 0.8737333333333334,
+      "standard_research": 0.8518333333333333,
+      "deep_review": 0.8425666666666667,
+      "product_compare": 0.8784666666666666,
+      "risk_only": 0.8820333333333333
     },
     "counts": {
-      "fast_snapshot": 0,
-      "standard_research": 1,
-      "deep_review": 0,
-      "product_compare": 1,
-      "risk_only": 1
+      "fast_snapshot": 3,
+      "standard_research": 3,
+      "deep_review": 3,
+      "product_compare": 3,
+      "risk_only": 3
     }
   },
   "evaluations": [
@@ -23,49 +23,271 @@
       "symbol": "600519",
       "action": "standard_research",
       "planner_task_type": "standard_research",
-      "reward": 0.9318,
+      "reward": 0.8237,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
         "risk_warning_coverage": 1.0,
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
-        "latency_ms": 145.92,
+        "route_match_score": 1.0,
+        "latency_ms": 610.55,
+        "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_cf1f0b926d29"
+      "run_id": "run_1cf8ddb8bf22"
     },
     {
       "symbol": "600519",
       "action": "risk_only",
       "planner_task_type": "risk_only",
-      "reward": 0.9388,
+      "reward": 0.8861,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
         "risk_warning_coverage": 1.0,
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
-        "latency_ms": 89.3,
+        "route_match_score": 1.0,
+        "latency_ms": 110.9,
+        "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_7bad1b120b68"
+      "run_id": "run_7cf8700465dc"
     },
     {
       "symbol": "600519",
       "action": "product_compare",
       "planner_task_type": "product_compare",
-      "reward": 0.9433,
+      "reward": 0.885,
       "metrics": {
         "tool_call_success": 1.0,
         "metric_consistency": 1.0,
         "risk_warning_coverage": 1.0,
         "evidence_coverage": 1.0,
         "report_format_pass": 1.0,
-        "latency_ms": 53.55,
+        "route_match_score": 1.0,
+        "latency_ms": 119.91,
+        "unnecessary_tool_penalty": 0.0,
         "forbidden_wording_hit": 0.0
       },
-      "run_id": "run_d32233828997"
+      "run_id": "run_38a60f64e2e6"
+    },
+    {
+      "symbol": "600519",
+      "action": "fast_snapshot",
+      "planner_task_type": "fast_snapshot",
+      "reward": 0.8682,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 254.14,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_1722b22a6d35"
+    },
+    {
+      "symbol": "600519",
+      "action": "deep_review",
+      "planner_task_type": "deep_review",
+      "reward": 0.8675,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 260.37,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_dd0bb7050a70"
+    },
+    {
+      "symbol": "600519",
+      "action": "standard_research",
+      "planner_task_type": "standard_research",
+      "reward": 0.8708,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 233.88,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_9c6bd417a784"
+    },
+    {
+      "symbol": "600519",
+      "action": "risk_only",
+      "planner_task_type": "risk_only",
+      "reward": 0.8798,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 161.58,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_1238bb9b3947"
+    },
+    {
+      "symbol": "600519",
+      "action": "product_compare",
+      "planner_task_type": "product_compare",
+      "reward": 0.8853,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 117.9,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_19864e7f09b0"
+    },
+    {
+      "symbol": "600519",
+      "action": "fast_snapshot",
+      "planner_task_type": "fast_snapshot",
+      "reward": 0.8718,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 225.84,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_07543251bab9"
+    },
+    {
+      "symbol": "600519",
+      "action": "deep_review",
+      "planner_task_type": "deep_review",
+      "reward": 0.8242,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 606.78,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_8218453da23a"
+    },
+    {
+      "symbol": "600519",
+      "action": "standard_research",
+      "planner_task_type": "standard_research",
+      "reward": 0.861,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 311.82,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_63919e410654"
+    },
+    {
+      "symbol": "600519",
+      "action": "risk_only",
+      "planner_task_type": "risk_only",
+      "reward": 0.8802,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 158.29,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_d9db28b4e159"
+    },
+    {
+      "symbol": "600519",
+      "action": "product_compare",
+      "planner_task_type": "product_compare",
+      "reward": 0.8651,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 279.26,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_9dbc21e71907"
+    },
+    {
+      "symbol": "600519",
+      "action": "fast_snapshot",
+      "planner_task_type": "fast_snapshot",
+      "reward": 0.8812,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 150.61,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_fd31980cc6d6"
+    },
+    {
+      "symbol": "600519",
+      "action": "deep_review",
+      "planner_task_type": "deep_review",
+      "reward": 0.836,
+      "metrics": {
+        "tool_call_success": 1.0,
+        "metric_consistency": 1.0,
+        "risk_warning_coverage": 1.0,
+        "evidence_coverage": 1.0,
+        "report_format_pass": 1.0,
+        "route_match_score": 1.0,
+        "latency_ms": 512.08,
+        "unnecessary_tool_penalty": 0.0,
+        "forbidden_wording_hit": 0.0
+      },
+      "run_id": "run_fc88eeb06e69"
     }
   ]
 }

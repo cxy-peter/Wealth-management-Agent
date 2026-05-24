@@ -1,17 +1,419 @@
 [
   {
+    "case_id": "eval_01",
     "symbol": "600519",
     "company": "贵州茅台",
+    "analysis_type": "deep",
+    "risk_preference": "strict",
+    "product_filters": {},
+    "scenario": "正常研究",
     "must_contain": [
       "合规说明",
       "数据与工具调用摘要",
       "核心量化指标",
       "基本面与估值摘要",
       "技术面风险观察",
-      "同业产品对比样例",
+      "同业产品对标样例",
       "新闻情绪与风险信号",
-      "风险提示与可追溯结论",
-      "不构成投资建议"
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_02",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "asset_class": "现金管理"
+    },
+    "scenario": "产品对标",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_03",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "风险摘要",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_04",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "product_filters": {},
+    "scenario": "高风险新闻",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_05",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "channel": "银行渠道"
+    },
+    "scenario": "缺失基本面",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_06",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "deep",
+    "risk_preference": "strict",
+    "product_filters": {
+      "duration_bucket": "6-12M"
+    },
+    "scenario": "缺失新闻",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_07",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "产品池为空",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_08",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "product_filters": {},
+    "scenario": "禁用措辞注入",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_09",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "asset_class": "不存在资产类别"
+    },
+    "scenario": "极端波动样例",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_10",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "正常研究",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_11",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "产品对标",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_12",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "product_filters": {},
+    "scenario": "风险摘要",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_13",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "risk_level": "R4"
+    },
+    "scenario": "高风险新闻",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_14",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "channel": "银行渠道"
+    },
+    "scenario": "缺失基本面",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_15",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "缺失新闻",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_16",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "risk",
+    "risk_preference": "conservative",
+    "product_filters": {},
+    "scenario": "产品池为空",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_17",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "strategy_type": "指数增强"
+    },
+    "scenario": "禁用措辞注入",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_18",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "full",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "asset_class": "不存在资产类别"
+    },
+    "scenario": "极端波动样例",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_19",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "fast",
+    "risk_preference": "balanced",
+    "product_filters": {},
+    "scenario": "正常研究",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
+    ],
+    "min_risk_flags": 1
+  },
+  {
+    "case_id": "eval_20",
+    "symbol": "600519",
+    "company": "贵州茅台",
+    "analysis_type": "product",
+    "risk_preference": "balanced",
+    "product_filters": {
+      "asset_class": "现金管理"
+    },
+    "scenario": "产品对标",
+    "must_contain": [
+      "合规说明",
+      "数据与工具调用摘要",
+      "核心量化指标",
+      "基本面与估值摘要",
+      "技术面风险观察",
+      "同业产品对标样例",
+      "新闻情绪与风险信号",
+      "风险提示与可追溯结论"
     ],
     "min_risk_flags": 1
   }

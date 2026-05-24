@@ -16,6 +16,9 @@ def product_benchmark_agent(state: dict[str, Any]) -> dict[str, Any]:
         asset_class=filters.get("asset_class"),
         risk_level=filters.get("risk_level"),
         channel=filters.get("channel"),
+        duration_bucket=filters.get("duration_bucket"),
+        liquidity_type=filters.get("liquidity_type"),
+        strategy_type=filters.get("strategy_type"),
     )
     record = call["record"]
     peer = record.get("output", {})

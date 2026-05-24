@@ -1,21 +1,7 @@
-import {
-  Activity,
-  BarChart3,
-  FileText,
-  Gauge,
-  GitBranch,
-  Landmark,
-  Newspaper,
-  UserCheck,
-  ShieldCheck,
-  SlidersHorizontal
-} from 'lucide-react';
+import { BarChart3, FileText, Gauge, GitBranch, Landmark, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import EvaluationPanel from './pages/EvaluationPanel.jsx';
 import HumanReview from './pages/HumanReview.jsx';
-import NewsRiskPanel from './pages/NewsRiskPanel.jsx';
-import PaperReplay from './pages/PaperReplay.jsx';
 import ProductBenchmark from './pages/ProductBenchmark.jsx';
 import ResearchDashboard from './pages/ResearchDashboard.jsx';
 import TraceView from './pages/TraceView.jsx';
@@ -24,19 +10,24 @@ import { sampleAnalysis } from './data/mockData.js';
 const pages = [
   { id: 'research', label: 'ResearchDashboard', icon: FileText },
   { id: 'benchmark', label: 'ProductBenchmark', icon: BarChart3 },
-  { id: 'news', label: 'NewsRiskPanel', icon: Newspaper },
-  { id: 'trace', label: 'TraceView', icon: GitBranch },
-  { id: 'eval', label: 'EvaluationPanel', icon: ShieldCheck },
-  { id: 'review', label: 'HumanReview', icon: UserCheck },
-  { id: 'replay', label: 'PaperReplay', icon: Activity }
+  { id: 'trace', label: 'TraceView', icon: GitBranch }
 ];
 
 export default function App() {
   const [activePage, setActivePage] = useState('research');
   const [analysis, setAnalysis] = useState(sampleAnalysis);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const activeMeta = useMemo(() => pages.find((page) => page.id === activePage) || pages[0], [activePage]);
   const ActiveIcon = activeMeta.icon;
+  const pendingReview = analysis.human_review?.status === 'pending_review';
+
+  function handleAnalysis(nextAnalysis) {
+    setAnalysis(nextAnalysis);
+    if (nextAnalysis?.human_review?.status === 'pending_review') {
+      setReviewOpen(true);
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -71,7 +62,7 @@ export default function App() {
         <div className="sidebar-status">
           <div className="status-row">
             <Gauge size={16} />
-            <span>LangGraph</span>
+            <span>Workflow</span>
             <strong>{analysis.workflow_engine || 'mock'}</strong>
           </div>
           <div className="status-row">
@@ -79,6 +70,11 @@ export default function App() {
             <span>Data</span>
             <strong>sample/mock</strong>
           </div>
+          {pendingReview ? (
+            <button className="review-chip" onClick={() => setReviewOpen(true)}>
+              Pending review
+            </button>
+          ) : null}
         </div>
       </aside>
 
@@ -93,18 +89,21 @@ export default function App() {
           </div>
           <div className="scope-pill">
             <ShieldCheck size={16} />
-            不构成投资建议
+            合规边界已启用
           </div>
         </header>
 
-        {activePage === 'research' ? <ResearchDashboard analysis={analysis} onAnalysis={setAnalysis} /> : null}
-        {activePage === 'benchmark' ? <ProductBenchmark analysis={analysis} onAnalysis={setAnalysis} /> : null}
-        {activePage === 'news' ? <NewsRiskPanel analysis={analysis} /> : null}
+        {activePage === 'research' ? <ResearchDashboard analysis={analysis} onAnalysis={handleAnalysis} /> : null}
+        {activePage === 'benchmark' ? <ProductBenchmark analysis={analysis} onAnalysis={handleAnalysis} /> : null}
         {activePage === 'trace' ? <TraceView analysis={analysis} /> : null}
-        {activePage === 'eval' ? <EvaluationPanel /> : null}
-        {activePage === 'review' ? <HumanReview analysis={analysis} onAnalysis={setAnalysis} /> : null}
-        {activePage === 'replay' ? <PaperReplay analysis={analysis} /> : null}
       </main>
+
+      <HumanReview
+        analysis={analysis}
+        isOpen={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        onAnalysis={handleAnalysis}
+      />
     </div>
   );
 }

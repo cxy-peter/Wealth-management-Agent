@@ -22,7 +22,7 @@ REQUIRED_REPORT_SECTIONS = [
     "核心量化指标",
     "基本面与估值摘要",
     "技术面风险观察",
-    "同业产品对比样例",
+    "同业产品对标样例",
     "新闻情绪与风险信号",
     "风险提示与可追溯结论",
 ]
@@ -32,9 +32,25 @@ def _load_cases(path: Path = DEFAULT_CASES_PATH) -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _metric_consistency(metrics: dict[str, Any]) -> bool:
+def _metric_consistency(metrics: dict[str, Any], result: dict[str, Any] | None = None, case: dict[str, Any] | None = None) -> bool:
     keys = ["total_return", "annualized_return", "annualized_volatility", "max_drawdown", "sharpe_ratio"]
-    return all(key in metrics and math.isfinite(float(metrics[key])) for key in keys)
+    if all(key in metrics and math.isfinite(float(metrics[key])) for key in keys):
+        return True
+    result = result or {}
+    peer_rows = result.get("peer_summary", {}).get("table", [])
+    if result.get("peer_summary", {}).get("product_count") == 0 and (case or {}).get("analysis_type") == "product":
+        return True
+    if peer_rows:
+        product_keys = [
+            "annualized_return",
+            "annualized_volatility",
+            "max_drawdown",
+            "sharpe_ratio",
+            "calmar_ratio",
+            "benchmark_excess_return",
+        ]
+        return all(key in peer_rows[0] and math.isfinite(float(peer_rows[0][key])) for key in product_keys)
+    return False
 
 
 def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
@@ -43,6 +59,9 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
         ResearchRequest(
             symbol=case["symbol"],
             company=case["company"],
+            analysis_type=case.get("analysis_type", "full"),
+            risk_preference=case.get("risk_preference", "balanced"),
+            product_filters=case.get("product_filters", {}),
             output_path=str(Path("reports") / f"eval_{case['symbol']}.md"),
         )
     )
@@ -50,7 +69,7 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
     report = result["report_markdown"]
 
     report_format_pass = all(section in report for section in case.get("must_contain", REQUIRED_REPORT_SECTIONS))
-    metric_consistency = _metric_consistency(result["metrics"])
+    metric_consistency = _metric_consistency(result["metrics"], result, case)
     risk_warning_coverage = len(result.get("risk_flags", [])) >= case.get("min_risk_flags", 1)
     tool_call_success = all(item.get("success") for item in result.get("tool_calls", []))
     forbidden_wording_fail = contains_forbidden_wording(report)

@@ -18,8 +18,8 @@ from backend.app.storage import (
     list_tool_calls,
     update_run,
 )
-from backend.app.tools.data_loader import load_products
-from backend.app.tools.product_benchmark import peer_summary
+from backend.app.tools.data_loader import load_product_nav, load_product_risk_events, load_products
+from backend.app.tools.product_benchmark import filter_products, peer_summary, product_detail
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -45,6 +45,9 @@ class ProductBenchmarkRequest(BaseModel):
     asset_class: str | None = None
     risk_level: str | None = None
     channel: str | None = None
+    duration_bucket: str | None = None
+    liquidity_type: str | None = None
+    strategy_type: str | None = None
 
 
 class EvalRunRequest(BaseModel):
@@ -115,6 +118,69 @@ def get_report(run_id: str) -> dict[str, Any]:
 def product_benchmark(req: ProductBenchmarkRequest) -> dict[str, Any]:
     filters = req.model_dump(exclude_none=True)
     return peer_summary(load_products(), filters=filters)
+
+
+def _frame_records(frame) -> list[dict[str, Any]]:
+    if frame.empty:
+        return []
+    copy = frame.copy()
+    for column in copy.select_dtypes(include=["datetime64[ns]", "datetimetz"]).columns:
+        copy[column] = copy[column].dt.strftime("%Y-%m-%d")
+    return copy.to_dict(orient="records")
+
+
+@app.get("/api/products")
+def list_products(
+    asset_class: str | None = None,
+    risk_level: str | None = None,
+    channel: str | None = None,
+    duration_bucket: str | None = None,
+    liquidity_type: str | None = None,
+    strategy_type: str | None = None,
+) -> dict[str, Any]:
+    products = load_products()
+    filters = {
+        key: value
+        for key, value in {
+            "asset_class": asset_class,
+            "risk_level": risk_level,
+            "channel": channel,
+            "duration_bucket": duration_bucket,
+            "liquidity_type": liquidity_type,
+            "strategy_type": strategy_type,
+        }.items()
+        if value
+    }
+    filtered = filter_products(products, **filters)
+    summary = peer_summary(products, filters=filters)
+    return {
+        "count": int(len(filtered)),
+        "filters": filters,
+        "filter_options": summary.get("filter_options", {}),
+        "products": _frame_records(filtered),
+    }
+
+
+@app.get("/api/products/{product_id}")
+def get_product(product_id: str) -> dict[str, Any]:
+    detail = product_detail(load_products(), product_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="product_id not found")
+    return detail
+
+
+@app.get("/api/products/{product_id}/nav")
+def get_product_nav(product_id: str) -> dict[str, Any]:
+    nav = load_product_nav(product_id)
+    if nav.empty:
+        raise HTTPException(status_code=404, detail="product nav not found")
+    return {"product_id": product_id, "records": _frame_records(nav)}
+
+
+@app.get("/api/products/{product_id}/risk-events")
+def get_product_risk_events(product_id: str) -> dict[str, Any]:
+    events = load_product_risk_events(product_id)
+    return {"product_id": product_id, "records": _frame_records(events)}
 
 
 @app.post("/api/eval/run")

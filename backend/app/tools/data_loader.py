@@ -47,7 +47,37 @@ def load_news(symbol: str, data_dir: Path | str | None = None) -> pd.DataFrame:
 
 
 def load_products(data_dir: Path | str | None = None) -> pd.DataFrame:
+    data_path = get_data_dir(data_dir)
+    catalog_path = data_path / "sample_product_catalog.csv"
+    if catalog_path.exists():
+        return pd.read_csv(catalog_path, parse_dates=["open_date"])
     return _read_csv("sample_products.csv", data_dir)
+
+
+def load_product_catalog(data_dir: Path | str | None = None) -> pd.DataFrame:
+    """Load the synthetic product catalog, falling back to the legacy sample."""
+
+    return load_products(data_dir)
+
+
+def load_product_nav(product_id: str | None = None, data_dir: Path | str | None = None) -> pd.DataFrame:
+    path = get_data_dir(data_dir) / "sample_product_nav.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    df = pd.read_csv(path, parse_dates=["date"])
+    if product_id:
+        df = df[df["product_id"].astype(str) == str(product_id)]
+    return df.sort_values(["product_id", "date"])
+
+
+def load_product_risk_events(product_id: str | None = None, data_dir: Path | str | None = None) -> pd.DataFrame:
+    path = get_data_dir(data_dir) / "sample_product_risk_events.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    df = pd.read_csv(path, parse_dates=["event_date"])
+    if product_id:
+        df = df[df["product_id"].astype(str) == str(product_id)]
+    return df.sort_values(["product_id", "event_date"])
 
 
 def load_fundamentals(symbol: str, data_dir: Path | str | None = None) -> pd.DataFrame:

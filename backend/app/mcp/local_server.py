@@ -50,12 +50,18 @@ def product_benchmark(
     asset_class: str | None = None,
     risk_level: str | None = None,
     channel: str | None = None,
+    duration_bucket: str | None = None,
+    liquidity_type: str | None = None,
+    strategy_type: str | None = None,
 ) -> dict[str, Any]:
     return execute_tool(
         "product_benchmark",
         asset_class=asset_class,
         risk_level=risk_level,
         channel=channel,
+        duration_bucket=duration_bucket,
+        liquidity_type=liquidity_type,
+        strategy_type=strategy_type,
     )
 
 

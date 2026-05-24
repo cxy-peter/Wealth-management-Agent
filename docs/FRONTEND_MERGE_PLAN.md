@@ -1,26 +1,11 @@
-# Frontend merge plan
+# Frontend Consolidation
 
-MSX/RiskLens 前端只作为交互参考，不整仓复制。当前项目保留三类适合投研投递的交互：
+The frontend is intentionally limited to three top-level workspaces:
 
-- 产品货架与产品详情式信息密度；
-- evidence-backed diligence：证据、memo、红旗、变化项分开展示；
-- Paper Replay：教学模拟回放，不连接账户，不发送真实订单。
+- `ResearchDashboard`: analysis form, metrics, report preview, and a merged News Risk tab.
+- `ProductBenchmark`: filter sidebar, product table, scatter plot, product detail drawer, NAV/benchmark curves, risk events, and metric trace.
+- `TraceView`: planner/tool/event trace, verifier, guardrail, advanced eval, route optimization, contextual bandit results, and ScenarioReplay preview.
 
-新页面已经落在：
+Human review is a drawer that opens when `human_review.status === "pending_review"`; it is not a top-level navigation item.
 
-```text
-frontend/src/pages/
-  ResearchDashboard.jsx
-  ProductBenchmark.jsx
-  NewsRiskPanel.jsx
-  EvaluationPanel.jsx
-  PaperReplay.jsx
-```
-
-API contract:
-
-- `POST /api/analyze`
-- `POST /api/product-benchmark`
-- `POST /api/eval/run`
-
-前端保持 sample/mock fallback，因此后端或模型不可用时仍能展示完整 demo。
+The app keeps sample/mock fallback data in `frontend/src/data/mockData.js`, so the UI remains usable when the backend is unavailable.

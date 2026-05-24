@@ -24,7 +24,7 @@ FORBIDDEN_PHRASES = [
 def sanitize_text(text: str) -> str:
     clean = str(text)
     for phrase in FORBIDDEN_PHRASES:
-        clean = clean.replace(phrase, "合规拦截表达")
+        clean = clean.replace(phrase, "合规拦截表述")
     return clean
 
 
@@ -47,7 +47,7 @@ def build_risk_flags(state: dict[str, Any]) -> list[str]:
         flags.append("新闻风险分处于中等及以上，应核查监管、渠道、价格、库存或违约相关事件。")
     if valuation.get("pe_to_peer", 0) >= 1.15 or valuation.get("pb_to_peer", 0) >= 1.15:
         flags.append("相对估值样例高于同业中位数，需要拆分质量溢价、成长预期和估值回撤风险。")
-    if peer.get("product_count", 0) > 0 and "R4" in peer.get("risk_levels", []):
+    if peer.get("product_count", 0) > 0 and any(level in peer.get("risk_levels", []) for level in ["R4", "R5"]):
         flags.append("产品池包含较高风险等级样例，展示收益指标时必须同步展示波动、回撤和风险等级。")
     if not flags:
         flags.append("样本期内未触发高等级量化阈值，但结论受样本长度和模拟数据限制。")
@@ -70,13 +70,14 @@ def risk_guardrail_agent(state: dict[str, Any]) -> dict[str, Any]:
         )
         for item in section
     ]
+    forbidden_hit = any(contains_forbidden_wording(str(item)) for item in state.get("agent_events", []))
     tool_calls = list(state.get("tool_calls", []))
     tool_calls.append(
         {
             "tool_call_id": guardrail_call_id,
             "tool_name": "risk_guardrail_check",
             "input_args": {"run_id": state.get("run_id"), "sections": ["metrics", "news", "valuation", "products"]},
-            "output": {"risk_flags": risk_flags, "forbidden_wording_found": False},
+            "output": {"risk_flags": risk_flags, "forbidden_wording_found": forbidden_hit},
             "evidence_ids": evidence_ids or ["ev_guardrail_policy"],
             "latency_ms": round((time.perf_counter() - started) * 1000, 2),
             "success": True,
@@ -86,7 +87,7 @@ def risk_guardrail_agent(state: dict[str, Any]) -> dict[str, Any]:
     guardrail = {
         "positioning": "投研辅助、风险摘要、产品对标、研究报告生成",
         "data_policy": "sample/mock data only; real connectors are configurable options",
-        "forbidden_wording_found": False,
+        "forbidden_wording_found": forbidden_hit,
         "risk_flags": risk_flags,
         "source_tool_call_id": guardrail_call_id,
         "evidence_ids": evidence_ids or ["ev_guardrail_policy"],

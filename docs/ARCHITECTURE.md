@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-  API["FastAPI /api/analyze"] --> Planner["planner_agent"]
+  API["FastAPI"] --> Planner["planner_agent"]
   Planner --> Graph["LangGraph conditional routing"]
   Graph --> F["fundamental_react_agent"]
   Graph --> T["technical_react_agent"]
@@ -20,18 +20,32 @@ flowchart LR
   R --> Verify["verifier_agent"]
   Verify --> H["human_review_agent"]
   Verify --> Done["completed"]
+  Verify --> Audit["SQLite audit store"]
+  Audit --> Trace["TraceView"]
+```
+
+## Product Benchmark Flow
+
+```mermaid
+flowchart LR
+  Catalog["sample_product_catalog.csv"] --> Tool["product_benchmark"]
+  Nav["sample_product_nav.csv"] --> Tool
+  Events["sample_product_risk_events.csv"] --> API["Product detail APIs"]
+  Tool --> Metrics["return / volatility / drawdown / Sharpe / Calmar / excess"]
+  Metrics --> Report["Report with evidence_id"]
 ```
 
 ## Key Contracts
 
-- Planner 输出 task type、depth、required tools、skipped tools、risk level、human review hint。
-- Tool registry 为所有工具返回统一 trace：`tool_call_id`、`tool_name`、`input_args`、`output`、`evidence_ids`、`latency_ms`、`success`、`error_type`。
-- Verifier 复核数值、证据、报告结构和 guardrail。
-- SQLite 记录 run、agent events、tool calls、report snapshots、eval results、human reviews。
+- Planner outputs task type, analysis depth, required tools, skipped tools, risk level, and human-review hint.
+- Tool registry returns `tool_call_id`, `tool_name`, `input_args`, `output`, `evidence_ids`, `latency_ms`, `success`, and `error_type`.
+- Product benchmark rows include metric evidence and source tool-call references.
+- Verifier checks metrics, evidence, report structure, product benchmark sourcing, and guardrail wording.
+- SQLite records runs, agent events, tool calls, report snapshots, eval results, and human reviews.
 
 ## Fallback Strategy
 
-- 无 API key：ReAct agent 自动走 deterministic tool pipeline。
-- 无 GPU 或无模型文件：Qwen adapter 自动走 rule-based fallback。
-- 无外部数据接口：默认使用 `data/` sample/mock CSV。
-- 无 blocking interrupt：使用 pending-review 状态和审核 API。
+- No API key: ReAct-capable agents use the deterministic tool pipeline.
+- No GPU or local model file: Qwen adapter uses rule-based fallback.
+- No external data connector: default reads `data/` sample/mock CSV files.
+- No blocking LangGraph interrupt: human review uses `pending_review` plus review APIs.

@@ -138,10 +138,20 @@ def product_benchmark(
     asset_class: str | None = None,
     risk_level: str | None = None,
     channel: str | None = None,
+    duration_bucket: str | None = None,
+    liquidity_type: str | None = None,
+    strategy_type: str | None = None,
 ) -> dict[str, Any]:
     filters = {
         key: value
-        for key, value in {"asset_class": asset_class, "risk_level": risk_level, "channel": channel}.items()
+        for key, value in {
+            "asset_class": asset_class,
+            "risk_level": risk_level,
+            "channel": channel,
+            "duration_bucket": duration_bucket,
+            "liquidity_type": liquidity_type,
+            "strategy_type": strategy_type,
+        }.items()
         if value
     }
     return peer_summary(load_products(), filters=filters)
@@ -177,6 +187,16 @@ def evidence_ids_for(tool_name: str, input_args: dict[str, Any], output: Any) ->
     return [_evidence(tool_name, symbol)]
 
 
+def _attach_source_tool_call_id(tool_name: str, output: Any, call_id: str) -> Any:
+    if tool_name != "product_benchmark" or not isinstance(output, dict):
+        return output
+    for row in output.get("table", []):
+        if isinstance(row, dict):
+            row["source_tool_call_id"] = call_id
+    output["source_tool_call_id"] = call_id
+    return output
+
+
 def execute_tool(tool_name: str, **input_args: Any) -> dict[str, Any]:
     started = time.perf_counter()
     call_id = _tool_call_id(tool_name)
@@ -195,6 +215,7 @@ def execute_tool(tool_name: str, **input_args: Any) -> dict[str, Any]:
     try:
         output = TOOL_REGISTRY[tool_name](**input_args)
         output = _jsonable(output)
+        output = _attach_source_tool_call_id(tool_name, output, call_id)
         return ToolCallRecord(
             tool_call_id=call_id,
             tool_name=tool_name,

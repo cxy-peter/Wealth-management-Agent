@@ -8,8 +8,11 @@ from backend.app.agents.verifier_agent import verify_result
 from backend.app.agents.workflow import ResearchRequest, run_workflow
 from backend.app.main import app
 from backend.app.mcp.client import local_mcp_config, mcp_available
+from backend.app.optimization.context_features import extract_context
+from backend.app.optimization.contextual_bandit import LinUCBPolicy
 from backend.app.optimization.reward import compute_reward
 from backend.app.optimization.router_policy import ACTION_TO_REQUEST, EpsilonGreedyRouter
+from backend.app.tools.data_loader import load_product_nav, load_product_risk_events, load_products
 from backend.app.tools.tool_registry import execute_tool, get_registered_tool_names
 
 
@@ -67,13 +70,15 @@ def test_workflow_product_route_runs_product_tool() -> None:
     result = run_workflow(ResearchRequest(symbol="600519", company="贵州茅台", analysis_type="product"), persist=False)
     tool_names = [call["tool_name"] for call in result["tool_calls"]]
     assert "product_benchmark" in tool_names
-    assert result["peer_summary"]["product_count"] == 5
+    assert result["peer_summary"]["product_count"] >= 80
+    assert "calmar_ratio" in result["peer_summary"]["table"][0]
+    assert result["peer_summary"]["table"][0]["source_tool_call_id"].startswith("tc_product_benchmark_")
 
 
 def test_verifier_detects_missing_evidence() -> None:
     verification = verify_result(
         {
-            "report_markdown": "合规说明 数据与工具调用摘要 核心量化指标 基本面与估值摘要 技术面风险观察 同业产品对比样例 新闻情绪与风险信号 风险提示与可追溯结论",
+            "report_markdown": "合规说明 数据与工具调用摘要 核心量化指标 基本面与估值摘要 技术面风险观察 同业产品对标样例 新闻情绪与风险信号 风险提示与可追溯结论",
             "metrics": {"total_return": 0, "annualized_volatility": 0, "max_drawdown": 0, "sharpe_ratio": 0},
             "news_signals": [{"title": "sample"}],
             "peer_summary": {"table": [{}]},
@@ -136,3 +141,44 @@ def test_api_job_report_and_review_flow() -> None:
 def test_mcp_client_config_is_available() -> None:
     assert "wealth_research_local" in local_mcp_config()
     assert isinstance(mcp_available(), bool)
+
+
+def test_synthetic_product_universe_files_are_loaded() -> None:
+    products = load_products()
+    nav = load_product_nav()
+    events = load_product_risk_events()
+    assert 80 <= len(products) <= 120
+    assert products["asset_class"].nunique() >= 9
+    assert products["risk_level"].nunique() == 5
+    assert len(nav) > len(products) * 20
+    assert {"信用利差走阔", "权益回撤", "估值波动"}.intersection(set(events["event_type"]))
+
+
+def test_product_api_detail_nav_and_events() -> None:
+    client = TestClient(app)
+    products = client.get("/api/products").json()
+    product_id = products["products"][0]["product_id"]
+    detail = client.get(f"/api/products/{product_id}").json()
+    nav = client.get(f"/api/products/{product_id}/nav").json()
+    events = client.get(f"/api/products/{product_id}/risk-events").json()
+    assert detail["metrics"]["metric_evidence_id"].startswith("ev_product_metric_")
+    assert nav["records"]
+    assert "records" in events
+
+
+def test_linucb_policy_select_update_and_snapshot() -> None:
+    context = extract_context(
+        {
+            "analysis_type": "product",
+            "risk_preference": "balanced",
+            "product_pool_size": 108,
+            "product_risk_level": "R3",
+            "latency_budget_ms": 800,
+        }
+    )
+    policy = LinUCBPolicy(alpha=0.5, ridge_lambda=1.0, seed=1)
+    action, scores = policy.select_action(context)
+    policy.update(action, context, 0.8)
+    snapshot = policy.snapshot()
+    assert action in scores
+    assert snapshot["A"][action]

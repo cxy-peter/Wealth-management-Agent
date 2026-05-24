@@ -8,8 +8,8 @@ from backend.app.agents.risk_guardrail_agent import FORBIDDEN_PHRASES
 from backend.app.tools.metrics import format_float, format_pct
 
 DISCLAIMER = (
-    "本报告仅用于投研辅助、模型流程展示和教育研究，不构成投资建议、"
-    "交易指令或收益承诺。所有样例数据均为脱敏/模拟数据。"
+    "本报告仅用于投研辅助、模型流程展示和教育研究，不构成交易指令或收益承诺。"
+    "所有样例数据均为脱敏/模拟数据。"
 )
 
 
@@ -27,18 +27,33 @@ def _trace(record: dict[str, Any]) -> str:
     return f"[tool_call_id={record.get('tool_call_id', 'missing')}; evidence_id={evidence}]"
 
 
+def _row_trace(item: dict[str, Any], fallback: str) -> str:
+    tool_call_id = item.get("source_tool_call_id")
+    evidence_id = item.get("metric_evidence_id") or item.get("nav_evidence_id")
+    if tool_call_id and evidence_id:
+        return f"[tool_call_id={tool_call_id}; evidence_id={evidence_id}]"
+    return fallback
+
+
 def _product_rows(rows: list[dict[str, Any]], source: str) -> str:
     lines = [
-        "| 产品 | 资产类别 | 渠道 | 风险等级 | 年化收益 | 年化波动 | 最大回撤 | Sharpe | 收益排名 | 追溯 |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|---|",
+        "| 产品 | 资产类别 | 风险等级 | 期限 | 年化收益 | 年化波动 | 最大回撤 | Sharpe | Calmar | Benchmark excess | 收益排名 | 风险调整排名 | 追溯 |",
+        "|---|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
-    for item in rows:
+    for item in rows[:20]:
         lines.append(
-            f"| {item['product_name']} | {item['asset_class']} | {item.get('channel', '')} | {item['risk_level']} | "
-            f"{format_pct(item['annualized_return'])} | {format_pct(item.get('annualized_volatility', 0))} | "
-            f"{format_pct(item.get('max_drawdown', 0))} | {format_float(item.get('sharpe_ratio', 0))} | "
-            f"{item['return_rank']} | {source} |"
+            f"| {item.get('product_name', '')} | {item.get('asset_class', '')} | {item.get('risk_level', '')} | "
+            f"{item.get('duration_bucket', item.get('duration_days', ''))} | "
+            f"{format_pct(float(item.get('annualized_return', 0)))} | "
+            f"{format_pct(float(item.get('annualized_volatility', 0)))} | "
+            f"{format_pct(float(item.get('max_drawdown', 0)))} | "
+            f"{format_float(float(item.get('sharpe_ratio', 0)))} | "
+            f"{format_float(float(item.get('calmar_ratio', 0)))} | "
+            f"{format_pct(float(item.get('benchmark_excess_return', 0)))} | "
+            f"{item.get('return_rank', '')} | {item.get('risk_adjusted_rank', '')} | {_row_trace(item, source)} |"
         )
+    if not rows:
+        lines.append("| 无匹配产品 | - | - | - | 0.00% | 0.00% | 0.00% | 0.000 | 0.000 | 0.00% | - | - | [tool_call_id=missing] |")
     return "\n".join(lines)
 
 
@@ -76,7 +91,7 @@ def _bullet_rows(items: list[str], fallback_trace: str) -> str:
 def _sanitize(report: str) -> str:
     clean = report
     for phrase in FORBIDDEN_PHRASES:
-        clean = clean.replace(phrase, "合规拦截表达")
+        clean = clean.replace(phrase, "合规拦截表述")
     return clean
 
 
@@ -136,6 +151,7 @@ def render_report(result: dict[str, Any]) -> str:
 - 行情/净值样本：{metrics['observations']} 条观测，起始值 {metrics['start_value']:.3f}，结束值 {metrics['end_value']:.3f}。{metric_trace}
 - 新闻样本：{news_summary['signal_count']} 条，平均情绪分 {news_summary['avg_sentiment']}，平均风险分 {news_summary['avg_risk']}。{news_trace}
 - 同业产品样本：{peer.get('product_count', 0)} 款，覆盖风险等级：{', '.join(peer.get('risk_levels', []))}。{product_trace}
+- 产品池规模：{peer.get('product_universe_size', peer.get('product_count', 0))} 款 synthetic sample 产品。{product_trace}
 - 数据模式：sample/mock；Qwen 风险适配器：{qwen_meta.get('mode', 'rule-based-fallback')}。{news_trace}
 
 {_tool_rows(tool_calls)}
@@ -169,7 +185,7 @@ def render_report(result: dict[str, Any]) -> str:
 
 {_bullet_rows(technical.get('points', []), metric_trace)}
 
-## 5. 同业产品对比样例
+## 5. 同业产品对标样例
 
 {_product_rows(peer.get('table', []), product_trace)}
 
@@ -185,7 +201,7 @@ def render_report(result: dict[str, Any]) -> str:
 
 {chr(10).join(f'- {flag} {guardrail_trace}' for flag in risk_flags)}
 
-系统结论：当前输出适合作为投研初筛、风险摘要、产品对标和材料整理的辅助结果。正式决策前，应结合真实数据源、基金/理财产品说明书、投委会口径、合规审查与人工复核。{guardrail_trace}
+系统结论：当前输出适合作为投研初稿、风险摘要、产品对标和材料整理的辅助结果。正式决策前，应结合真实数据源、产品说明书、投委会口径、合规审查与人工复核。{guardrail_trace}
 """
     return _sanitize(report)
 

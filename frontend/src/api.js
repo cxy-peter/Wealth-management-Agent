@@ -24,6 +24,35 @@ export function runEvaluation(payload = {}) {
   return postJson('/api/eval/run', payload);
 }
 
+export async function getProducts(filters = {}) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const suffix = params.toString() ? `?${params.toString()}` : '';
+  const response = await fetch(`${API_BASE}/api/products${suffix}`);
+  if (!response.ok) throw new Error(`products returned ${response.status}`);
+  return response.json();
+}
+
+export async function getProduct(productId) {
+  const response = await fetch(`${API_BASE}/api/products/${productId}`);
+  if (!response.ok) throw new Error(`product returned ${response.status}`);
+  return response.json();
+}
+
+export async function getProductNav(productId) {
+  const response = await fetch(`${API_BASE}/api/products/${productId}/nav`);
+  if (!response.ok) throw new Error(`product nav returned ${response.status}`);
+  return response.json();
+}
+
+export async function getProductRiskEvents(productId) {
+  const response = await fetch(`${API_BASE}/api/products/${productId}/risk-events`);
+  if (!response.ok) throw new Error(`risk events returned ${response.status}`);
+  return response.json();
+}
+
 export async function getJobEvents(runId) {
   const response = await fetch(`${API_BASE}/api/analyze/jobs/${runId}/events`);
   if (!response.ok) throw new Error(`events returned ${response.status}`);

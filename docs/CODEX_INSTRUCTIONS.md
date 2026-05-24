@@ -1,54 +1,59 @@
-# Codex implementation notes
+# Codex Implementation Notes
 
-本仓库定位为 `wealth-research-agent`：面向资管投研、理财产品研究、金融算法实习投递的可运行 demo。
+This repository is positioned as `wealth-research-agent`: a runnable asset-management research assistant demo for portfolio research, wealth-product comparison, risk summary, and report generation.
 
-## Hard constraints
+## Hard Constraints
 
-1. 所有页面、API 和报告统一定位为投研辅助、风险摘要、产品对标、研究报告生成。
-2. 不输出交易方向、收益承诺或确定性上涨判断。
-3. 不提交密钥、私有数据、真实客户数据或公司内部文件。
-4. 默认数据只来自 `data/` 下 sample/mock 文件；真实接口只能通过 `.env` 或 CLI 参数配置。
-5. 每个结论必须能追溯到样例数据、指标工具、新闻风险证据或 guardrail。
+1. All pages, APIs, and reports must be framed as research assistance, risk summary, product benchmarking, or report generation.
+2. Do not output trade-direction language or promised return language.
+3. Do not commit credentials, private data, real customer data, model weights, or internal company files.
+4. Default data must come from `data/` sample/mock files. Real connectors must be configured through environment variables.
+5. Report conclusions must be traceable to sample data, metric tools, news evidence, product metrics, or guardrail output through `tool_call_id` or `evidence_id`.
 
-## Backend architecture
+## Backend Architecture
+
+Current workflow:
 
 ```text
-data_extraction_agent
-  -> fundamental_agent
-  -> technical_agent
-  -> news_risk_agent
-  -> product_benchmark_agent
+planner_agent
+  -> conditional LangGraph route
+  -> ReAct/MCP-capable tool agents with deterministic fallback
   -> risk_guardrail_agent
   -> report_agent
+  -> verifier_agent
+  -> human_review_agent when needed
 ```
 
-关键文件：
+Product benchmark uses:
 
-- `backend/app/agents/workflow.py`: LangGraph workflow。
-- `backend/app/models/qwen_risk_adapter.py`: 可选 Qwen LoRA 风险/情绪 adapter。
-- `backend/app/tools/news_risk.py`: 规则兜底。
-- `backend/app/evaluation.py`: CLI 与 API 共用评测逻辑。
-- `eval/results.json`: 当前评测输出。
+```text
+sample_product_catalog.csv
+sample_product_nav.csv
+sample_product_risk_events.csv
+```
 
-## Frontend architecture
+## Frontend Architecture
+
+Top-level pages:
 
 ```text
 frontend/src/pages/
   ResearchDashboard.jsx
   ProductBenchmark.jsx
-  NewsRiskPanel.jsx
-  EvaluationPanel.jsx
-  PaperReplay.jsx
+  TraceView.jsx
 ```
 
-前端默认访问 `VITE_WEALTH_AGENT_API_BASE`，未配置时使用 `http://127.0.0.1:8000`。API 不可用时保留本地 mock 预览。
+Human review is implemented as a drawer, not a top-level page. News risk is a tab in `ResearchDashboard`. Eval, route optimization, contextual bandit, and ScenarioReplay are in `TraceView` advanced tabs.
 
 ## Verification
 
 ```bash
+python scripts/generate_sample_product_universe.py
 python scripts/run_demo.py --symbol 600519 --company 贵州茅台
 python eval/run_eval.py
+python eval/run_route_optimization.py
+python eval/run_contextual_bandit.py
+pytest
 cd frontend
-npm install
 npm run build
 ```
