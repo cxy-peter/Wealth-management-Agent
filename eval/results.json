@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-05-24T17:45:09.014649+00:00",
+  "case_count": 1,
+  "metrics": {
+    "tool_call_success": 1.0,
+    "report_format_pass": 1.0,
+    "metric_consistency": 1.0,
+    "risk_warning_coverage": 1.0,
+    "forbidden_wording_fail_rate": 0.0,
+    "avg_latency_ms": 32.53
+  },
+  "guardrail_terms_count": 7,
+  "cases": [
+    {
+      "symbol": "600519",
+      "company": "贵州茅台",
+      "latency_ms": 32.53,
+      "tool_call_success": true,
+      "report_format_pass": true,
+      "metric_consistency": true,
+      "risk_warning_coverage": true,
+      "forbidden_wording_fail": false,
+      "workflow_engine": "langgraph",
+      "report_path": "reports/eval_600519.md",
+      "passed": true
+    }
+  ]
+}

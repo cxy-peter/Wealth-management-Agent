@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.DS_Store
+reports/*.tmp
+models/
+checkpoints/
+data/private/
+frontend/node_modules/
+frontend/dist/
+*.log

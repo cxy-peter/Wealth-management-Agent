@@ -1,0 +1,2 @@
+symbol,company,as_of,revenue_growth,net_margin,roe,debt_to_asset,operating_cashflow_ratio,pe_ttm,pb,industry_pe_median,industry_pb_median,source,comment
+600519,贵州茅台,2025-02-12,0.083,0.472,0.286,0.198,0.411,28.4,8.6,24.8,6.9,demo_mock,样例基本面数据，仅用于投研辅助流程演示。
