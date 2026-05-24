@@ -3,8 +3,8 @@
   "base_date": "2025-04-04",
   "source_type": "synthetic_weekly_snapshot",
   "record_counts": {
-    "weekly_snapshot": 96,
-    "peer_metrics": 192,
+    "weekly_snapshot": 8,
+    "peer_metrics": 16,
     "market_issuance": 1
   },
   "files": [
@@ -12,6 +12,6 @@
     "D:\\NYU\\资管agent\\wealth_research_agent_v1\\wealth_research_agent_v1\\data\\live\\peer_metrics_2025-04-11.csv",
     "D:\\NYU\\资管agent\\wealth_research_agent_v1\\wealth_research_agent_v1\\data\\live\\market_issuance_2025-04-11.csv"
   ],
-  "generated_at": "2026-05-24T21:52:57+00:00",
+  "generated_at": "2026-05-24T22:38:37+00:00",
   "disclaimer": "Synthetic demo data only; not a real full-market ranking."
 }

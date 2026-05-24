@@ -1,0 +1,94 @@
+{
+  "uploads": [
+    {
+      "upload_id": "upload_302b022d2c1d",
+      "file_name": "weekly.csv",
+      "target_schema": "product_weekly_snapshot",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "report_date",
+              "product_code",
+              "product_name",
+              "product_type",
+              "channel",
+              "risk_level",
+              "product_scale_bn",
+              "scale_wow_bn",
+              "scale_mom_bn",
+              "latest_nav",
+              "return_3m",
+              "max_drawdown",
+              "volatility",
+              "sharpe",
+              "benchmark_status"
+            ],
+            "sample_rows": [
+              {
+                "report_date": "2025-04-04",
+                "product_code": "WPX001",
+                "product_name": "样例",
+                "product_type": "纯固收",
+                "channel": "个金",
+                "risk_level": "R2",
+                "product_scale_bn": "1.2",
+                "scale_wow_bn": "0.1",
+                "scale_mom_bn": "0.2",
+                "latest_nav": "1.01",
+                "return_3m": "0.01",
+                "max_drawdown": "-0.02",
+                "volatility": "0.03",
+                "sharpe": "0.5",
+                "benchmark_status": "in_range"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "product_weekly_snapshot",
+        "mapping": {
+          "report_date": "report_date",
+          "product_code": "product_code",
+          "product_name": "product_name",
+          "product_type": "product_type",
+          "channel": "channel",
+          "risk_level": "risk_level",
+          "product_scale_bn": "product_scale_bn",
+          "scale_wow_bn": "scale_wow_bn",
+          "scale_mom_bn": "scale_mom_bn",
+          "latest_nav": "latest_nav",
+          "return_3m": "return_3m",
+          "max_drawdown": "max_drawdown",
+          "volatility": "volatility",
+          "sharpe": "sharpe",
+          "benchmark_status": "benchmark_status"
+        },
+        "required_fields": [
+          "report_date",
+          "product_code",
+          "product_name",
+          "product_type",
+          "channel",
+          "risk_level",
+          "product_scale_bn",
+          "scale_wow_bn",
+          "scale_mom_bn",
+          "latest_nav",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "benchmark_status"
+        ],
+        "missing_required_fields": [],
+        "mapping_status": "pass"
+      }
+    }
+  ]
+}
