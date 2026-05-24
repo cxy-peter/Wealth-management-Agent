@@ -1137,6 +1137,260 @@ th.sticky-col {
   outline-offset: 2px;
 }
 
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: #22776f;
+  font-weight: 850;
+}
+
+.attention-panel {
+  padding-bottom: 14px;
+}
+
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.attention-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 10px;
+  min-height: 112px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 10px;
+  text-align: left;
+}
+
+.attention-card:hover {
+  border-color: #22776f;
+  background: #f4faf7;
+}
+
+.attention-card strong {
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attention-card span {
+  color: #667176;
+  font-size: 12px;
+}
+
+.attention-metrics,
+.tag-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attention-metrics span,
+.tag-row i {
+  border-radius: 999px;
+  background: #f7f2e8;
+  padding: 4px 7px;
+  color: #4d5960;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.weekly-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.compact-table table {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.compact-table th,
+.compact-table td {
+  overflow: hidden;
+  padding: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.ellipsis-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-dropzone {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px dashed #b9c8c2;
+  border-radius: 8px;
+  background: #f4faf7;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.upload-dropzone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-dropzone p {
+  margin: 4px 0 0;
+  color: #667176;
+  line-height: 1.45;
+}
+
+.mapping-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mapping-grid div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background: #f7f2e8;
+  padding: 10px;
+}
+
+.mapping-grid span {
+  color: #667176;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.skeleton-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #4d5960;
+  font-weight: 850;
+}
+
+.compact-tabs {
+  margin-bottom: 14px;
+}
+
+.histogram-bars {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  min-height: 150px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background: #f7f2e8;
+  padding: 12px;
+}
+
+.histogram-bars > div {
+  display: grid;
+  justify-items: center;
+  align-items: end;
+  gap: 4px;
+  flex: 1;
+}
+
+.histogram-bars i {
+  width: 100%;
+  max-width: 32px;
+  border-radius: 6px 6px 2px 2px;
+  background: #22776f;
+}
+
+.histogram-bars span {
+  color: #667176;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.compare-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 180px)) repeat(2, auto);
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.check-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.check-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.check-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.multi-line-chart {
+  height: 310px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  background:
+    linear-gradient(#eef2ed 1px, transparent 1px),
+    linear-gradient(90deg, #eef2ed 1px, transparent 1px),
+    #fffdf8;
+  background-size: 20% 25%;
+  padding: 10px;
+}
+
+.multi-line-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.multi-line-chart polyline {
+  fill: none;
+  stroke-width: 2.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-legend.wrap {
+  flex-wrap: wrap;
+}
+
+.chart-legend.wrap span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chart-legend.wrap i {
+  width: 16px;
+  height: 3px;
+  border-radius: 3px;
+}
+
 @media (max-width: 1020px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -1176,6 +1430,11 @@ th.sticky-col {
   .quality-grid,
   .calibration-score-grid,
   .focus-grid,
+  .weekly-focus-grid,
+  .attention-grid,
+  .mapping-grid,
+  .compare-controls,
+  .check-list,
   .explainer-grid,
   .comparison-box,
   .score-row {

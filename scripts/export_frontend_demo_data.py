@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import math
-import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -20,7 +19,8 @@ from backend.app.weekly_report.generators.benchmark_report_generator import (  #
 from backend.app.weekly_report.generators.weekly_report_generator import weekly_products, weekly_summary  # noqa: E402
 
 PUBLIC_DIR = ROOT / "frontend" / "public" / "demo-data"
-REPORT_DATE = "2025-04-04"
+DEMO_DATES = ["2025-01-31", "2025-02-05", "2025-03-19", "2025-04-04"]
+LATEST_DATE = "2025-04-04"
 DEFAULT_PRODUCT = "WP0031"
 
 ISSUERS = ["信银理财", "交银理财", "招银理财", "工银理财", "建信理财", "农银理财", "中银理财", "兴银理财"]
@@ -38,6 +38,14 @@ def _jsonable(value: Any) -> Any:
     if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
         return None
     return value
+
+
+def _date_key(date: str) -> str:
+    return str(date)[:10]
+
+
+def _filename_date(date: str) -> str:
+    return _date_key(date)
 
 
 def _product_index(code: str) -> int:
@@ -60,8 +68,6 @@ def _natural_name(row: dict[str, Any], code_key: str = "product_code") -> str:
     else:
         term = open_type.replace("天", "天持有期")
     suffix = CLASS_SUFFIX[idx % len(CLASS_SUFFIX)]
-    if suffix in {"私银款", "机构款", "直销款"}:
-        return f"{series}{term}{suffix}"
     return f"{series}{term}{suffix}"
 
 
@@ -90,7 +96,10 @@ def _enrich_product(row: dict[str, Any], code_key: str = "product_code") -> dict
     row["total_fee_rate"] = row["fee_rate"]
     row["inception_date"] = str(row.get("inception_date") or "2023-01-06")[:10]
     row["latest_nav"] = round(float(row.get("latest_nav", 1 + float(row.get("return_3m", 0) or 0))), 6)
-    row["since_inception_annual_return"] = round(float(row.get("since_inception_annual_return", float(row.get("return_3m", 0) or 0) * 4)), 6)
+    row["since_inception_annual_return"] = round(
+        float(row.get("since_inception_annual_return", float(row.get("return_3m", 0) or 0) * 4)),
+        6,
+    )
     row["return_3m_annualized"] = _annualized(row.get("return_3m", 0), 4)
     row["return_1m_annualized"] = _annualized(row.get("return_1m", float(row.get("return_3m", 0) or 0) / 3), 12)
     row["source_type"] = row.get("source_type") or "synthetic_weekly_snapshot"
@@ -102,96 +111,142 @@ def _transform_product_rows(rows: list[dict[str, Any]], code_key: str = "product
     return [_enrich_product(row, code_key=code_key) for row in rows]
 
 
-def _transform_summary(summary: dict[str, Any], name_map: dict[str, str]) -> dict[str, Any]:
+def _apply_name_map(rows: list[dict[str, Any]], name_map: dict[str, str]) -> list[dict[str, Any]]:
+    next_rows = []
+    for row in rows:
+        row = dict(row)
+        code = row.get("product_code")
+        if code in name_map:
+            row["product_name"] = name_map[code]
+        row["source_type"] = row.get("source_type") or "synthetic_weekly_snapshot"
+        next_rows.append(row)
+    return next_rows
+
+
+def _transform_summary(summary: dict[str, Any], name_map: dict[str, str], requested_date: str) -> dict[str, Any]:
     payload = dict(summary)
     for table_key in ["scale_change_rank", "benchmark_failed_products", "percentile_decline_products", "attention_top10", "weekly_diff"]:
-        rows = []
-        for row in payload.get(table_key, []):
-            row = dict(row)
-            code = row.get("product_code")
-            if code in name_map:
-                row["product_name"] = name_map[code]
-            row["source_type"] = row.get("source_type") or "synthetic_weekly_snapshot"
-            rows.append(row)
-        payload[table_key] = rows
+        payload[table_key] = _apply_name_map(payload.get(table_key, []), name_map)
+    payload["report_date"] = _date_key(requested_date)
     payload["source_type"] = "synthetic_weekly_snapshot"
     payload["demo_disclaimer"] = "演示数据为 synthetic_weekly_snapshot，不代表真实全市场产品排名。"
     return payload
 
 
-def _peer_payload(product_code: str, name_map: dict[str, str]) -> dict[str, Any]:
-    payload = peer_benchmark(product_code, REPORT_DATE, limit=16)
+def _with_requested_date(payload: dict[str, Any], requested_date: str) -> dict[str, Any]:
+    payload = dict(payload)
+    payload["report_date"] = _date_key(requested_date)
+    payload["source_type"] = "synthetic_weekly_snapshot"
+    return payload
+
+
+def _median(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    return values[len(values) // 2]
+
+
+def _bucket_histogram(rows: list[dict[str, Any]], field: str = "return_3m") -> list[dict[str, Any]]:
+    values = [float(row.get(field, 0) or 0) for row in rows]
+    if not values:
+        return []
+    floor = min(values)
+    ceiling = max(values)
+    width = max((ceiling - floor) / 8, 0.0001)
+    buckets = [{"from": round(floor + i * width, 6), "to": round(floor + (i + 1) * width, 6), "count": 0} for i in range(8)]
+    for value in values:
+        idx = min(7, max(0, int((value - floor) / width)))
+        buckets[idx]["count"] += 1
+    return buckets
+
+
+def _peer_payload(product_code: str, report_date: str, name_map: dict[str, str]) -> dict[str, Any]:
+    payload = peer_benchmark(product_code, report_date, limit=16)
     product = _enrich_product(payload.get("product", {}))
     product["product_name"] = name_map.get(product_code, product["product_name"])
     rows = _transform_product_rows(payload.get("table", []), code_key="peer_product_code")
     returns = sorted(float(row.get("return_3m", 0) or 0) for row in rows)
     drawdowns = sorted(float(row.get("max_drawdown", 0) or 0) for row in rows)
     sharpes = sorted(float(row.get("sharpe", 0) or 0) for row in rows)
-
-    def median(values: list[float]) -> float:
-        if not values:
-            return 0.0
-        return values[len(values) // 2]
-
+    top_rows = sorted(rows, key=lambda row: float(row.get("return_3m", 0) or 0), reverse=True)[:10]
+    bottom_rows = sorted(rows, key=lambda row: float(row.get("return_3m", 0) or 0))[:10]
     return {
         **payload,
+        "report_date": _date_key(report_date),
         "product": product,
         "table": rows,
         "market_percentile_summary": {
-            "pool_conditions": [
-                "同产品类型",
-                "同风险等级优先",
-                "同期限/同渠道优先",
-                "成立满3个月",
-                "样本不足时使用模拟同业池扩展",
-            ],
+            "pool_conditions": ["同产品类型", "同风险等级优先", "同期限/同渠道优先", "成立满3个月", "样本不足时使用模拟同业池扩展"],
             "sample_count": payload.get("peer_count", len(rows)),
             "source_type": "synthetic_weekly_snapshot",
             "indicators": [
                 {
                     "metric": "近3个月收益",
-                    "market_p50": round(median(returns), 6),
+                    "market_p50": round(_median(returns), 6),
                     "product_value": product.get("return_3m"),
                     "product_percentile": payload.get("percentile", {}).get("return_percentile"),
                 },
                 {
                     "metric": "最大回撤",
-                    "market_p50": round(median(drawdowns), 6),
+                    "market_p50": round(_median(drawdowns), 6),
                     "product_value": product.get("max_drawdown"),
                     "product_percentile": payload.get("percentile", {}).get("drawdown_percentile"),
                 },
                 {
                     "metric": "Sharpe",
-                    "market_p50": round(median(sharpes), 6),
+                    "market_p50": round(_median(sharpes), 6),
                     "product_value": product.get("sharpe"),
                     "product_percentile": payload.get("percentile", {}).get("sharpe_percentile"),
                 },
             ],
+            "return_histogram": _bucket_histogram(rows, "return_3m"),
+            "top_10": top_rows,
+            "bottom_10": bottom_rows,
         },
     }
 
 
+def _write(filename: str, payload: Any) -> None:
+    (PUBLIC_DIR / filename).write_text(json.dumps(_jsonable(payload), ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
-    products_payload = weekly_products(REPORT_DATE)
-    product_rows = _transform_product_rows(products_payload["products"])
-    name_map = {row["product_code"]: row["product_name"] for row in product_rows}
-    products_payload["products"] = product_rows
-    products_payload["source_type"] = "synthetic_weekly_snapshot"
+    products_by_date: dict[str, dict[str, Any]] = {}
+    summary_by_date: dict[str, dict[str, Any]] = {}
 
-    summary_payload = _transform_summary(weekly_summary(REPORT_DATE), name_map)
+    for requested_date in DEMO_DATES:
+        products_payload = weekly_products(requested_date)
+        product_rows = _transform_product_rows(products_payload["products"])
+        name_map = {row["product_code"]: row["product_name"] for row in product_rows}
+        products_payload = _with_requested_date(products_payload, requested_date)
+        products_payload["products"] = product_rows
+        products_payload["source_type"] = "synthetic_weekly_snapshot"
+        summary_payload = _transform_summary(weekly_summary(requested_date), name_map, requested_date)
+        products_by_date[requested_date] = products_payload
+        summary_by_date[requested_date] = summary_payload
+        date_part = _filename_date(requested_date)
+        _write(f"weekly_summary_{date_part}.json", summary_payload)
+        _write(f"weekly_products_{date_part}.json", products_payload)
+
+    latest_products = products_by_date[LATEST_DATE]
+    latest_summary = summary_by_date[LATEST_DATE]
+    latest_name_map = {row["product_code"]: row["product_name"] for row in latest_products["products"]}
 
     details: dict[str, Any] = {}
     peers: dict[str, Any] = {}
-    for row in product_rows:
+    for row in latest_products["products"]:
         code = row["product_code"]
-        detail = weekly_product_detail(code, REPORT_DATE)
+        detail = weekly_product_detail(code, LATEST_DATE)
         if detail:
             detail = dict(detail)
             detail["snapshot"] = _enrich_product(detail.get("snapshot", {}))
-            detail["snapshot"]["product_name"] = name_map.get(code, detail["snapshot"]["product_name"])
+            detail["snapshot"]["product_name"] = latest_name_map.get(code, detail["snapshot"]["product_name"])
             details[code] = detail
-        peers[code] = _peer_payload(code, name_map)
+            _write(f"product_detail_{code}_{LATEST_DATE}.json", detail)
+        peer_payload = _peer_payload(code, LATEST_DATE, latest_name_map)
+        peers[code] = peer_payload
+        _write(f"peer_summary_{code}_{LATEST_DATE}.json", peer_payload)
 
     channel_payload = channel_benchmark()
     channel_rows = []
@@ -203,11 +258,11 @@ def main() -> None:
     channel_payload["table"] = channel_rows
     channel_payload["source_type"] = "synthetic_weekly_snapshot"
 
-    top_payload = top_peers(report_date=REPORT_DATE, limit=24)
+    top_payload = top_peers(report_date=LATEST_DATE, limit=24)
     top_rows = []
     for row in top_payload.get("table", []):
         row = _enrich_product(row, code_key="peer_product_code")
-        row["selection_reason"] = row.get("tracking_reason") or "同类收益分位和风险调整指标靠前，纳入周报跟踪。"
+        row["selection_reason"] = row.get("tracking_reason") or "同类收益分位和风险调整指标靠前，用于周报跟踪样例。"
         top_rows.append(row)
     top_payload["table"] = top_rows
     top_payload["source_type"] = "synthetic_weekly_snapshot"
@@ -216,19 +271,33 @@ def main() -> None:
         run_dpo_eval()
     dpo_payload = json.loads(DPO_EVAL_PATH.read_text(encoding="utf-8"))
 
-    outputs = {
-        "weekly_summary.json": summary_payload,
-        "weekly_products.json": products_payload,
-        "product_details.json": {"default_product_code": DEFAULT_PRODUCT, "by_product": details, "source_type": "synthetic_weekly_snapshot"},
-        "peer_benchmark.json": {"default_product_code": DEFAULT_PRODUCT, "by_product": peers, "source_type": "synthetic_weekly_snapshot"},
-        "channel_benchmark.json": channel_payload,
-        "top_peers.json": top_payload,
-        "dpo_eval.json": dpo_payload,
-    }
-    for filename, payload in outputs.items():
-        (PUBLIC_DIR / filename).write_text(json.dumps(_jsonable(payload), ensure_ascii=False, indent=2), encoding="utf-8")
+    _write("weekly_dates.json", {"dates": DEMO_DATES, "latest": LATEST_DATE, "source_type": "synthetic_weekly_snapshot"})
+    _write("weekly_summary.json", latest_summary)
+    _write("weekly_products.json", latest_products)
+    _write(
+        "product_details.json",
+        {"default_product_code": DEFAULT_PRODUCT, "by_product": {DEFAULT_PRODUCT: details.get(DEFAULT_PRODUCT)}, "source_type": "synthetic_weekly_snapshot"},
+    )
+    _write(
+        "peer_benchmark.json",
+        {"default_product_code": DEFAULT_PRODUCT, "by_product": {DEFAULT_PRODUCT: peers.get(DEFAULT_PRODUCT)}, "source_type": "synthetic_weekly_snapshot"},
+    )
+    _write("channel_benchmark.json", channel_payload)
+    _write("top_peers.json", top_payload)
+    _write("dpo_eval.json", dpo_payload)
 
-    print(json.dumps({"output_dir": str(PUBLIC_DIR), "product_count": len(product_rows), "files": sorted(outputs)}, ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            {
+                "output_dir": str(PUBLIC_DIR),
+                "dates": DEMO_DATES,
+                "product_count": len(latest_products["products"]),
+                "files": sorted(path.name for path in PUBLIC_DIR.glob("*.json")),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

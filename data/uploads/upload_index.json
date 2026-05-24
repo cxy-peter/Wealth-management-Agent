@@ -1,7 +1,7 @@
 {
   "uploads": [
     {
-      "upload_id": "upload_302b022d2c1d",
+      "upload_id": "upload_d481c3e21aba",
       "file_name": "weekly.csv",
       "target_schema": "product_weekly_snapshot",
       "parser_status": "parsed",

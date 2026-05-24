@@ -1,0 +1,30 @@
+forbidden_wording:
+  - 建议买入
+  - 值得买
+  - 推荐配置
+  - 保证收益
+  - 确定上涨
+required_fields_by_report_type:
+  weekly_report:
+    - report_date
+    - product_count
+    - total_scale_bn
+    - benchmark_pass_rate
+  peer_benchmark:
+    - product_code
+    - peer_count
+    - market_percentile
+required_evidence_rules:
+  - every_numeric_claim_requires_evidence_id
+  - every_tool_output_requires_tool_call_id
+numeric_consistency_rules:
+  - scale_wow_bn_equals_current_minus_previous
+  - return_and_drawdown_from_nav_series
+  - percentile_from_peer_universe_rank
+source_boundary_rules:
+  - synthetic_must_be_labeled_demo
+  - official_disclosure_failure_cannot_be_called_realtime
+report_style_rules:
+  - weekly_report_tone
+  - concise_risk_warning
+  - no_investment_advice

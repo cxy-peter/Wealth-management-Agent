@@ -1,11 +1,17 @@
-import { BarChart3, FileCheck2, FileText, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
+import { BarChart3, FileCheck2, FileText, Loader2, RefreshCw, ShieldCheck, UploadCloud } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { generateWeeklyReport, getDataFreshness, getWeeklyProducts, getWeeklyReportDates, getWeeklySummary } from '../api.js';
 import { dataFreshnessMock, dpoAgentEvalMock, sampleAnalysis, weeklyMock, weeklyProductsMock } from '../data/mockData.js';
+import DataUploadDrawer from './components/DataUploadDrawer.jsx';
 
 function pct(value, digits = 1) {
   return `${(Number(value || 0) * 100).toFixed(digits)}%`;
+}
+
+function signedNum(value, digits = 2) {
+  const number = Number(value || 0);
+  return `${number >= 0 ? '+' : ''}${number.toFixed(digits)}`;
 }
 
 function num(value, digits = 2) {
@@ -21,11 +27,11 @@ function KpiCard({ label, value, tone = 'neutral', testId }) {
   );
 }
 
-function SelectField({ label, value, options, onChange }) {
+function SelectField({ label, value, options, onChange, testId }) {
   return (
     <label className="field-group">
       <span>{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
+      <select value={value} onChange={(event) => onChange(event.target.value)} data-testid={testId}>
         <option value="">全部</option>
         {(options || []).map((item) => (
           <option key={item} value={item}>
@@ -34,46 +40,6 @@ function SelectField({ label, value, options, onChange }) {
         ))}
       </select>
     </label>
-  );
-}
-
-function FocusTable({ title, rows, columns, emptyText, onRowClick }) {
-  return (
-    <section className="table-panel focus-table">
-      <div className="section-title table-title">
-        <span>{title}</span>
-        <strong>{rows.length}</strong>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            {columns.map((column) => (
-              <th key={column.key} className={column.sticky ? `sticky-col ${column.sticky === true ? '' : column.sticky}` : ''}>{column.label}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr
-              key={row.product_code || row.evidence_id || index}
-              className={onRowClick ? 'clickable-row' : ''}
-              onClick={() => onRowClick?.(row.product_code)}
-            >
-              {columns.map((column) => (
-                <td key={column.key} className={column.sticky ? `sticky-col ${column.sticky === true ? '' : column.sticky}` : ''}>
-                  {column.render ? column.render(row) : row[column.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
-          {!rows.length ? (
-            <tr>
-              <td colSpan={columns.length}>{emptyText}</td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
-    </section>
   );
 }
 
@@ -87,6 +53,86 @@ function TaskCard({ icon: Icon, title, description, button, onClick }) {
         <button className="primary-btn" onClick={onClick}>{button}</button>
       </div>
     </article>
+  );
+}
+
+function AttentionCard({ row, onOpen }) {
+  return (
+    <button className="attention-card" onClick={() => onOpen?.(row.product_code)}>
+      <div>
+        <strong title={row.product_name}>{row.product_name}</strong>
+        <span>{row.product_code}</span>
+      </div>
+      <span className={`risk-chip ${row.risk_level}`}>{row.risk_level}</span>
+      <div className="attention-metrics">
+        <span>关注分 {num(row.attention_score, 3)}</span>
+        <span>规模 {signedNum(row.scale_wow_bn)} 亿</span>
+        <span>分位 {pct(row.return_percentile, 0)}</span>
+        <span>{row.benchmark_status}</span>
+      </div>
+      <div className="tag-row">
+        {(row.attention_reason_tags || ['需关注']).slice(0, 3).map((tag) => (
+          <i key={tag}>{tag}</i>
+        ))}
+      </div>
+    </button>
+  );
+}
+
+function CompactAttentionList({ rows, onOpen }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleRows = expanded ? rows : rows.slice(0, 10);
+  return (
+    <section className="panel attention-panel">
+      <div className="section-title">
+        <span>需关注产品 Top 10</span>
+        <button className="link-btn" onClick={() => setExpanded((value) => !value)}>
+          {expanded ? '收起' : '查看全部'}
+        </button>
+      </div>
+      <div className="attention-grid">
+        {visibleRows.map((row) => (
+          <AttentionCard key={row.product_code} row={row} onOpen={onOpen} />
+        ))}
+      </div>
+      {!visibleRows.length ? <p className="panel-copy">当前筛选下暂无需关注样本。</p> : null}
+    </section>
+  );
+}
+
+function FocusTable({ title, rows, columns, emptyText, onRowClick }) {
+  return (
+    <section className="table-panel focus-table compact-table">
+      <div className="section-title table-title">
+        <span>{title}</span>
+        <strong>{rows.length}</strong>
+      </div>
+      <table>
+        <thead>
+          <tr>{columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr
+              key={row.product_code || row.evidence_id || index}
+              className={onRowClick ? 'clickable-row' : ''}
+              onClick={() => onRowClick?.(row.product_code)}
+            >
+              {columns.map((column) => (
+                <td key={column.key} title={column.title ? column.title(row) : undefined}>
+                  {column.render ? column.render(row) : row[column.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+          {!rows.length ? (
+            <tr>
+              <td colSpan={columns.length}>{emptyText}</td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+    </section>
   );
 }
 
@@ -123,11 +169,11 @@ function AiCalibrationCard({ analysis }) {
       </div>
       <div className="score-row">
         <div><span>模板草稿</span><strong>{templateScore}/100</strong></div>
-        <div><span>AI 校准稿</span><strong>{dpoScore}/100</strong></div>
+        <div><span>DPO 校准稿</span><strong>{dpoScore}/100</strong></div>
         <div><span>证据覆盖</span><strong>100%</strong></div>
         <div><span>禁用措辞</span><strong>0 次</strong></div>
       </div>
-      <p className="panel-copy">AI 报告校准只用于对齐周报文风、证据覆盖、风险提示、分位解释和禁用措辞，不用于生成投资建议。</p>
+      <p className="panel-copy">DPO 只用于对齐周报文风、证据覆盖、风险提示、分位解释和禁用措辞，不用于生成投资建议。</p>
       <details>
         <summary>查看技术指标</summary>
         <pre className="json-block">{JSON.stringify({ dpo_eval: dpoAgentEvalMock, report: analysis?.verification_result || {} }, null, 2)}</pre>
@@ -187,6 +233,7 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
   const [freshness, setFreshness] = useState(dataFreshnessMock);
   const [source, setSource] = useState('演示样本');
   const [loading, setLoading] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const options = summary.filter_options || weeklyMock.filter_options;
   const kpis = summary.kpis || weeklyMock.kpis;
@@ -195,24 +242,20 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
     [products]
   );
 
-  function updateFilter(key, value) {
-    setFilters((current) => ({ ...current, [key]: value }));
-  }
-
   async function refreshWeeklyData(nextFilters = filters) {
     setLoading(true);
     try {
-      const [datePayload, summaryPayload, productsPayload, freshnessPayload] = await Promise.all([
+      const [datePayload, productsPayload, freshnessPayload] = await Promise.all([
         getWeeklyReportDates(),
-        getWeeklySummary(nextFilters),
         getWeeklyProducts(nextFilters),
         getDataFreshness()
       ]);
+      const summaryPayload = await getWeeklySummary(nextFilters);
       setDates(datePayload.dates || [summaryPayload.report_date]);
       setSummary(summaryPayload);
       setProducts(productsPayload.products || []);
       setFreshness(freshnessPayload);
-      setSource('演示样本');
+      setSource(summaryPayload.source_type === 'manual_upload_overlay' ? '用户上传 + 演示样本' : '演示样本');
     } catch {
       setSummary(weeklyMock);
       setProducts(weeklyProductsMock);
@@ -220,6 +263,14 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
       setSource('演示样本');
     } finally {
       setLoading(false);
+    }
+  }
+
+  function updateFilter(key, value) {
+    const nextFilters = { ...filters, [key]: value };
+    setFilters(nextFilters);
+    if (key === 'report_date') {
+      refreshWeeklyData(nextFilters);
     }
   }
 
@@ -235,7 +286,7 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
       });
       setSummary(result);
     } catch {
-      onAnalysis?.(sampleAnalysis);
+      onAnalysis?.({ ...sampleAnalysis, weekly_report_date: filters.report_date });
     } finally {
       setLoading(false);
     }
@@ -243,13 +294,17 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
 
   useEffect(() => {
     refreshWeeklyData();
+    const listener = () => refreshWeeklyData();
+    window.addEventListener('wealth-agent-session-data-updated', listener);
+    return () => window.removeEventListener('wealth-agent-session-data-updated', listener);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const commonColumns = [
-    { key: 'product_name', label: '产品名称', sticky: true, render: (row) => <strong>{row.product_name}</strong> },
-    { key: 'product_code', label: '产品代码', sticky: 'second' },
-    { key: 'risk_level', label: '风险等级', sticky: 'third', render: (row) => <span className={`risk-chip ${row.risk_level}`}>{row.risk_level}</span> }
+  const compactColumns = [
+    { key: 'product_name', label: '产品', title: (row) => row.product_name, render: (row) => <strong className="ellipsis-cell">{row.product_name}</strong> },
+    { key: 'risk_level', label: '风险', render: (row) => <span className={`risk-chip ${row.risk_level}`}>{row.risk_level}</span> },
+    { key: 'scale_wow_bn', label: '周变', render: (row) => `${signedNum(row.scale_wow_bn)} 亿` },
+    { key: 'return_3m', label: '3M', render: (row) => pct(row.return_3m) }
   ];
 
   return (
@@ -269,7 +324,7 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
       <section className="metric-grid hero-kpis">
         <KpiCard label="产品数" value={summary.product_count || products.length} tone="green" testId="product-count-kpi" />
         <KpiCard label="总规模" value={`${num(kpis.total_scale_bn)} 亿`} />
-        <KpiCard label="较上周变化" value={`${num(kpis.scale_wow_bn)} 亿`} tone={Number(kpis.scale_wow_bn) >= 0 ? 'green' : 'red'} />
+        <KpiCard label="较上周变化" value={`${signedNum(kpis.scale_wow_bn)} 亿`} tone={Number(kpis.scale_wow_bn) >= 0 ? 'green' : 'red'} />
         <KpiCard label="基准达标率" value={pct(kpis.benchmark_pass_rate)} />
         <KpiCard label="需关注产品数" value={kpis.attention_product_count || 0} tone="red" />
       </section>
@@ -292,14 +347,14 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
         <TaskCard
           icon={FileCheck2}
           title="查看 AI 报告校准"
-          description="对比模板草稿和 AI 校准稿，检查数字、证据和合规措辞。"
+          description="对比模板草稿和 DPO 校准稿，检查数字、证据和合规措辞。"
           button="查看质检结果"
           onClick={onOpenTrace}
         />
       </section>
 
       <section className="control-band weekly-control">
-        <SelectField label="周报日期" value={filters.report_date} options={dates} onChange={(value) => updateFilter('report_date', value)} />
+        <SelectField label="周报日期" value={filters.report_date} options={dates} onChange={(value) => updateFilter('report_date', value)} testId="weekly-date-select" />
         <SelectField label="产品系列" value={filters.product_series} options={options.product_series} onChange={(value) => updateFilter('product_series', value)} />
         <SelectField label="产品类型" value={filters.product_type} options={options.product_type} onChange={(value) => updateFilter('product_type', value)} />
         <SelectField label="渠道" value={filters.channel} options={options.channel} onChange={(value) => updateFilter('channel', value)} />
@@ -309,6 +364,10 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
         <button className="primary-btn secondary" onClick={() => refreshWeeklyData()} disabled={loading}>
           {loading ? <Loader2 className="spin" size={18} /> : <RefreshCw size={18} />}
           更新周报
+        </button>
+        <button className="primary-btn" onClick={() => setUploadOpen(true)}>
+          <UploadCloud size={18} />
+          导入周报/净值数据
         </button>
       </section>
 
@@ -320,27 +379,16 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
         <ShieldCheck size={22} />
       </section>
 
-      <section className="split-grid triple">
-        <FocusTable
-          title="需关注产品 Top 10"
-          rows={summary.attention_top10 || []}
-          emptyText="当前筛选下暂无需关注样本。"
-          onRowClick={onOpenBenchmark}
-          columns={[
-            ...commonColumns,
-            { key: 'attention_score', label: '关注分', render: (row) => num(row.attention_score, 3) },
-            { key: 'attention_reason_tags', label: '异常原因', render: (row) => (row.attention_reason_tags || []).join(' / ') },
-            { key: 'scale_wow_bn', label: '本周变化', render: (row) => `${num(row.scale_wow_bn)} 亿` }
-          ]}
-        />
+      <CompactAttentionList rows={summary.attention_top10 || []} onOpen={onOpenBenchmark} />
+
+      <section className="weekly-focus-grid">
         <FocusTable
           title="基准未达标产品"
           rows={summary.benchmark_failed_products || []}
           emptyText="当前筛选下暂无低于基准下限样本。"
           onRowClick={onOpenBenchmark}
           columns={[
-            ...commonColumns,
-            { key: 'since_inception_annual_return', label: '成立以来年化', render: (row) => pct(row.since_inception_annual_return) },
+            ...compactColumns,
             { key: 'benchmark_lower', label: '基准下限', render: (row) => pct(row.benchmark_lower) }
           ]}
         />
@@ -350,9 +398,8 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
           emptyText="当前筛选下暂无规模下降样本。"
           onRowClick={onOpenBenchmark}
           columns={[
-            ...commonColumns,
-            { key: 'product_scale_bn', label: '最新规模', render: (row) => `${num(row.product_scale_bn)} 亿` },
-            { key: 'scale_wow_bn', label: '较上周', render: (row) => `${num(row.scale_wow_bn)} 亿` }
+            ...compactColumns,
+            { key: 'product_scale_bn', label: '规模', render: (row) => `${num(row.product_scale_bn)} 亿` }
           ]}
         />
         <FocusTable
@@ -361,9 +408,8 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
           emptyText="暂无低分位样本。"
           onRowClick={onOpenBenchmark}
           columns={[
-            ...commonColumns,
-            { key: 'return_3m', label: '3M 收益', render: (row) => pct(row.return_3m) },
-            { key: 'return_percentile', label: '收益分位', render: (row) => pct(row.return_percentile, 0) }
+            ...compactColumns,
+            { key: 'return_percentile', label: '分位', render: (row) => pct(row.return_percentile, 0) }
           ]}
         />
       </section>
@@ -374,6 +420,8 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
         <AiCalibrationCard analysis={analysis} />
         <DataSourceFreshness freshness={freshness} />
       </section>
+
+      <DataUploadDrawer isOpen={uploadOpen} onClose={() => setUploadOpen(false)} onImported={() => refreshWeeklyData()} />
     </div>
   );
 }
