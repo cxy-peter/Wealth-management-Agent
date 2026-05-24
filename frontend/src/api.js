@@ -1,5 +1,21 @@
 const API_BASE = import.meta.env.VITE_WEALTH_AGENT_API_BASE || 'http://127.0.0.1:8000';
 
+async function getJson(path) {
+  const response = await fetch(`${API_BASE}${path}`);
+  if (!response.ok) {
+    throw new Error(`API ${path} returned ${response.status}`);
+  }
+  return response.json();
+}
+
+async function getDemoJson(name) {
+  const response = await fetch(`/demo-data/${name}`);
+  if (!response.ok) {
+    throw new Error(`demo data ${name} returned ${response.status}`);
+  }
+  return response.json();
+}
+
 async function postJson(path, payload = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
@@ -25,9 +41,12 @@ export function runEvaluation(payload = {}) {
 }
 
 export async function getWeeklyReportDates() {
-  const response = await fetch(`${API_BASE}/api/weekly-report/dates`);
-  if (!response.ok) throw new Error(`weekly dates returned ${response.status}`);
-  return response.json();
+  try {
+    return await getJson('/api/weekly-report/dates');
+  } catch {
+    const summary = await getDemoJson('weekly_summary.json');
+    return { dates: [summary.report_date], latest: summary.report_date };
+  }
 }
 
 export async function getWeeklySummary(filters = {}) {
@@ -36,9 +55,11 @@ export async function getWeeklySummary(filters = {}) {
     if (value) params.set(key, value);
   });
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(`${API_BASE}/api/weekly-report/summary${suffix}`);
-  if (!response.ok) throw new Error(`weekly summary returned ${response.status}`);
-  return response.json();
+  try {
+    return await getJson(`/api/weekly-report/summary${suffix}`);
+  } catch {
+    return getDemoJson('weekly_summary.json');
+  }
 }
 
 export async function getWeeklyProducts(filters = {}) {
@@ -47,16 +68,21 @@ export async function getWeeklyProducts(filters = {}) {
     if (value) params.set(key, value);
   });
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(`${API_BASE}/api/weekly-report/products${suffix}`);
-  if (!response.ok) throw new Error(`weekly products returned ${response.status}`);
-  return response.json();
+  try {
+    return await getJson(`/api/weekly-report/products${suffix}`);
+  } catch {
+    return getDemoJson('weekly_products.json');
+  }
 }
 
 export async function getWeeklyProduct(productCode, reportDate) {
   const suffix = reportDate ? `?report_date=${encodeURIComponent(reportDate)}` : '';
-  const response = await fetch(`${API_BASE}/api/weekly-report/products/${productCode}${suffix}`);
-  if (!response.ok) throw new Error(`weekly product returned ${response.status}`);
-  return response.json();
+  try {
+    return await getJson(`/api/weekly-report/products/${productCode}${suffix}`);
+  } catch {
+    const details = await getDemoJson('product_details.json');
+    return details.by_product?.[productCode] || details.by_product?.[details.default_product_code];
+  }
 }
 
 export function generateWeeklyReport(payload = {}) {
@@ -64,15 +90,18 @@ export function generateWeeklyReport(payload = {}) {
 }
 
 export function runPeerBenchmark(payload = {}) {
-  return postJson('/api/benchmark/peer', payload);
+  return postJson('/api/benchmark/peer', payload).catch(async () => {
+    const peers = await getDemoJson('peer_benchmark.json');
+    return peers.by_product?.[payload.product_code] || peers.by_product?.[peers.default_product_code];
+  });
 }
 
 export function runChannelBenchmark(payload = {}) {
-  return postJson('/api/benchmark/channel', payload);
+  return postJson('/api/benchmark/channel', payload).catch(() => getDemoJson('channel_benchmark.json'));
 }
 
 export function runTopPeers(payload = {}) {
-  return postJson('/api/benchmark/top-peers', payload);
+  return postJson('/api/benchmark/top-peers', payload).catch(() => getDemoJson('top_peers.json'));
 }
 
 export async function getProducts(filters = {}) {
@@ -111,15 +140,36 @@ export async function getJobEvents(runId) {
 }
 
 export async function getDataFreshness() {
-  const response = await fetch(`${API_BASE}/api/data/freshness`);
-  if (!response.ok) throw new Error(`data freshness returned ${response.status}`);
-  return response.json();
+  try {
+    return await getJson('/api/data/freshness');
+  } catch {
+    const summary = await getDemoJson('weekly_summary.json');
+    return {
+      data_mode: 'static demo sample',
+      sources: [
+        {
+          source_type: 'synthetic_weekly_snapshot',
+          source_name: 'Vercel static demo data',
+          record_count: summary.product_count || 0,
+          latest_as_of_date: summary.report_date,
+          staleness_days: 0,
+          confidence_level: 'medium',
+          adapter_status: 'available',
+          missing_fields: []
+        }
+      ]
+    };
+  }
 }
 
 export async function getDataLineage(evidenceId) {
   const response = await fetch(`${API_BASE}/api/data/lineage/${encodeURIComponent(evidenceId)}`);
   if (!response.ok) throw new Error(`data lineage returned ${response.status}`);
   return response.json();
+}
+
+export async function getDpoEval() {
+  return getDemoJson('dpo_eval.json');
 }
 
 export async function getReport(runId) {

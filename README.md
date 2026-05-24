@@ -1,5 +1,7 @@
 # wealth-research-agent / DPO-aligned 资管产品周报 Agent
 
+Live demo: https://frontend-five-delta-35.vercel.app
+
 面向资管投研、理财产品研究和产品周报工作的可审计 Agent 应用。项目主线不是荐股或交易决策，而是围绕产品周报数据、净值收益、业绩基准、同业产品池、渠道分位和数据源新鲜度，生成：
 
 - 产品情况周报
@@ -14,7 +16,7 @@
 ## 核心边界
 
 - 不输出买入、卖出、持有建议，不写推荐配置、保证收益或确定性上涨判断。
-- DPO 不用于生成投资建议，只用于 Planner 工具选择偏好、报告文风、证据覆盖、风险提示和合规措辞对齐。
+- DPO 不用于生成投资建议，只用于对齐周报文风、证据覆盖、风险提示、分位解释和禁用措辞；所有数字仍由 deterministic tools 计算并进入 Verifier/Guardrail。
 - 所有数字仍由 deterministic tools 计算或引用 tool output。
 - 所有报告仍需 verifier 与 guardrail 检查。
 - 不提交 API key、模型权重、adapter 权重、私有语料、真实客户数据或公司内部文件。
@@ -71,7 +73,7 @@ python scripts/generate_next_week_snapshot.py --as-of-date 2025-04-11 --base-dat
 
 ```mermaid
 flowchart LR
-  UI["WeeklyReportDashboard / ProductBenchmarkWorkbench / AgentTraceView"] --> API["FastAPI"]
+  UI["产品周报 / 产品对标 / 审计追踪"] --> API["FastAPI"]
   API --> DS["data_sources: upload / official sample / market reports / synthetic"]
   API --> Weekly["weekly_report parsers + metrics"]
   Weekly --> Tools["Tool Registry"]
@@ -143,13 +145,13 @@ Verifier 检查：
 
 ## 前端
 
-顶层导航是三页：
+顶层导航收敛为三页，面向业务用户展示，不默认暴露 raw JSON 或训练细节：
 
-- 产品周报：对应 `WeeklyReportDashboard`，展示 KPI、需关注产品 Top 10、Weekly Diff、市场新发、数据源与新鲜度、DPO 周报摘要。
-- 产品对标：对应 `ProductBenchmarkWorkbench`，展示竞品/全市场/渠道/同类绩优产品，详情 drawer 包含 NAV、benchmark、风险事件、字段来源矩阵和 Peer Universe Explainer。
-- 审计追踪：对应 `AgentTraceView`，展示 planner plan、tool calls、evidence_id、verifier、guardrail、Data Lineage、DPO Alignment 和 Advanced Eval。
+- 产品周报：周报概览、需关注产品、规模变化、基准未达标、市场发行。
+- 产品对标：竞品对标、全市场分位、渠道对标、同类绩优产品。
+- 审计追踪：工具调用、数据溯源、报告质检、AI 报告校准。
 
-`HumanReviewDrawer` 只在 `pending_review` 时出现，不作为顶层导航。
+高风险、证据缺失或质检失败时，人工复核以抽屉形式出现，不作为顶层页面。
 
 ## API 快速入口
 
@@ -174,11 +176,12 @@ POST /api/eval/run
 pip install -r requirements.txt
 python scripts/generate_weekly_report_universe.py
 python -m backend.app.dpo.dpo_dataset_builder
-python scripts/run_weekly_demo.py --report-date 2025-03-19
-python scripts/run_product_benchmark_demo.py --product-code WP0001
+python scripts/run_weekly_demo.py --report-date 2025-04-04
+python scripts/run_product_benchmark_demo.py --product-code WP0031
+python -m backend.app.dpo.eval_dpo_agent_alignment
 ```
 
-`2025-03-19` 不是样例周五报告日时，demo 会自动落到最近的前序周报日期。
+`2025-04-04` 是默认静态 demo 的周报日期；Vercel 前端在无后端时读取 `frontend/public/demo-data/` 下的演示数据。
 
 Backend:
 

@@ -16,6 +16,7 @@ const pages = [
 export default function App() {
   const [activePage, setActivePage] = useState('weekly');
   const [analysis, setAnalysis] = useState(sampleAnalysis);
+  const [selectedProductCode, setSelectedProductCode] = useState('WP0031');
   const [reviewOpen, setReviewOpen] = useState(false);
 
   const activeMeta = useMemo(() => pages.find((page) => page.id === activePage) || pages[0], [activePage]);
@@ -29,6 +30,15 @@ export default function App() {
     }
   }
 
+  function navigateToBenchmark(productCode = selectedProductCode) {
+    setSelectedProductCode(productCode || 'WP0031');
+    setActivePage('benchmark');
+  }
+
+  function navigateToTrace() {
+    setActivePage('trace');
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -38,7 +48,7 @@ export default function App() {
           </div>
           <div>
             <div className="brand-title">wealth-research-agent</div>
-            <div className="brand-subtitle">DPO-aligned 周报型资管产品研究 Agent</div>
+            <div className="brand-subtitle">资管产品周报工作台</div>
           </div>
         </div>
 
@@ -62,17 +72,17 @@ export default function App() {
         <div className="sidebar-status">
           <div className="status-row">
             <SlidersHorizontal size={16} />
-            <span>Data</span>
-            <strong>synthetic/mock</strong>
+            <span>数据</span>
+            <strong>演示数据</strong>
           </div>
           <div className="status-row">
             <ShieldCheck size={16} />
-            <span>Boundary</span>
-            <strong>research support</strong>
+            <span>边界</span>
+            <strong>仅用于投研辅助</strong>
           </div>
           {pendingReview ? (
             <button className="review-chip" onClick={() => setReviewOpen(true)}>
-              Pending review
+              待人工复核
             </button>
           ) : null}
         </div>
@@ -93,8 +103,21 @@ export default function App() {
           </div>
         </header>
 
-        {activePage === 'weekly' ? <WeeklyReportDashboard analysis={analysis} onAnalysis={handleAnalysis} /> : null}
-        {activePage === 'benchmark' ? <ProductBenchmarkWorkbench analysis={analysis} onAnalysis={handleAnalysis} /> : null}
+        {activePage === 'weekly' ? (
+          <WeeklyReportDashboard
+            analysis={analysis}
+            onAnalysis={handleAnalysis}
+            onOpenBenchmark={navigateToBenchmark}
+            onOpenTrace={navigateToTrace}
+          />
+        ) : null}
+        {activePage === 'benchmark' ? (
+          <ProductBenchmarkWorkbench
+            analysis={analysis}
+            onAnalysis={handleAnalysis}
+            initialProductCode={selectedProductCode}
+          />
+        ) : null}
         {activePage === 'trace' ? <AgentTraceView analysis={analysis} /> : null}
       </main>
 

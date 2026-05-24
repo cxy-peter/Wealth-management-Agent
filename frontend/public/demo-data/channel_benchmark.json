@@ -1,0 +1,302 @@
+{
+  "product_type": null,
+  "channel": null,
+  "peer_count": 360,
+  "channels": [
+    "个金",
+    "交行",
+    "厦门银行",
+    "对公",
+    "百信",
+    "直销",
+    "私银",
+    "邮惠万家"
+  ],
+  "table": [
+    {
+      "channel": "对公",
+      "product_type": "QDII",
+      "peer_count": 4,
+      "avg_return_3m": 0.243554,
+      "total_scale_bn": 60.1314,
+      "channel_rank": 1,
+      "product_channel_percentile": 0.9667
+    },
+    {
+      "channel": "直销",
+      "product_type": "QDII",
+      "peer_count": 4,
+      "avg_return_3m": 0.087365,
+      "total_scale_bn": 72.0604,
+      "channel_rank": 2,
+      "product_channel_percentile": 0.9333
+    },
+    {
+      "channel": "厦门银行",
+      "product_type": "多资产",
+      "peer_count": 4,
+      "avg_return_3m": 0.050933,
+      "total_scale_bn": 58.9508,
+      "channel_rank": 3,
+      "product_channel_percentile": 0.9
+    },
+    {
+      "channel": "邮惠万家",
+      "product_type": "混合类",
+      "peer_count": 4,
+      "avg_return_3m": 0.047757,
+      "total_scale_bn": 65.4446,
+      "channel_rank": 4,
+      "product_channel_percentile": 0.8667
+    },
+    {
+      "channel": "直销",
+      "product_type": "封闭式",
+      "peer_count": 4,
+      "avg_return_3m": 0.043392,
+      "total_scale_bn": 63.6747,
+      "channel_rank": 5,
+      "product_channel_percentile": 0.8333
+    },
+    {
+      "channel": "私银",
+      "product_type": "最短持有期型",
+      "peer_count": 4,
+      "avg_return_3m": 0.036278,
+      "total_scale_bn": 67.0604,
+      "channel_rank": 6,
+      "product_channel_percentile": 0.8
+    },
+    {
+      "channel": "个金",
+      "product_type": "固收增强",
+      "peer_count": 4,
+      "avg_return_3m": 0.035305,
+      "total_scale_bn": 87.082,
+      "channel_rank": 7,
+      "product_channel_percentile": 0.7667
+    },
+    {
+      "channel": "个金",
+      "product_type": "封闭式",
+      "peer_count": 4,
+      "avg_return_3m": 0.033959,
+      "total_scale_bn": 41.5794,
+      "channel_rank": 8,
+      "product_channel_percentile": 0.7333
+    },
+    {
+      "channel": "对公",
+      "product_type": "多资产",
+      "peer_count": 7,
+      "avg_return_3m": 0.029232,
+      "total_scale_bn": 84.8682,
+      "channel_rank": 9,
+      "product_channel_percentile": 0.7
+    },
+    {
+      "channel": "百信",
+      "product_type": "封闭式",
+      "peer_count": 4,
+      "avg_return_3m": 0.026392,
+      "total_scale_bn": 42.6223,
+      "channel_rank": 10,
+      "product_channel_percentile": 0.6667
+    },
+    {
+      "channel": "厦门银行",
+      "product_type": "最短持有期型",
+      "peer_count": 4,
+      "avg_return_3m": 0.025278,
+      "total_scale_bn": 64.1927,
+      "channel_rank": 11,
+      "product_channel_percentile": 0.6333
+    },
+    {
+      "channel": "交行",
+      "product_type": "QDII",
+      "peer_count": 7,
+      "avg_return_3m": 0.024426,
+      "total_scale_bn": 95.8103,
+      "channel_rank": 12,
+      "product_channel_percentile": 0.6
+    },
+    {
+      "channel": "对公",
+      "product_type": "固收增强",
+      "peer_count": 7,
+      "avg_return_3m": 0.021098,
+      "total_scale_bn": 97.9884,
+      "channel_rank": 13,
+      "product_channel_percentile": 0.5667
+    },
+    {
+      "channel": "交行",
+      "product_type": "封闭式",
+      "peer_count": 4,
+      "avg_return_3m": 0.020168,
+      "total_scale_bn": 47.4397,
+      "channel_rank": 14,
+      "product_channel_percentile": 0.5333
+    },
+    {
+      "channel": "对公",
+      "product_type": "混合类",
+      "peer_count": 4,
+      "avg_return_3m": 0.019771,
+      "total_scale_bn": 51.6089,
+      "channel_rank": 15,
+      "product_channel_percentile": 0.5
+    },
+    {
+      "channel": "直销",
+      "product_type": "最短持有期型",
+      "peer_count": 4,
+      "avg_return_3m": 0.019111,
+      "total_scale_bn": 35.3462,
+      "channel_rank": 16,
+      "product_channel_percentile": 0.4667
+    },
+    {
+      "channel": "百信",
+      "product_type": "固收增强",
+      "peer_count": 4,
+      "avg_return_3m": 0.018458,
+      "total_scale_bn": 42.6799,
+      "channel_rank": 17,
+      "product_channel_percentile": 0.4333
+    },
+    {
+      "channel": "交行",
+      "product_type": "纯固收",
+      "peer_count": 4,
+      "avg_return_3m": 0.018142,
+      "total_scale_bn": 53.9305,
+      "channel_rank": 18,
+      "product_channel_percentile": 0.4
+    },
+    {
+      "channel": "百信",
+      "product_type": "最短持有期型",
+      "peer_count": 4,
+      "avg_return_3m": 0.016328,
+      "total_scale_bn": 55.0401,
+      "channel_rank": 19,
+      "product_channel_percentile": 0.3667
+    },
+    {
+      "channel": "私银",
+      "product_type": "纯固收",
+      "peer_count": 7,
+      "avg_return_3m": 0.016245,
+      "total_scale_bn": 106.2442,
+      "channel_rank": 20,
+      "product_channel_percentile": 0.3333
+    },
+    {
+      "channel": "私银",
+      "product_type": "固收增强",
+      "peer_count": 7,
+      "avg_return_3m": 0.016178,
+      "total_scale_bn": 102.0648,
+      "channel_rank": 21,
+      "product_channel_percentile": 0.3
+    },
+    {
+      "channel": "对公",
+      "product_type": "日开型",
+      "peer_count": 4,
+      "avg_return_3m": 0.015251,
+      "total_scale_bn": 69.8541,
+      "channel_rank": 22,
+      "product_channel_percentile": 0.2667
+    },
+    {
+      "channel": "直销",
+      "product_type": "纯固收",
+      "peer_count": 4,
+      "avg_return_3m": 0.014762,
+      "total_scale_bn": 60.6064,
+      "channel_rank": 23,
+      "product_channel_percentile": 0.2333
+    },
+    {
+      "channel": "百信",
+      "product_type": "现金管理",
+      "peer_count": 4,
+      "avg_return_3m": 0.014707,
+      "total_scale_bn": 66.7497,
+      "channel_rank": 24,
+      "product_channel_percentile": 0.2
+    },
+    {
+      "channel": "邮惠万家",
+      "product_type": "固收增强",
+      "peer_count": 4,
+      "avg_return_3m": 0.014513,
+      "total_scale_bn": 60.6385,
+      "channel_rank": 25,
+      "product_channel_percentile": 0.1667
+    },
+    {
+      "channel": "交行",
+      "product_type": "混合类",
+      "peer_count": 7,
+      "avg_return_3m": 0.014367,
+      "total_scale_bn": 96.0562,
+      "channel_rank": 26,
+      "product_channel_percentile": 0.1333
+    },
+    {
+      "channel": "直销",
+      "product_type": "现金管理",
+      "peer_count": 4,
+      "avg_return_3m": 0.014223,
+      "total_scale_bn": 48.376,
+      "channel_rank": 27,
+      "product_channel_percentile": 0.1
+    },
+    {
+      "channel": "百信",
+      "product_type": "混合类",
+      "peer_count": 7,
+      "avg_return_3m": 0.013272,
+      "total_scale_bn": 111.5471,
+      "channel_rank": 28,
+      "product_channel_percentile": 0.0667
+    },
+    {
+      "channel": "厦门银行",
+      "product_type": "混合类",
+      "peer_count": 4,
+      "avg_return_3m": 0.01307,
+      "total_scale_bn": 51.4922,
+      "channel_rank": 29,
+      "product_channel_percentile": 0.05
+    },
+    {
+      "channel": "个金",
+      "product_type": "多资产",
+      "peer_count": 4,
+      "avg_return_3m": 0.013049,
+      "total_scale_bn": 50.1626,
+      "channel_rank": 30,
+      "product_channel_percentile": 0.05
+    }
+  ],
+  "evidence_ids": [
+    "ev_channel_peer_PR0001",
+    "ev_channel_peer_PR0002",
+    "ev_channel_peer_PR0003",
+    "ev_channel_peer_PR0004",
+    "ev_channel_peer_PR0005",
+    "ev_channel_peer_PR0006",
+    "ev_channel_peer_PR0007",
+    "ev_channel_peer_PR0008",
+    "ev_channel_peer_PR0009",
+    "ev_channel_peer_PR0010",
+    "ev_channel_peer_PR0011",
+    "ev_channel_peer_PR0012"
+  ],
+  "source_type": "synthetic_weekly_snapshot"
+}
