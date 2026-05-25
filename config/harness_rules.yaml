@@ -11,10 +11,15 @@ forbidden_wording:
 
 required_fields_by_report_type:
   weekly_report:
-    - report_date
     - product_count
     - total_scale_bn
     - benchmark_pass_rate
+    - attention_count
+  weekly_product_summary:
+    - product_count
+    - total_scale_bn
+    - benchmark_pass_rate
+    - attention_count
   peer_benchmark:
     - product_code
     - peer_count
@@ -34,14 +39,16 @@ required_evidence_rules:
   - every_tool_output_requires_tool_call_id
 
 numeric_consistency_rules:
+  - report_metric_claim_requires_tool_output_or_evidence_id
   - scale_wow_bn_equals_current_minus_previous
   - return_and_drawdown_from_nav_series
   - percentile_from_peer_universe_rank
   - dpo_must_not_recalculate_metrics
 
 source_boundary_rules:
-  - synthetic_must_be_labeled_demo
-  - manual_upload_must_keep_dataset_scope
+  - synthetic_data_must_not_claim_real_market_ranking
+  - synthetic_percentile_requires_simulated_peer_pool_label
+  - manual_upload_requires_uploaded_data_label
   - official_disclosure_failure_cannot_be_called_realtime
 
 report_style_rules:

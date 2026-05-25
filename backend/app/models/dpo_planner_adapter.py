@@ -29,6 +29,11 @@ REQUIRED_PLAN_KEYS = {
 }
 
 
+def _contains_any(text: str, keywords: list[str]) -> bool:
+    lowered = text.lower()
+    return any(keyword.lower() in lowered for keyword in keywords)
+
+
 class DPOPlannerAdapter:
     """DPO-capable planner adapter with deterministic fallback.
 
@@ -56,29 +61,39 @@ class DPOPlannerAdapter:
         for key in ["steps", "selected_skills", "required_evidence"]:
             if key in plan and not isinstance(plan[key], list):
                 type_errors.append(f"{key} must be list")
+        if "selected_skills" in plan and not all(isinstance(skill, str) for skill in plan["selected_skills"]):
+            type_errors.append("selected_skills must contain strings")
         return {"valid": not missing and not type_errors, "missing_keys": missing, "type_errors": type_errors}
 
     def generate_plan(self, prompt: dict[str, Any]) -> dict[str, Any]:
-        task = str(prompt.get("user_task", "")).lower()
+        task = str(prompt.get("user_task", ""))
         dataset_scope = str(prompt.get("dataset_scope") or "")
         available_skills = set(prompt.get("available_skills") or [])
         data_quality = prompt.get("data_quality_status") or {}
 
         plan_type = "weekly_report"
         selected = ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
-        if "上传" in task or "upload" in task or dataset_scope:
+
+        if _contains_any(task, ["上传", "导入", "upload", "import", "涓婁紶"]) or dataset_scope:
             plan_type = "data_upload"
             selected = ["data_upload_skill", "verifier_skill"]
-        if "渠道" in task or "channel" in task:
+
+        if _contains_any(task, ["渠道", "channel", "娓犻亾"]):
             plan_type = "channel_benchmark"
             selected = ["channel_benchmark_skill", "verifier_skill"]
-        if "竞品" in task or "对标" in task or "benchmark" in task:
+        elif _contains_any(task, ["竞品", "同业", "对标", "benchmark", "peer", "绔炲搧", "瀵规爣"]):
             plan_type = "peer_benchmark"
             selected = ["peer_benchmark_skill", "nav_compare_skill", "verifier_skill"]
-        if "系列" in task or "series" in task:
+
+        if _contains_any(task, ["净值对比", "五只", "5只", "nav compare", "five product"]):
+            plan_type = "nav_compare"
+            selected = ["nav_compare_skill", "dpo_report_skill", "verifier_skill"]
+
+        if _contains_any(task, ["系列", "series", "绯诲垪"]):
             plan_type = "series_compare"
             selected = ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
-        if "利率" in task or dataset_scope == "reference_rates":
+
+        if _contains_any(task, ["利率", "基准利率", "reference", "rate", "鍒╃巼"]) or dataset_scope == "reference_rates":
             plan_type = "reference_rate_benchmark"
             selected = ["data_upload_skill", "verifier_skill"] if dataset_scope == "reference_rates" else ["weekly_summary_skill", "verifier_skill"]
 
@@ -92,9 +107,9 @@ class DPOPlannerAdapter:
             "plan_type": plan_type,
             "steps": [
                 "读取 dataset_scope 与数据质量状态",
-                "选择与任务匹配的 skills",
-                "要求所有关键结论带 evidence_id",
-                "进入 verifier 与 guardrail"
+                "选择与任务匹配的 Skill-Harness skills",
+                "要求所有关键结论带 evidence_id 或 tool_call_id",
+                "进入 verifier 与 guardrail",
             ],
             "selected_skills": selected[:3],
             "required_tools": selected[:3],

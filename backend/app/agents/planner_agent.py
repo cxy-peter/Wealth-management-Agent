@@ -34,7 +34,7 @@ def infer_task_type(analysis_type: str, risk_preference: str) -> str:
     risk_preference = (risk_preference or "balanced").lower()
     if analysis_type in {"risk", "risk_only"}:
         return "risk_only"
-    if analysis_type in {"product", "product_compare", "benchmark"}:
+    if analysis_type in {"weekly_product", "product", "product_compare", "benchmark"}:
         return "product_compare"
     if analysis_type in {"fast", "snapshot"}:
         return "fast_snapshot"

@@ -63,16 +63,23 @@ def list_skills() -> list[dict[str, Any]]:
     return [skill.to_dict() for skill in SKILLS.values()]
 
 
+def _contains_any(text: str, keywords: list[str]) -> bool:
+    lowered = text.lower()
+    return any(keyword.lower() in lowered for keyword in keywords)
+
+
 def select_skills(user_task: str) -> list[str]:
-    task = str(user_task).lower()
-    if "上传" in task or "upload" in task:
+    """Rule-based planner used as a fallback when the DPO plan is invalid."""
+
+    task = str(user_task)
+    if _contains_any(task, ["上传", "导入", "upload", "import", "涓婁紶"]):
         return ["data_upload_skill", "verifier_skill"]
-    if "利率" in task or "reference" in task:
+    if _contains_any(task, ["利率", "基准利率", "reference", "rate", "鍒╃巼"]):
         return ["weekly_summary_skill", "verifier_skill"]
-    if "系列" in task or "series" in task:
+    if _contains_any(task, ["系列", "series", "绯诲垪"]):
         return ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
-    if "渠道" in task or "channel" in task:
+    if _contains_any(task, ["渠道", "channel", "娓犻亾"]):
         return ["channel_benchmark_skill", "verifier_skill"]
-    if "竞品" in task or "对标" in task or "benchmark" in task:
+    if _contains_any(task, ["竞品", "同业", "对标", "benchmark", "peer", "绔炲搧", "瀵规爣"]):
         return ["peer_benchmark_skill", "nav_compare_skill", "verifier_skill"]
     return ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]

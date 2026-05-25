@@ -79,9 +79,9 @@ app.add_middleware(
 
 
 class AnalyzeRequest(BaseModel):
-    symbol: str = Field("600519", description="Instrument or product code")
-    company: str = Field("贵州茅台", description="Company/product display name")
-    analysis_type: str = Field("full", description="full/risk/product")
+    symbol: str = Field("WP0001", description="Instrument or product code")
+    company: str = Field("得润固收添益30天持有期", description="Company/product display name")
+    analysis_type: str = Field("weekly_product", description="weekly_product/full/risk/product/legacy_stock")
     risk_preference: str = Field("balanced", description="balanced/conservative/strict")
     output_path: str | None = Field(None, description="Optional markdown report path")
 
@@ -249,7 +249,7 @@ def health() -> dict[str, Any]:
     return {
         "status": "ok",
         "service": "wealth-research-agent",
-        "data_mode": "sample/mock",
+        "data_mode": "hybrid_demo_uploaded_official_sample",
         "workflow": "weekly product research workbench with deterministic fallbacks",
     }
 

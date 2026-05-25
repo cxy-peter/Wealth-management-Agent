@@ -43,9 +43,25 @@ def _input_for_skill(skill_name: str, task_payload: dict[str, Any], tool_outputs
     return dict(task_payload)
 
 
+def _select_skills_from_planner(
+    planner: dict[str, Any],
+    fallback_selected: list[str],
+    max_total_calls: int,
+) -> tuple[list[str], str]:
+    generated_plan = planner.get("generated_plan") or {}
+    validation = planner.get("schema_validation") or {}
+    proposed = generated_plan.get("selected_skills") or []
+    valid_proposed = [skill for skill in proposed if isinstance(skill, str) and skill in SKILLS]
+    if validation.get("valid") and valid_proposed:
+        if generated_plan.get("verifier_required") and "verifier_skill" in SKILLS and "verifier_skill" not in valid_proposed:
+            valid_proposed.append("verifier_skill")
+        return valid_proposed[:max_total_calls], "dpo_planner"
+    return fallback_selected[:max_total_calls], "rule_fallback"
+
+
 def execute_skill_harness(user_task: str, task_payload: dict[str, Any] | None = None, max_total_calls: int = 3) -> dict[str, Any]:
     task_payload = task_payload or {}
-    selected = select_skills(user_task)[:max_total_calls]
+    fallback_selected = select_skills(user_task)[:max_total_calls]
     planner_prompt = {
         "user_task": user_task,
         "dataset_scope": task_payload.get("dataset_scope"),
@@ -53,6 +69,7 @@ def execute_skill_harness(user_task: str, task_payload: dict[str, Any] | None = 
         "data_quality_status": task_payload.get("data_quality_status", {}),
     }
     planner = DPOPlannerAdapter().generate_plan(planner_prompt)
+    selected, selection_source = _select_skills_from_planner(planner, fallback_selected, max_total_calls)
     validator = HarnessValidator()
     tool_outputs: dict[str, Any] = {}
     skill_calls = []
@@ -64,7 +81,12 @@ def execute_skill_harness(user_task: str, task_payload: dict[str, Any] | None = 
         try:
             module = importlib.import_module(MODULE_BY_SKILL[skill_name])
             output = module.run(**input_payload)
-            harness_result = validator.validate(output, report_type=task_payload.get("task_type", "weekly_report"))
+            harness_result = validator.validate(
+                output,
+                report_type=task_payload.get("task_type", "weekly_report"),
+                tool_outputs=tool_outputs,
+                skill_name=skill_name,
+            )
             success = bool(harness_result["pass"])
             error_type = None
             tool_outputs[skill_name] = output
@@ -92,6 +114,8 @@ def execute_skill_harness(user_task: str, task_payload: dict[str, Any] | None = 
     return {
         "user_task": user_task,
         "selected_skills": selected,
+        "skill_selection_source": selection_source,
+        "fallback_selected_skills": fallback_selected,
         "dpo_planner": planner,
         "skill_calls": skill_calls,
         "harness_result": {
@@ -101,8 +125,8 @@ def execute_skill_harness(user_task: str, task_payload: dict[str, Any] | None = 
         },
         "trace": {
             "selected_skills": selected,
+            "skill_selection_source": selection_source,
             "skill_call_count": len(skill_calls),
             "evidence_ids": list(dict.fromkeys(eid for call in skill_calls for eid in call.get("evidence_ids", []))),
         },
     }
-

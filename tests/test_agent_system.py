@@ -28,6 +28,7 @@ from backend.app.product_taxonomy.series_classifier import classify_products
 from backend.app.product_taxonomy.series_performance import compute_series_performance
 from backend.app.benchmark.reference_rate_engine import compare_product_to_reference, load_reference_rates
 from backend.app.data_sources.real_adapters.official_nav.boc_nav_adapter import fetch_public_nav
+from backend.app.data_sources.real_adapters.reference_rates.us_treasury_adapter import _parse_treasury_html
 from backend.app.data_sources.real_adapters.registry.registry_lookup_adapter import lookup_registry_code
 from backend.app.external_verification.external_verification_agent import run_external_verification
 from backend.app.external_verification.source_boundary_guardrail import check_source_boundary
@@ -554,3 +555,66 @@ def test_report_requires_manual_review_when_official_nav_conflicts() -> None:
     verification = result["external_verification_result"]
     assert verification["conflicting_fields"]
     assert verification["source_boundary"]["manual_review_required"] is True
+
+
+def test_health_defaults_to_weekly_product_mode() -> None:
+    client = TestClient(app)
+    payload = client.get("/health").json()
+    assert payload["data_mode"] == "hybrid_demo_uploaded_official_sample"
+
+
+def test_analyze_default_uses_wealth_product_route() -> None:
+    client = TestClient(app)
+    payload = client.post("/api/analyze", json={}).json()
+    assert payload["planner_plan"]["task_type"] == "product_compare"
+    assert payload["verification_result"]["pass"] is True
+
+
+def test_dpo_planner_selected_skills_override_rule_fallback() -> None:
+    trace = execute_skill_harness("请做渠道对标并输出证据编号", {"channel": "个金", "product_type": "纯固收"})
+    assert trace["skill_selection_source"] == "dpo_planner"
+    assert trace["dpo_planner"]["generated_plan"]["plan_type"] == "channel_benchmark"
+    assert trace["selected_skills"][0] == "channel_benchmark_skill"
+
+
+def test_harness_required_weekly_fields_are_enforced() -> None:
+    result = HarnessValidator().validate(
+        {"product_count": 12, "kpis": {"total_scale_bn": 100.0}, "evidence_ids": ["ev_unit"]},
+        report_type="weekly_report",
+        skill_name="weekly_summary_skill",
+    )
+    assert result["pass"] is False
+    assert "required_fields_by_report_type" in result["failed_rules"]
+    assert "benchmark_pass_rate" in result["missing_required_fields"]
+    assert "attention_count" in result["missing_required_fields"]
+
+
+def test_harness_numeric_claim_requires_grounding() -> None:
+    result = HarnessValidator().validate("近3个月收益 2.10%，最大回撤 -0.50%，市场分位 35%。", report_type="weekly_report")
+    assert result["pass"] is False
+    assert "numeric_consistency_rules" in result["failed_rules"]
+
+
+def test_harness_blocks_real_market_claim_for_synthetic_source() -> None:
+    result = HarnessValidator().validate(
+        "该产品处于真实全市场排名前列。",
+        report_type="weekly_report",
+        source_context={"source_types": ["synthetic_weekly_snapshot"]},
+    )
+    assert result["pass"] is False
+    assert "source_boundary_rules" in result["failed_rules"]
+
+
+def test_us_treasury_html_parser_extracts_core_tenors() -> None:
+    html = """
+    <table>
+      <tr><th>Date</th><th>1 Mo</th><th>3 Mo</th><th>6 Mo</th><th>1 Yr</th><th>2 Yr</th><th>10 Yr</th></tr>
+      <tr><td>04/03/2025</td><td>4.31</td><td>4.28</td><td>4.16</td><td>3.88</td><td>3.70</td><td>4.10</td></tr>
+      <tr><td>04/04/2025</td><td>4.30</td><td>4.27</td><td>4.15</td><td>3.87</td><td>3.69</td><td>4.09</td></tr>
+    </table>
+    """
+    rows = _parse_treasury_html(html)
+    by_id = {row["rate_id"]: row for row in rows}
+    assert {"USD_TREASURY_1M", "USD_TREASURY_3M", "USD_TREASURY_6M", "USD_TREASURY_1Y", "USD_TREASURY_2Y", "USD_TREASURY_10Y"}.issubset(by_id)
+    assert by_id["USD_TREASURY_10Y"]["as_of_date"] == "2025-04-04"
+    assert by_id["USD_TREASURY_10Y"]["annual_yield"] == 0.0409

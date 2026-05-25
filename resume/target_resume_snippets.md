@@ -1,22 +1,28 @@
-# Resume snippets for 资管投研 / 金融算法方向
+# Resume snippets for 资管产品研究 / 金融算法 / Agent 工程方向
 
 ## Version A: technical project bullets
 
-资管投研辅助 Agent 系统｜Python, LangGraph, FastAPI, Qwen LoRA Adapter, pandas, React
+DPO-aligned Skill-Harness 资管产品周报 Agent｜Python, FastAPI, React, pandas, DPO Preference Data, Evidence Lineage
 
-- 构建 `data_extraction_agent → fundamental_agent → technical_agent → news_risk_agent → product_benchmark_agent → risk_guardrail_agent → report_agent` 的 LangGraph 工作流，自动生成可追溯 Markdown 投研辅助报告。
-- 封装 sample 行情/净值、模拟基本面与估值字段、新闻文本和理财产品对标工具，统一 tool call schema、指标口径、异常处理与报告结构。
-- 实现 Qwen LoRA 风险/情绪模型 adapter，并保留 rule-based fallback，确保无 GPU、无本地模型权重时仍可运行完整 demo。
-- 建立评测脚本与 `eval/results.json`，统计 tool call success、报告格式通过、指标一致性、风险提示覆盖、guardrail 失败率和端到端延迟。
-- 搭建 React/Vite 前端工作台，包含研究仪表盘、产品对标、新闻风险、评测面板和教学回放页面，展示投研流程而非交易执行。
+- 构建周报型资管产品研究 Agent，支持上传周报、净值、同业产品池和参考利率 CSV/XLSX，按 `own_company`、`full_market`、`reference_rates` 进行 dataset_scope 治理，并为每条记录生成 `upload_id`、`source_type`、`as_of_date`、`parser_version` 与 `evidence_id`。
+- 将产品周报、竞品对标、全市场分位、渠道对标、同类绩优产品追踪和 5 只产品净值对比工程化，计算收益、波动、最大回撤、Sharpe、Calmar、benchmark excess、市场/渠道分位等指标，所有数值由 deterministic tools 计算。
+- 设计 DPO Planner 与 DPO Report Writer：Planner 通过 JSON schema 校验后选择 Skill-Harness 路由，Report Writer 只做周报文风、证据覆盖、风险提示、分位解释和禁用措辞校准，不负责收益/回撤/分位计算。
+- 实现 Skill-Harness Runtime，将 data upload、weekly summary、peer benchmark、channel benchmark、nav compare、DPO report、verifier 封装为可审计 skill call，并检查 required fields、numeric consistency、source boundary、required evidence 和 forbidden wording。
+- 增加 Evidence Lineage 与 External Verification：区分 `manual_upload`、`synthetic_weekly_snapshot`、`official_public_nav`、`official_disclosure_sample`、`registry_lookup_sample`、`public_reference_rate_api`，并对官方净值、登记编码、参考利率和数据来源边界输出核验分数与复核提示。
 
 ## Version B: concise project bullets
 
-资管投研辅助 Agent 系统｜Python, FastAPI, pandas, React
+DPO-aligned Skill-Harness 资管产品周报 Agent｜FastAPI, React, pandas, DPO, Verifier
 
-- 搭建面向资管研究的 Agent MVP，将 sample 行情/净值、新闻文本和同业产品表统一接入，自动计算收益率、波动率、最大回撤、Sharpe 等指标并生成结构化报告。
-- 构建新闻风险与合规检查模块，对监管、价格、库存、违约等风险信号进行摘要，拦截交易方向、收益承诺和确定性判断类措辞，保留人工复核环节。
-- 设计小规模评测集，验证报告格式、指标一致性、风险提示覆盖和 guardrail 规则，支持后续接入 Qwen LoRA 情绪/风险分类模型。
+- 构建资管产品周报工作台，支持上传产品周报/净值/同业对标/参考利率数据，自动完成字段映射、质量检查、数据来源标记和 evidence_id 生成。
+- 设计产品系列归类与手工修正模块，支持系列业绩聚合、系列间收益风险对比、基准利率对比和 manual override trace。
+- 实现竞品对标、全市场分位、渠道对标、同类绩优产品和 5 只产品净值对比，输出收益、波动、最大回撤、Sharpe、Calmar、benchmark excess 等可追溯指标。
+- 设计 DPO Planner / Report Writer 偏好数据与 hard negatives，围绕工具选择、数字一致性、证据覆盖、风险提示、source boundary 和禁用投资建议措辞做报告校准。
+- 构建 Verifier / Guardrail / Evidence Lineage / External Verification，保证报告定位为投研辅助、风险摘要、产品对标和周报草稿整理，不生成买入、卖出、持有或收益承诺。
+
+## Interview framing
+
+这个项目的核心不是“让大模型直接写投资结论”，而是把资管产品周报中的数据接入、指标计算、同业对标、来源治理、证据追踪、报告校准和合规边界做成一个可审计工作流。DPO 只用于 Planner 偏好和 Report Writer 文风/证据/风险提示对齐；收益、回撤、分位、Sharpe、Calmar 等数字仍由确定性工具计算，并经过 Verifier 与 Harness 复核。
 
 ## Wealth product internship bullets
 
@@ -30,5 +36,5 @@
 Home Credit 消费金融信用风险稳定性建模｜Kaggle Bronze Medal, LightGBM, CatBoost, Polars
 
 - 基于 Home Credit 多表信贷申请、征信与还款数据构建客户违约风险预测模型，围绕 Gini stability 目标设计按周级别的验证流程，评估模型排序能力与跨时间稳定性。
-- 使用 Polars 搭建多表数据清洗、聚合与特征工程管线，联结申请表、历史借贷、征信及还款记录等数据源，生成高维候选特征并进行内存优化。
-- 结合 StratifiedGroupKFold、LightGBM 与 CatBoost 训练多组模型，进行候选参数筛选与 soft voting 融合，最终获得 Kaggle Bronze Medal（221/3856）。
+- 使用 Polars 搭建多表数据清洗、聚合与特征工程管线，连接申请表、历史借贷、征信及还款记录等数据源，生成高维候选特征并进行内存优化。
+- 结合 StratifiedGroupKFold、LightGBM 与 CatBoost 训练多组模型，进行候选参数筛选与 soft voting 融合，最终获得 Kaggle Bronze Medal。
