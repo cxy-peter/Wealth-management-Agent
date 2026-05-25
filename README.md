@@ -1,25 +1,120 @@
-# wealth-research-agent / DPO-aligned 周报型资管产品研究 Agent 系统
+# wealth-research-agent / DPO-aligned Skill-Harness 资管产品周报 Agent
 
 Live demo: https://frontend-five-delta-35.vercel.app
 
-面向资管投研、理财产品研究和产品周报工作的可审计 Agent 工作台。项目主线不是荐股、交易或下单，而是围绕产品周报、净值表现、同业产品池、渠道分位、上传数据和报告质检，生成产品周报、竞品/全市场/渠道对标、5只产品净值对比和 DPO 报告校准结果。
+面向资管投研、理财产品研究和产品周报工作的可审计 Agent 工作台。项目主线不是交易、下单或投资建议，而是围绕产品周报、净值表现、同业产品池、渠道分位、上传数据、产品系列归类、基准利率对比和报告质检，生成产品周报、竞品/全市场/渠道对标、5 只产品净值对比和 AI 报告校准结果。
 
 ## 核心能力
 
-- 可上传 CSV/XLSX：前端 Vercel demo 默认在浏览器本地解析，识别 sheet、字段、前 20 行预览、缺失字段、日期格式、百分比/bp/亿元单位、重复键和数值缺失率；导入记录标记为 `source_type=manual_upload`。
-- 产品周报：多日期静态 fallback，展示产品数、总规模、较上周变化、基准达标率、需关注产品 Top 10、规模下降、基准未达标和市场发行概览。
-- 产品对标：竞品对标、全市场分位、渠道对标、同类绩优产品追踪。
-- 5只产品净值对比：支持 1 个本公司产品 + 最多 4 个竞品，展示原始净值/起点归一化净值曲线，计算收益率、年化收益、年化波动率、最大回撤、Sharpe、Calmar 和 benchmark excess。
-- DPO 报告校准：展示 template draft、DPO calibrated draft、chosen/rejected hard negative、Verifier 结果、证据覆盖和禁用措辞命中率。
-- 审计追踪：工具调用记录、数据溯源、报告质检、Guardrail 和 Evidence lineage。
+- 产品周报：多日期静态 fallback，展示产品数、总规模、较上周变化、基准达标率、需关注产品 Top 10、规模下降、基准未达标、市场发行概览。
+- 数据导入：支持 CSV/XLSX，本地浏览器解析 sheet、字段、前 20 行预览、字段映射、缺失字段、日期格式、百分比/bp/亿元单位、重复键和数值缺失率。
+- dataset_scope 治理：上传时必须选择 `own_company`、`full_market` 或 `reference_rates`，并为每条记录生成 `upload_id`、`source_type=manual_upload`、`parser_version`、`as_of_date` 和 `evidence_id`。
+- 产品系列归类：基于产品名称、产品类型、期限、风险等级、渠道、发行方和开放类型自动识别系列，支持低置信度复核、手工移动、合并、拆分、重命名和系列业绩重算。
+- 产品对标：支持竞品对标、全市场分位、渠道对标、同类绩优产品追踪和 5 只产品净值对比。
+- 基准利率对比：支持同期限存款利率、美债利率、中债/国债/同业存单参考收益率和自定义 benchmark basket 的演示数据或上传数据。
+- DPO 报告校准：Planner DPO 对齐工具调用计划，Report Writer DPO 对齐周报文风、证据覆盖、风险提示、分位解释和禁用措辞规避。
+- Skill-Harness Runtime：将上传、周报摘要、竞品对标、渠道对标、净值对比、DPO 报告和 Verifier 封装为 skill call，并通过 harness 规则检查证据、数值、来源边界和合规措辞。
+- 审计追踪：展示工具调用记录、Skill/Harness trace、数据溯源、报告质检、Guardrail 和 evidence lineage。
 
-## 合规边界
+## 页面结构
 
-- 不输出买入、卖出、持有、推荐配置、保证收益或确定性上涨判断。
-- DPO 不用于生成投资建议，只用于 Planner 任务规划偏好、Report Writer 周报文风、证据覆盖、风险提示、分位解释和禁用措辞规避。
-- 所有数字仍由 deterministic tools 计算或从 tool output 引用，并进入 Verifier / Guardrail。
-- 不提交 API key、模型权重、adapter 权重、私有语料、真实客户数据或公司内部文件。
-- 默认使用 synthetic/mock/sample 数据；真实接口只能通过 `.env` 配置。
+顶层导航收敛为三页：
+
+- 产品周报：周报概览、导入周报/净值数据、产品系列归类、系列业绩对比、基准利率对比、需关注产品、规模变化、基准未达标、市场发行。
+- 产品对标：竞品对标、全市场分位、渠道对标、同类绩优产品、5 只产品净值对比。
+- 审计追踪：工具调用、数据溯源、报告质检、AI 报告校准、Skill/Harness、质量评估。
+
+## 数据上传 Scope
+
+上传数据不会在 Vercel demo 中发送到公网后端；默认在浏览器本地解析并写入 session/local storage。连接本地 FastAPI 后端时，也会保留同样的 metadata 约束。
+
+| dataset_scope | 用途 | 支持 schema |
+| --- | --- | --- |
+| `own_company` | 自家公司产品周报、净值、规模和基准状态，用于产品系列归类和内部系列对比 | `product_weekly_snapshot`, `product_nav_weekly`, `product_scale_history`, `product_benchmark_status` |
+| `full_market` | 同业/全市场产品池，用于竞品对标、全市场分位、渠道分位和同类绩优产品 | `peer_product_universe`, `peer_product_metrics`, `channel_peer_universe`, `top_peer_products` |
+| `reference_rates` | 存款利率、美债利率、中债/国债/同业存单参考收益率和自定义 benchmark basket | `reference_rates` |
+
+每条上传记录必须包含：
+
+```text
+upload_id, dataset_scope, source_type=manual_upload, file_name,
+parser_version, as_of_date, evidence_id
+```
+
+## 产品系列与手工修正
+
+`backend/app/product_taxonomy/` 提供自动归类和手工修正能力：
+
+- `taxonomy_rules.py`：根据产品名称、产品类型、期限、风险等级、渠道、发行方和开放类型生成 `suggested_series_id`、`suggested_series_name`、`confidence`、`classify_reason` 和 `rule_version`。
+- `manual_override_store.py`：记录加入、删除、移动、合并、拆分、重命名等操作，生成 `override_id` 和 `evidence_id`。
+- `series_performance.py`：重算系列产品数、总规模、规模变化、等权收益、规模加权收益、收益中位数、最大回撤、波动率、Sharpe、基准达标率、低分位产品数和需关注产品数。
+- `series_compare.py`：支持多个系列在收益、风险、规模和达标率维度的对比。
+
+前端 `ProductSeriesManager` 展示未归类/低置信度产品、自动识别系列、归类原因和手工调整记录；`SeriesComparePanel` 展示系列表格、收益-风险散点图、系列周报摘要和 AI 报告校准说明。
+
+## 基准利率对比
+
+`data/reference/reference_rates.csv` 和 `backend/app/benchmark/reference_rate_engine.py` 提供参考利率样例和计算逻辑：
+
+- 产品收益减同期限存款利率。
+- 产品收益减美债利率。
+- 系列规模加权收益减参考利率。
+- 产品业绩比较基准上下限与参考利率对比。
+- benchmark excess。
+
+演示数据必须标记为 `source_type=synthetic_reference_rates` 或 `manual_upload`。项目不会声称实时抓取官方利率；只有真实 adapter 可用且记录 source metadata 时，才会把来源标记为官方披露或公开市场报告。
+
+## Skill-Harness Runtime
+
+Skill-Harness 将业务流程从“文件配置”升级为可追踪运行时：
+
+```mermaid
+flowchart LR
+  Task["User Task"] --> Planner["select_skills"]
+  Planner --> Execute["execute skills"]
+  Execute --> Harness["harness_validate"]
+  Harness --> DPO["dpo_report_skill"]
+  DPO --> Verifier["verifier_skill"]
+  Verifier --> Guardrail["guardrail"]
+  Guardrail --> Trace["skill trace / evidence lineage"]
+```
+
+每个 skill call 输出：
+
+```text
+skill_call_id, skill_name, input, output, timeout_seconds, max_calls,
+risk_level, latency_ms, success, evidence_ids, harness_result
+```
+
+`config/harness_rules.yaml` 覆盖：
+
+- forbidden wording
+- required fields by report type
+- required evidence rules
+- numeric consistency rules
+- source boundary rules
+- report style rules
+
+前端审计追踪页的 `Skill / Harness` tab 展示 selected skills、每个 skill 的 input/output/latency/status、harness pass/fail、failed rules、evidence_id 和 source boundary check。
+
+## DPO 主线
+
+本项目把 DPO 放在报告与规划偏好对齐层，而不是让模型负责算数。
+
+- Planner DPO：输入 user task、dataset_scope、available skills、data quality status，输出 selected_skills、required_evidence、verifier_required、guardrail_required。
+- Report Writer DPO：输入 deterministic tool outputs，输出周报摘要、系列对比解释、竞品对标解释、基准利率对比解释。
+- Hard negatives：覆盖数值幻觉、分位误读、证据缺失、合规违规、风险提示缺失、任务错配、数据源夸大、错误系列归类原因。
+
+默认不加载真实 adapter：
+
+```text
+training_status = not_trained
+adapter_available = false
+```
+
+前端会显示：“当前为 DPO preference eval demo，未加载真实模型权重。”
+
+DPO 不用于生成投资建议。所有收益、回撤、分位、Sharpe、Calmar、benchmark excess 等数字仍由 deterministic tools 计算或从 tool output 引用，并进入 Verifier / Guardrail。
 
 ## Data Source Strategy
 
@@ -30,6 +125,7 @@ Live demo: https://frontend-five-delta-35.vercel.app
 - `public_market_report`：公开行业报告中的市场级统计，不用于产品级分位排名。
 - `manual_upload`：用户上传的 CSV/XLSX/PPT/PDF 样本，先做 schema preview 和质量检查。
 - `synthetic_weekly_snapshot`：基于历史分布和公开市场统计生成的模拟周报。
+- `synthetic_reference_rates`：基准利率演示样例，不代表官方实时利率。
 
 所有治理后的记录都要求包含：
 
@@ -38,15 +134,29 @@ source_type, source_name, source_url_or_file, fetched_at, as_of_date,
 staleness_days, confidence_level, evidence_id, parser_version
 ```
 
-## 前端工作台
+## Architecture Inspiration
 
-顶层导航收敛为三页：
+项目参考金融 AI Agent 的常见工程分层，但只实现投研辅助与周报生成，不做交易执行：
 
-- 产品周报：周报概览、导入周报/净值数据、需关注产品、规模变化、基准未达标、市场发行。
-- 产品对标：竞品对标、全市场分位、渠道对标、同类绩优产品、5只产品净值对比。
-- 审计追踪：工具调用、数据溯源、报告质检、AI 报告校准、质量评估。
+- FinRobot 风格：把 Financial AI Agents、LLM Algorithms、DataOps/LLMOps、多源 LLM 工作流拆成可审计模块。
+- FinGPT 风格：按 Data Source、Data Engineering、LLMs、Applications 分层，强调数据治理先于模型输出。
+- RAG for finance：上传文档或表格后保留 metadata、schema mapping、structured output 和 evidence lineage。
+- FinMem 风格：短期上传上下文、中期产品系列归类状态、长期 manual override memory。
 
-Vercel 无后端时读取 `frontend/public/demo-data/`：
+边界说明：
+
+- 不做交易执行。
+- 不生成买入、卖出、持有或推荐配置结论。
+- 不声称拥有真实全市场实时产品级数据。
+- demo 使用 synthetic/manual_upload 数据，并显式标记 `source_type` 与 `evidence_id`。
+
+## Vercel 与本地后端
+
+- Vercel 静态 demo：无后端时读取 `frontend/public/demo-data/`，上传文件只在浏览器本地解析并存入 session data store。
+- 本地后端模式：设置 `VITE_WEALTH_AGENT_API_BASE=http://127.0.0.1:8000`，可调用 FastAPI 的周报、对标、上传预览、数据新鲜度、产品系列、参考利率和审计接口。
+- 如部署后端，设置 `VITE_WEALTH_AGENT_API_BASE=https://your-backend.example.com`；后端 CORS 使用 `ALLOWED_ORIGINS`。
+
+静态 fallback 主要文件：
 
 - `weekly_dates.json`
 - `weekly_summary_2025-01-31.json`
@@ -56,6 +166,7 @@ Vercel 无后端时读取 `frontend/public/demo-data/`：
 - `weekly_products_*.json`
 - `peer_benchmark.json`
 - `product_details.json`
+- `reference_rates.json`
 - `dpo_eval.json`
 
 ## 后端结构
@@ -65,37 +176,28 @@ flowchart LR
   UI["产品周报 / 产品对标 / 审计追踪"] --> API["FastAPI"]
   API --> Upload["manual upload / schema detector"]
   API --> Weekly["weekly_report parsers + metrics"]
-  API --> Compare["nav_compare five_product_compare"]
-  Weekly --> Skills["Skill Registry"]
+  API --> Taxonomy["product_taxonomy"]
+  API --> RefRate["reference_rate_engine"]
+  API --> Compare["nav_compare / five_product_compare"]
+  Upload --> Skills["Skill Registry + Executor"]
+  Weekly --> Skills
+  Taxonomy --> Skills
   Compare --> Skills
-  Skills --> DPO["Planner DPO + Report Writer DPO"]
+  Skills --> Harness["Harness Validator"]
+  Harness --> DPO["Planner DPO + Report Writer DPO"]
   DPO --> Verifier["Verifier"]
   Verifier --> Guardrail["Guardrail"]
-  Guardrail --> Trace["tool_call_id / evidence_id / lineage"]
+  Guardrail --> Trace["tool_call_id / skill_call_id / evidence_id / lineage"]
 ```
 
 新增工程化模块：
 
 - `backend/app/importers/`：CSV/XLSX schema detector、产品合集、净值序列、同业对标和周报导入。
-- `backend/app/nav_compare/`：净值归一化、收益/波动/回撤/Sharpe/Calmar/benchmark excess 计算、5只产品对比。
-- `backend/app/skills/`：data upload、weekly summary、peer benchmark、channel benchmark、nav compare、DPO report、Verifier skill registry。
-- `config/harness_rules.yaml`：禁用措辞、必需字段、证据规则、数值一致性、数据源边界和周报文风规则。
-
-## DPO 主线
-
-项目实现两类 DPO preference data：
-
-- Planner DPO：给定用户任务、产品上下文、可用工具和数据源状态，偏好正确工具选择、正确对标维度、必须进入 Verifier/Guardrail 的结构化计划。
-- Report Writer DPO：给定 tool outputs，偏好数字一致、证据充分、风险提示完整、无投资建议措辞、符合资管周报文风的摘要。
-
-默认不加载真实 adapter：
-
-```text
-training_status = not_trained
-adapter_available = false
-```
-
-前端会显示：“当前为 DPO preference eval demo，未加载真实模型权重。”
+- `backend/app/product_taxonomy/`：产品系列规则、自动分类、手工修正、系列业绩和系列对比。
+- `backend/app/benchmark/`：参考利率加载和产品/系列 benchmark excess 计算。
+- `backend/app/nav_compare/`：净值归一化、收益/波动/回撤/Sharpe/Calmar/benchmark excess 计算、5 只产品对比。
+- `backend/app/skills/`：data upload、weekly summary、peer benchmark、channel benchmark、nav compare、DPO report、Verifier、skill executor、harness validator、skill trace。
+- `backend/app/dpo/`：Planner preference builder、Report preference builder、hard negative generator、DPO/SFT dry-run train scripts 和 alignment eval。
 
 ## 运行
 
@@ -125,12 +227,6 @@ npm run dev
 
 打开 `http://127.0.0.1:5173`。
 
-## Vercel 与本地后端
-
-- Vercel 静态 demo：无后端时读取 `frontend/public/demo-data/`，上传文件只在浏览器本地解析并存入 localStorage/session data store。
-- 本地后端模式：设置 `VITE_WEALTH_AGENT_API_BASE=http://127.0.0.1:8000`，可调用 FastAPI 的周报、对标、上传预览、数据新鲜度和审计接口。
-- 如部署后端，设置 `VITE_WEALTH_AGENT_API_BASE=https://your-backend.example.com`；后端 CORS 使用 `ALLOWED_ORIGINS`。
-
 ## API 快速入口
 
 ```text
@@ -143,6 +239,13 @@ POST /api/weekly-report/generate
 POST /api/benchmark/peer
 POST /api/benchmark/channel
 POST /api/benchmark/top-peers
+GET  /api/product-taxonomy/classify
+POST /api/product-taxonomy/override
+GET  /api/product-taxonomy/series-performance
+GET  /api/product-taxonomy/series-compare
+GET  /api/reference-rates
+POST /api/benchmark/reference-rate
+POST /api/skills/run
 POST /api/data/upload
 GET  /api/data/upload/{upload_id}/schema-preview
 POST /api/data/upload/{upload_id}/confirm-mapping
@@ -154,17 +257,20 @@ GET  /api/data/lineage/{evidence_id}
 ## 验证
 
 ```bash
-npm run build
+cd frontend && npm run build
 python -m compileall backend scripts eval
 pytest
 python eval/run_eval.py
+cd frontend && npm run test:smoke
 ```
 
 ## 简历 Bullet
 
-- 构建 DPO-aligned 周报型资管产品研究 Agent，支持上传周报/净值/同业对标 CSV 与 Excel，自动完成字段识别、质量检查、证据编号生成，并生成产品周报、竞品对标和全市场分位报告。
+- 构建 DPO-aligned 周报型资管产品研究 Agent，支持上传周报/净值/同业对标/参考利率 CSV 与 Excel，自动完成 dataset_scope 识别、字段映射、质量检查、证据编号生成，并生成产品周报、竞品对标和全市场分位报告。
 - 将实习中的产品合集、净值对比、五只产品业绩比较和数据月报流程工程化，设计 5 只产品净值对比模块，计算收益率、年化波动率、最大回撤、Sharpe、Calmar 和 benchmark excess，并支持起点归一化净值曲线展示。
-- 设计 DPO Planner 与 DPO Report Writer 偏好数据，围绕工具调用计划、数字一致性、证据覆盖、风险提示、分位数解释和禁用投资建议措辞构造 hard negatives，并通过 Verifier 自动复核报告质量。
+- 实现产品系列自动归类与手工修正机制，支持系列业绩聚合、系列间收益风险对比、基准利率对比和 manual override trace，保证人工调整可复核、可追踪。
+- 设计 Skill-Harness Runtime，将上传、周报摘要、竞品对标、渠道对标、净值对比、DPO 报告和 Verifier 封装为可审计 skill call，并通过 harness 规则校验证据覆盖、数值一致性、来源边界和合规措辞。
+- 设计 DPO Planner 与 DPO Report Writer 偏好数据，围绕工具调用计划、数字一致性、证据覆盖、风险提示、分位数解释、系列归类原因和禁用投资建议措辞构造 hard negatives，并通过 Verifier 自动复核报告质量。
 
 ## 附录：早期股票研究 Demo
 

@@ -1,0 +1,10 @@
+rate_id,as_of_date,currency,rate_type,tenor_days,tenor_label,annual_yield,source_type,source_name,confidence_level,evidence_id
+USD_TREASURY_3M,2025-04-04,USD,us_treasury,90,3M,0.0440,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_usd_3m_20250404
+USD_TREASURY_6M,2025-04-04,USD,us_treasury,180,6M,0.0425,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_usd_6m_20250404
+USD_TREASURY_1Y,2025-04-04,USD,us_treasury,360,1Y,0.0410,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_usd_1y_20250404
+RMB_DEPOSIT_3M,2025-04-04,CNY,deposit,90,3M,0.0135,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_rmb_3m_20250404
+RMB_DEPOSIT_6M,2025-04-04,CNY,deposit,180,6M,0.0155,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_rmb_6m_20250404
+RMB_DEPOSIT_1Y,2025-04-04,CNY,deposit,360,1Y,0.0175,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_rmb_1y_20250404
+RMB_DEPOSIT_360D,2025-04-04,CNY,deposit,360,360D,0.0170,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_rmb_360d_20250404
+CGB_1Y,2025-04-04,CNY,gov_bond,360,1Y,0.0168,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_cgb_1y_20250404
+NCD_AAA_3M,2025-04-04,CNY,ncd,90,3M,0.0182,synthetic_reference_rates,Synthetic reference rates,medium,ev_ref_rate_ncd_3m_20250404

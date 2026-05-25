@@ -24,6 +24,12 @@ from backend.app.data_sources.quality.freshness_checker import freshness_report
 from backend.app.data_sources.quality.lineage_builder import lineage_for_evidence
 from backend.app.data_sources.source_registry import list_data_sources, refresh_demo
 from backend.app.evaluation import run_evaluation
+from backend.app.benchmark.reference_rate_engine import compare_product_to_reference, load_reference_rates
+from backend.app.product_taxonomy.manual_override_store import create_override, list_overrides
+from backend.app.product_taxonomy.series_classifier import classify_products
+from backend.app.product_taxonomy.series_compare import compare_series
+from backend.app.product_taxonomy.series_performance import compute_series_performance
+from backend.app.skills.skill_executor import execute_skill_harness
 from backend.app.storage import (
     add_human_review,
     get_latest_report,
@@ -126,6 +132,7 @@ class ReviewRequest(BaseModel):
 
 class DataUploadRequest(BaseModel):
     file_name: str
+    dataset_scope: str = Field(..., description="own_company/full_market/reference_rates")
     content_base64: str | None = None
     text: str | None = None
     target_schema: str = "product_weekly_snapshot"
@@ -141,6 +148,20 @@ class RefreshDemoRequest(BaseModel):
     base_date: str | None = None
     seed: int = 20260709
     n_products: int = 96
+
+
+class ManualSeriesOverrideRequest(BaseModel):
+    product_code: str
+    product_name: str | None = ""
+    old_series_id: str | None = ""
+    new_series_id: str
+    action_type: str = "move"
+    reason: str = "manual correction"
+
+
+class SkillHarnessRequest(BaseModel):
+    user_task: str = "生成产品周报"
+    task_payload: dict[str, Any] = Field(default_factory=dict)
 
 
 def _write_upload_index() -> None:
@@ -190,6 +211,21 @@ def _preview_columns(preview: dict[str, Any]) -> list[str]:
     return []
 
 
+DATASET_SCOPE_SCHEMAS = {
+    "own_company": {"product_weekly_snapshot", "product_nav_weekly", "product_scale_history", "product_benchmark_status"},
+    "full_market": {"peer_product_universe", "peer_product_metrics", "channel_peer_universe", "top_peer_products"},
+    "reference_rates": {"reference_rates"},
+}
+
+
+def _validate_dataset_scope(dataset_scope: str, target_schema: str) -> None:
+    allowed = DATASET_SCOPE_SCHEMAS.get(dataset_scope)
+    if allowed is None:
+        raise HTTPException(status_code=422, detail="dataset_scope must be own_company, full_market, or reference_rates")
+    if target_schema not in allowed:
+        raise HTTPException(status_code=422, detail=f"target_schema {target_schema} is not allowed for dataset_scope {dataset_scope}")
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {
@@ -226,21 +262,37 @@ def post_data_refresh_demo(req: RefreshDemoRequest | None = None) -> dict[str, A
 
 @app.post("/api/data/upload")
 def post_data_upload(req: DataUploadRequest) -> dict[str, Any]:
+    _validate_dataset_scope(req.dataset_scope, req.target_schema)
     upload_id = f"upload_{uuid.uuid4().hex[:12]}"
     preview = _preview_upload(req)
     columns = _preview_columns(preview)
     mapping = suggest_mapping(columns, req.target_schema)
     record = {
         "upload_id": upload_id,
+        "dataset_scope": req.dataset_scope,
+        "source_type": "manual_upload",
         "file_name": req.file_name,
         "target_schema": req.target_schema,
+        "parser_version": "backend_upload_parser.v2",
+        "as_of_date": None,
+        "evidence_id": f"ev_upload_{upload_id}",
         "parser_status": preview.get("parser_status"),
         "schema_preview": preview,
         "mapping_preview": mapping,
     }
     UPLOAD_STORE[upload_id] = record
     _write_upload_index()
-    return {"upload_id": upload_id, "parser_status": preview.get("parser_status"), "mapping_preview": mapping}
+    return {
+        "upload_id": upload_id,
+        "dataset_scope": req.dataset_scope,
+        "source_type": "manual_upload",
+        "file_name": req.file_name,
+        "parser_version": "backend_upload_parser.v2",
+        "as_of_date": None,
+        "evidence_id": f"ev_upload_{upload_id}",
+        "parser_status": preview.get("parser_status"),
+        "mapping_preview": mapping,
+    }
 
 
 @app.get("/api/data/upload/{upload_id}/schema-preview")
@@ -250,6 +302,8 @@ def get_upload_schema_preview(upload_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="upload_id not found")
     return {
         "upload_id": upload_id,
+        "dataset_scope": record.get("dataset_scope"),
+        "source_type": record.get("source_type", "manual_upload"),
         "file_name": record["file_name"],
         "target_schema": record["target_schema"],
         "schema_preview": record["schema_preview"],
@@ -262,6 +316,7 @@ def post_upload_confirm_mapping(upload_id: str, req: ConfirmMappingRequest) -> d
     record = UPLOAD_STORE.get(upload_id)
     if record is None:
         raise HTTPException(status_code=404, detail="upload_id not found")
+    _validate_dataset_scope(record.get("dataset_scope", ""), req.target_schema)
     record["target_schema"] = req.target_schema
     record["confirmed_mapping"] = req.mapping
     record["mapping_confirmed"] = True
@@ -282,6 +337,8 @@ def get_upload_quality_report(upload_id: str) -> dict[str, Any]:
     mapping = record.get("mapping_preview", {})
     return {
         "upload_id": upload_id,
+        "dataset_scope": record.get("dataset_scope"),
+        "source_type": record.get("source_type", "manual_upload"),
         "parser_status": record.get("parser_status"),
         "target_schema": record.get("target_schema"),
         "missing_required_fields": mapping.get("missing_required_fields", []),
@@ -495,6 +552,63 @@ def post_benchmark_channel(req: ChannelBenchmarkRequest) -> dict[str, Any]:
 @app.post("/api/benchmark/top-peers")
 def post_benchmark_top_peers(req: TopPeersRequest) -> dict[str, Any]:
     return top_peers(product_type=req.product_type, report_date=req.report_date, limit=req.limit)
+
+
+@app.get("/api/product-taxonomy/classify")
+def get_product_taxonomy_classify(report_date: str | None = None) -> dict[str, Any]:
+    return classify_products(report_date=report_date)
+
+
+@app.post("/api/product-taxonomy/override")
+def post_product_taxonomy_override(req: ManualSeriesOverrideRequest) -> dict[str, Any]:
+    override = create_override(
+        product_code=req.product_code,
+        product_name=req.product_name or "",
+        old_series_id=req.old_series_id or "",
+        new_series_id=req.new_series_id,
+        action_type=req.action_type,
+        reason=req.reason,
+    )
+    performance = compute_series_performance()
+    return {"override": override, "series_performance": performance}
+
+
+@app.get("/api/product-taxonomy/overrides")
+def get_product_taxonomy_overrides() -> dict[str, Any]:
+    rows = list_overrides()
+    return {"count": len(rows), "overrides": rows}
+
+
+@app.get("/api/product-taxonomy/series-performance")
+def get_product_taxonomy_series_performance(report_date: str | None = None) -> dict[str, Any]:
+    return compute_series_performance(report_date=report_date)
+
+
+@app.get("/api/product-taxonomy/series-compare")
+def get_product_taxonomy_series_compare(series_ids: str | None = None, report_date: str | None = None) -> dict[str, Any]:
+    ids = [item.strip() for item in series_ids.split(",") if item.strip()] if series_ids else None
+    return compare_series(ids, report_date=report_date)
+
+
+@app.get("/api/reference-rates")
+def get_reference_rates(as_of_date: str | None = None) -> dict[str, Any]:
+    rates = load_reference_rates(as_of_date)
+    return {
+        "count": int(len(rates)),
+        "source_type": "synthetic_reference_rates",
+        "rates": _frame_records(rates),
+    }
+
+
+@app.post("/api/benchmark/reference-rate")
+def post_reference_rate_benchmark(payload: dict[str, Any]) -> dict[str, Any]:
+    product = payload.get("product") or {}
+    return compare_product_to_reference(product, payload.get("as_of_date"))
+
+
+@app.post("/api/skills/run")
+def post_skill_harness(req: SkillHarnessRequest) -> dict[str, Any]:
+    return execute_skill_harness(req.user_task, req.task_payload)
 
 
 @app.post("/api/eval/run")

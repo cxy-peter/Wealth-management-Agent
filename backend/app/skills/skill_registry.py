@@ -20,7 +20,7 @@ class SkillSpec:
 SKILLS = {
     "data_upload_skill": SkillSpec(
         "data_upload_skill",
-        {"file_type": "csv|xlsx|pptx", "target_schema": "string"},
+        {"file_type": "csv|xlsx|pptx", "dataset_scope": "own_company|full_market|reference_rates", "target_schema": "string"},
         {"upload_id": "string", "quality_report": "object", "evidence_ids": "array"},
         risk_level="medium",
     ),
@@ -67,6 +67,10 @@ def select_skills(user_task: str) -> list[str]:
     task = str(user_task).lower()
     if "上传" in task or "upload" in task:
         return ["data_upload_skill", "verifier_skill"]
+    if "利率" in task or "reference" in task:
+        return ["weekly_summary_skill", "verifier_skill"]
+    if "系列" in task or "series" in task:
+        return ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
     if "渠道" in task or "channel" in task:
         return ["channel_benchmark_skill", "verifier_skill"]
     if "竞品" in task or "对标" in task or "benchmark" in task:

@@ -22,7 +22,7 @@ class DPOPlannerMetadata:
 REQUIRED_PLAN_KEYS = {
     "plan_type",
     "steps",
-    "required_tools",
+    "selected_skills",
     "required_evidence",
     "verifier_required",
     "guardrail_required",
@@ -30,6 +30,13 @@ REQUIRED_PLAN_KEYS = {
 
 
 class DPOPlannerAdapter:
+    """DPO-capable planner adapter with deterministic fallback.
+
+    The fallback aligns planning preferences without loading model weights. It
+    selects skills and review gates; metric calculation remains in deterministic
+    tools.
+    """
+
     def __init__(self, adapter_path: str | None = None, base_model: str | None = None) -> None:
         self.adapter_path = adapter_path or os.getenv("DPO_PLANNER_ADAPTER_PATH", "")
         self.base_model = base_model or os.getenv("DPO_PLANNER_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
@@ -46,39 +53,55 @@ class DPOPlannerAdapter:
     def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
         missing = sorted(REQUIRED_PLAN_KEYS - set(plan))
         type_errors = []
-        if "steps" in plan and not isinstance(plan["steps"], list):
-            type_errors.append("steps must be list")
-        if "required_tools" in plan and not isinstance(plan["required_tools"], list):
-            type_errors.append("required_tools must be list")
+        for key in ["steps", "selected_skills", "required_evidence"]:
+            if key in plan and not isinstance(plan[key], list):
+                type_errors.append(f"{key} must be list")
         return {"valid": not missing and not type_errors, "missing_keys": missing, "type_errors": type_errors}
 
     def generate_plan(self, prompt: dict[str, Any]) -> dict[str, Any]:
         task = str(prompt.get("user_task", "")).lower()
-        tools = set(prompt.get("available_tools", []))
+        dataset_scope = str(prompt.get("dataset_scope") or "")
+        available_skills = set(prompt.get("available_skills") or [])
+        data_quality = prompt.get("data_quality_status") or {}
+
         plan_type = "weekly_report"
-        required = {"load_weekly_snapshot", "weekly_report_verifier", "guardrail_check"}
+        selected = ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
+        if "上传" in task or "upload" in task or dataset_scope:
+            plan_type = "data_upload"
+            selected = ["data_upload_skill", "verifier_skill"]
         if "渠道" in task or "channel" in task:
             plan_type = "channel_benchmark"
-            required.add("channel_benchmark")
-        if "竞品" in task or "peer" in task:
+            selected = ["channel_benchmark_skill", "verifier_skill"]
+        if "竞品" in task or "对标" in task or "benchmark" in task:
             plan_type = "peer_benchmark"
-            required.add("peer_benchmark")
-        if "分位" in task or "percentile" in task:
-            required.add("calculate_percentile_metrics")
-        if "风险" in task or prompt.get("product_context", {}).get("benchmark_status") == "below_lower":
-            required.add("classify_risk_events")
+            selected = ["peer_benchmark_skill", "nav_compare_skill", "verifier_skill"]
+        if "系列" in task or "series" in task:
+            plan_type = "series_compare"
+            selected = ["weekly_summary_skill", "dpo_report_skill", "verifier_skill"]
+        if "利率" in task or dataset_scope == "reference_rates":
+            plan_type = "reference_rate_benchmark"
+            selected = ["data_upload_skill", "verifier_skill"] if dataset_scope == "reference_rates" else ["weekly_summary_skill", "verifier_skill"]
+
+        if available_skills:
+            selected = [skill for skill in selected if skill in available_skills]
+            if "verifier_skill" in available_skills and "verifier_skill" not in selected:
+                selected.append("verifier_skill")
+
+        human_review_required = bool(data_quality.get("missing_required_fields") or data_quality.get("forbidden_wording_hit"))
         plan = {
             "plan_type": plan_type,
             "steps": [
-                "读取周报快照、同业池和数据源状态",
-                "调用与任务匹配的指标/对标工具",
-                "生成带 evidence_id/tool_call_id 的摘要",
-                "进入 verifier 和 guardrail",
+                "读取 dataset_scope 与数据质量状态",
+                "选择与任务匹配的 skills",
+                "要求所有关键结论带 evidence_id",
+                "进入 verifier 与 guardrail"
             ],
-            "required_tools": sorted(tool for tool in required if not tools or tool in tools or tool in {"weekly_report_verifier", "guardrail_check"}),
-            "required_evidence": ["evidence_id", "tool_call_id", "source_type"],
+            "selected_skills": selected[:3],
+            "required_tools": selected[:3],
+            "required_evidence": ["evidence_id", "source_type", "dataset_scope"],
             "verifier_required": True,
             "guardrail_required": True,
+            "human_review_required": human_review_required,
         }
         validation = self.validate_plan(plan)
         return {
@@ -92,4 +115,3 @@ class DPOPlannerAdapter:
 
     def to_json(self, prompt: dict[str, Any]) -> str:
         return json.dumps(self.generate_plan(prompt), ensure_ascii=False)
-

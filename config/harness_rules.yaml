@@ -4,6 +4,11 @@ forbidden_wording:
   - 推荐配置
   - 保证收益
   - 确定上涨
+  - 收益稳定可期
+  - 买入
+  - 卖出
+  - 持有建议
+
 required_fields_by_report_type:
   weekly_report:
     - report_date
@@ -14,16 +19,31 @@ required_fields_by_report_type:
     - product_code
     - peer_count
     - market_percentile
+  series_compare:
+    - series_id
+    - total_scale_bn
+    - aum_weighted_return_3m
+  reference_rate_benchmark:
+    - rate_id
+    - annual_yield
+    - evidence_id
+
 required_evidence_rules:
   - every_numeric_claim_requires_evidence_id
+  - every_skill_output_requires_evidence_id
   - every_tool_output_requires_tool_call_id
+
 numeric_consistency_rules:
   - scale_wow_bn_equals_current_minus_previous
   - return_and_drawdown_from_nav_series
   - percentile_from_peer_universe_rank
+  - dpo_must_not_recalculate_metrics
+
 source_boundary_rules:
   - synthetic_must_be_labeled_demo
+  - manual_upload_must_keep_dataset_scope
   - official_disclosure_failure_cannot_be_called_realtime
+
 report_style_rules:
   - weekly_report_tone
   - concise_risk_warning

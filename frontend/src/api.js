@@ -1,6 +1,6 @@
 const API_BASE = (import.meta.env.VITE_WEALTH_AGENT_API_BASE || '').replace(/\/$/, '');
 
-import { applySessionProducts, applySessionSummary } from './sessionDataStore.js';
+import { applySessionPeerBenchmark, applySessionProducts, applySessionSummary, applySessionTopPeers } from './sessionDataStore.js';
 
 async function getJson(path) {
   if (!API_BASE) {
@@ -138,7 +138,8 @@ export function runPeerBenchmark(payload = {}) {
       }
     }
     const peers = await getDemoJson('peer_benchmark.json');
-    return peers.by_product?.[payload.product_code] || peers.by_product?.[peers.default_product_code];
+    const base = peers.by_product?.[payload.product_code] || peers.by_product?.[peers.default_product_code];
+    return applySessionPeerBenchmark(base, payload.product_code);
   });
 }
 
@@ -147,7 +148,39 @@ export function runChannelBenchmark(payload = {}) {
 }
 
 export function runTopPeers(payload = {}) {
-  return postJson('/api/benchmark/top-peers', payload).catch(() => getDemoJson('top_peers.json'));
+  return postJson('/api/benchmark/top-peers', payload).catch(async () => applySessionTopPeers(await getDemoJson('top_peers.json')));
+}
+
+export async function getReferenceRates() {
+  try {
+    return await getJson('/api/reference-rates');
+  } catch {
+    return getDemoJson('reference_rates.json').catch(() => ({ count: 0, rates: [] }));
+  }
+}
+
+export async function runSkillHarness(payload = {}) {
+  try {
+    return await postJson('/api/skills/run', payload);
+  } catch {
+    return {
+      user_task: payload.user_task || '生成产品周报',
+      selected_skills: ['weekly_summary_skill', 'dpo_report_skill', 'verifier_skill'],
+      skill_calls: [
+        {
+          skill_call_id: 'sc_static_weekly_summary',
+          skill_name: 'weekly_summary_skill',
+          input: payload.task_payload || {},
+          output: { evidence_ids: ['ev_snapshot_WP0001_20250404'] },
+          latency_ms: 12.4,
+          success: true,
+          evidence_ids: ['ev_snapshot_WP0001_20250404'],
+          harness_result: { pass: true, failed_rules: [] }
+        }
+      ],
+      harness_result: { pass: true, failed_rules: [], source_boundary_check: 'pass' }
+    };
+  }
 }
 
 export async function getProducts(filters = {}) {

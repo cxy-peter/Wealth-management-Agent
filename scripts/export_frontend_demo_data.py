@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from backend.app.dpo.eval_dpo_agent_alignment import RESULT_PATH as DPO_EVAL_PATH, run_eval as run_dpo_eval  # noqa: E402
+from backend.app.benchmark.reference_rate_engine import load_reference_rates  # noqa: E402
 from backend.app.weekly_report.generators.benchmark_report_generator import (  # noqa: E402
     channel_benchmark,
     peer_benchmark,
@@ -285,6 +286,15 @@ def main() -> None:
     _write("channel_benchmark.json", channel_payload)
     _write("top_peers.json", top_payload)
     _write("dpo_eval.json", dpo_payload)
+    reference_rates = load_reference_rates(LATEST_DATE)
+    _write(
+        "reference_rates.json",
+        {
+            "count": int(len(reference_rates)),
+            "source_type": "synthetic_reference_rates",
+            "rates": reference_rates.to_dict(orient="records") if not reference_rates.empty else [],
+        },
+    )
 
     print(
         json.dumps(

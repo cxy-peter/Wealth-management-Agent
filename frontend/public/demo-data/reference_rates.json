@@ -1,0 +1,123 @@
+{
+  "count": 9,
+  "source_type": "synthetic_reference_rates",
+  "rates": [
+    {
+      "rate_id": "USD_TREASURY_3M",
+      "as_of_date": "2025-04-04",
+      "currency": "USD",
+      "rate_type": "us_treasury",
+      "tenor_days": 90,
+      "tenor_label": "3M",
+      "annual_yield": 0.044,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_usd_3m_20250404"
+    },
+    {
+      "rate_id": "USD_TREASURY_6M",
+      "as_of_date": "2025-04-04",
+      "currency": "USD",
+      "rate_type": "us_treasury",
+      "tenor_days": 180,
+      "tenor_label": "6M",
+      "annual_yield": 0.0425,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_usd_6m_20250404"
+    },
+    {
+      "rate_id": "USD_TREASURY_1Y",
+      "as_of_date": "2025-04-04",
+      "currency": "USD",
+      "rate_type": "us_treasury",
+      "tenor_days": 360,
+      "tenor_label": "1Y",
+      "annual_yield": 0.041,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_usd_1y_20250404"
+    },
+    {
+      "rate_id": "RMB_DEPOSIT_3M",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "deposit",
+      "tenor_days": 90,
+      "tenor_label": "3M",
+      "annual_yield": 0.0135,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_rmb_3m_20250404"
+    },
+    {
+      "rate_id": "RMB_DEPOSIT_6M",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "deposit",
+      "tenor_days": 180,
+      "tenor_label": "6M",
+      "annual_yield": 0.0155,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_rmb_6m_20250404"
+    },
+    {
+      "rate_id": "RMB_DEPOSIT_1Y",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "deposit",
+      "tenor_days": 360,
+      "tenor_label": "1Y",
+      "annual_yield": 0.0175,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_rmb_1y_20250404"
+    },
+    {
+      "rate_id": "RMB_DEPOSIT_360D",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "deposit",
+      "tenor_days": 360,
+      "tenor_label": "360D",
+      "annual_yield": 0.017,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_rmb_360d_20250404"
+    },
+    {
+      "rate_id": "CGB_1Y",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "gov_bond",
+      "tenor_days": 360,
+      "tenor_label": "1Y",
+      "annual_yield": 0.0168,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_cgb_1y_20250404"
+    },
+    {
+      "rate_id": "NCD_AAA_3M",
+      "as_of_date": "2025-04-04",
+      "currency": "CNY",
+      "rate_type": "ncd",
+      "tenor_days": 90,
+      "tenor_label": "3M",
+      "annual_yield": 0.0182,
+      "source_type": "synthetic_reference_rates",
+      "source_name": "Synthetic reference rates",
+      "confidence_level": "medium",
+      "evidence_id": "ev_ref_rate_ncd_3m_20250404"
+    }
+  ]
+}

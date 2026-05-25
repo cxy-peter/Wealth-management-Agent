@@ -1,9 +1,14 @@
 {
   "uploads": [
     {
-      "upload_id": "upload_d481c3e21aba",
+      "upload_id": "upload_b6e413d58d72",
+      "dataset_scope": "own_company",
+      "source_type": "manual_upload",
       "file_name": "weekly.csv",
       "target_schema": "product_weekly_snapshot",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_b6e413d58d72",
       "parser_status": "parsed",
       "schema_preview": {
         "parser_status": "parsed",
@@ -86,6 +91,189 @@
           "sharpe",
           "benchmark_status"
         ],
+        "missing_required_fields": [],
+        "mapping_status": "pass"
+      }
+    },
+    {
+      "upload_id": "upload_226f525f116d",
+      "dataset_scope": "own_company",
+      "source_type": "manual_upload",
+      "file_name": "own.csv",
+      "target_schema": "product_weekly_snapshot",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_226f525f116d",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "report_date",
+              "product_code",
+              "product_name",
+              "product_type",
+              "channel",
+              "risk_level"
+            ],
+            "sample_rows": [
+              {
+                "report_date": "2025-04-04",
+                "product_code": "WPX101",
+                "product_name": "稳健添利90天持有期A",
+                "product_type": "纯固收",
+                "channel": "个金",
+                "risk_level": "R2"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "product_weekly_snapshot",
+        "mapping": {
+          "report_date": "report_date",
+          "product_code": "product_code",
+          "product_name": "product_name",
+          "product_type": "product_type",
+          "channel": "channel",
+          "risk_level": "risk_level"
+        },
+        "required_fields": [
+          "report_date",
+          "product_code",
+          "product_name",
+          "product_type",
+          "channel",
+          "risk_level",
+          "product_scale_bn",
+          "scale_wow_bn",
+          "scale_mom_bn",
+          "latest_nav",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "benchmark_status"
+        ],
+        "missing_required_fields": [
+          "product_scale_bn",
+          "scale_wow_bn",
+          "scale_mom_bn",
+          "latest_nav",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "benchmark_status"
+        ],
+        "mapping_status": "needs_confirmation"
+      }
+    },
+    {
+      "upload_id": "upload_75537c9df22d",
+      "dataset_scope": "full_market",
+      "source_type": "manual_upload",
+      "file_name": "peer.csv",
+      "target_schema": "peer_product_metrics",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_75537c9df22d",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "peer_product_code",
+              "report_date",
+              "return_3m"
+            ],
+            "sample_rows": [
+              {
+                "peer_product_code": "PRX001",
+                "report_date": "2025-04-04",
+                "return_3m": "0.012"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "peer_product_metrics",
+        "mapping": {
+          "peer_product_code": "peer_product_code",
+          "report_date": "report_date",
+          "return_3m": "return_3m"
+        },
+        "required_fields": [
+          "peer_product_code",
+          "report_date",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "return_percentile",
+          "drawdown_percentile"
+        ],
+        "missing_required_fields": [
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "return_percentile",
+          "drawdown_percentile"
+        ],
+        "mapping_status": "needs_confirmation"
+      }
+    },
+    {
+      "upload_id": "upload_f6bcf80bd43d",
+      "dataset_scope": "reference_rates",
+      "source_type": "manual_upload",
+      "file_name": "rates.csv",
+      "target_schema": "reference_rates",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_f6bcf80bd43d",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "rate_id",
+              "as_of_date",
+              "currency",
+              "rate_type",
+              "tenor_days",
+              "tenor_label",
+              "annual_yield"
+            ],
+            "sample_rows": [
+              {
+                "rate_id": "RMB_TEST_3M",
+                "as_of_date": "2025-04-04",
+                "currency": "CNY",
+                "rate_type": "deposit",
+                "tenor_days": "90",
+                "tenor_label": "3M",
+                "annual_yield": "0.015"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "reference_rates",
+        "mapping": {},
+        "required_fields": [],
         "missing_required_fields": [],
         "mapping_status": "pass"
       }

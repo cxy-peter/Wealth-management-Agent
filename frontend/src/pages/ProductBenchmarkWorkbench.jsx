@@ -238,7 +238,7 @@ const PeerTable = memo(function PeerTable({ rows }) {
           {(rows || []).map((row) => (
             <tr key={row.peer_product_code || row.product_code}>
               <td className="sticky-col">{row.issuer_name || row.issuer_type || '模拟发行机构'}</td>
-              <td className="sticky-col second"><strong>{row.peer_product_name || row.product_name}</strong><span>{row.peer_product_code || row.product_code}</span></td>
+              <td className="sticky-col second"><strong className="peer-product-name">{row.peer_product_name || row.product_name}</strong><span>{row.peer_product_code || row.product_code}</span></td>
               <td>{row.benchmark || '2.00%-4.00%'}</td><td>{pct(row.total_fee_rate || row.fee_rate, 2)}</td><td>{row.inception_date || '-'}</td><td>{num(row.latest_nav)}</td><td>{signedPct(row.since_inception_annual_return)}</td><td>{signedPct(row.return_3m_annualized || Number(row.return_3m || 0) * 4)}</td><td>{signedPct(row.return_1m_annualized || Number(row.return_1m || 0) * 12)}</td><td>{pct(row.volatility)}</td><td>{pct(row.max_drawdown)}</td><td>{num(row.sharpe)}</td>
             </tr>
           ))}
@@ -303,7 +303,7 @@ function SmallPeerList({ title, rows }) {
       <div className="section-title table-title"><span>{title}</span><strong>{rows.length}</strong></div>
       <table>
         <thead><tr><th>产品</th><th>3M收益</th><th>回撤</th><th>Sharpe</th></tr></thead>
-        <tbody>{rows.map((row) => <tr key={row.peer_product_code}><td>{row.peer_product_name}</td><td>{pct(row.return_3m)}</td><td>{pct(row.max_drawdown)}</td><td>{num(row.sharpe)}</td></tr>)}</tbody>
+        <tbody>{rows.map((row) => <tr key={row.peer_product_code}><td><span className="peer-product-name">{row.peer_product_name}</span></td><td>{pct(row.return_3m)}</td><td>{pct(row.max_drawdown)}</td><td>{num(row.sharpe)}</td></tr>)}</tbody>
       </table>
     </div>
   );
@@ -335,9 +335,9 @@ const TopPeersTable = memo(function TopPeersTable({ topPeers }) {
       <table>
         <thead><tr><th className="sticky-col">排名</th><th className="sticky-col second">发行机构</th><th>产品名称</th><th>近3个月收益</th><th>最大回撤</th><th>Sharpe</th><th>入选原因</th></tr></thead>
         <tbody>
-          {rows.map((row) => (
+          {rows.map((row, index) => (
             <tr key={row.peer_product_code}>
-              <td className="sticky-col">{row.rank}</td><td className="sticky-col second">{row.issuer_name || row.issuer_type || '模拟发行机构'}</td><td><strong>{row.peer_product_name || row.product_name}</strong><span>{row.peer_product_code}</span></td><td>{signedPct(row.return_3m)}</td><td>{pct(row.max_drawdown)}</td><td>{num(row.sharpe)}</td><td>{row.selection_reason || row.tracking_reason || '同类收益分位和风险调整指标靠前，用于周报跟踪样例。'}</td>
+              <td className="sticky-col">{row.global_rank || index + 1}</td><td className="sticky-col second">{row.issuer_name || row.issuer_type || '模拟发行机构'}</td><td><strong className="peer-product-name">{row.peer_product_name || row.product_name}</strong><span>{row.peer_product_code}</span></td><td>{signedPct(row.return_3m)}</td><td>{pct(row.max_drawdown)}</td><td>{num(row.sharpe)}</td><td>{row.selection_reason || row.tracking_reason || '同类收益分位和风险调整指标靠前，用于周报跟踪样例。'}</td>
             </tr>
           ))}
         </tbody>
@@ -487,6 +487,18 @@ export default function ProductBenchmarkWorkbench({ initialProductCode = 'WP0031
 
   const filteredProducts = useMemo(() => products.filter((item) => Object.entries(filters).every(([key, value]) => !value || key === 'report_date' || String(item[key] || '') === String(value))), [filters, products]);
 
+  useEffect(() => {
+    if (!products.length) return;
+    if (!filteredProducts.length) {
+      setSelectedCode('');
+      setDetail(null);
+      return;
+    }
+    if (selectedCode && filteredProducts.some((item) => item.product_code === selectedCode)) return;
+    loadPeer(filteredProducts[0].product_code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredProducts.map((item) => item.product_code).join('|')]);
+
   const scatter = useMemo(() => {
     const rows = filteredProducts.length ? filteredProducts : products;
     if (!rows.length) return [];
@@ -596,7 +608,7 @@ export default function ProductBenchmarkWorkbench({ initialProductCode = 'WP0031
     <div className="product-workspace">
       <aside className="filter-panel">
         <div className="section-title"><span>筛选器</span><strong>{filteredProducts.length || products.length}</strong></div>
-        <label className="field-group"><span>选择产品</span><select value={selectedCode || ''} onChange={(event) => loadPeer(event.target.value)}>{products.slice(0, 120).map((item) => <option key={item.product_code} value={item.product_code}>{item.product_code} · {item.product_name}</option>)}</select></label>
+        <label className="field-group"><span>选择产品</span><select value={selectedCode || ''} onChange={(event) => loadPeer(event.target.value)}>{filteredProducts.slice(0, 120).map((item) => <option key={item.product_code} value={item.product_code}>{item.product_code} · {item.product_name}</option>)}</select></label>
         <SelectField label="资产类别" value={filters.product_type} options={options.product_type} onChange={(value) => updateFilter('product_type', value)} />
         <SelectField label="策略/系列" value={filters.product_series} options={options.product_series} onChange={(value) => updateFilter('product_series', value)} />
         <SelectField label="风险等级" value={filters.risk_level} options={options.risk_level} onChange={(value) => updateFilter('risk_level', value)} />

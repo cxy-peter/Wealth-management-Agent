@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { generateWeeklyReport, getDataFreshness, getWeeklyProducts, getWeeklyReportDates, getWeeklySummary } from '../api.js';
 import { dataFreshnessMock, dpoAgentEvalMock, sampleAnalysis, weeklyMock, weeklyProductsMock } from '../data/mockData.js';
 import DataUploadDrawer from './components/DataUploadDrawer.jsx';
+import ProductSeriesManager from './components/ProductSeriesManager.jsx';
+import ReferenceRateBenchmarkPanel from './components/ReferenceRateBenchmarkPanel.jsx';
+import SeriesComparePanel from './components/SeriesComparePanel.jsx';
 
 function pct(value, digits = 1) {
   return `${(Number(value || 0) * 100).toFixed(digits)}%`;
@@ -60,7 +63,7 @@ function AttentionCard({ row, onOpen }) {
   return (
     <button className="attention-card" onClick={() => onOpen?.(row.product_code)}>
       <div>
-        <strong title={row.product_name}>{row.product_name}</strong>
+        <strong className="attention-product-name" title={row.product_name}>{row.product_name}</strong>
         <span>{row.product_code}</span>
       </div>
       <span className={`risk-chip ${row.risk_level}`}>{row.risk_level}</span>
@@ -301,7 +304,7 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
   }, []);
 
   const compactColumns = [
-    { key: 'product_name', label: '产品', title: (row) => row.product_name, render: (row) => <strong className="ellipsis-cell">{row.product_name}</strong> },
+    { key: 'product_name', label: '产品', title: (row) => row.product_name, render: (row) => <strong className="product-name-cell">{row.product_name}</strong> },
     { key: 'risk_level', label: '风险', render: (row) => <span className={`risk-chip ${row.risk_level}`}>{row.risk_level}</span> },
     { key: 'scale_wow_bn', label: '周变', render: (row) => `${signedNum(row.scale_wow_bn)} 亿` },
     { key: 'return_3m', label: '3M', render: (row) => pct(row.return_3m) }
@@ -415,6 +418,12 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
       </section>
 
       <MarketBlock market={summary.market_issuance} />
+
+      <ProductSeriesManager products={products} />
+
+      <SeriesComparePanel products={products} />
+
+      <ReferenceRateBenchmarkPanel products={products} />
 
       <section className="split-grid">
         <AiCalibrationCard analysis={analysis} />

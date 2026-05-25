@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from backend.app.agents.planner_agent import planner_agent
@@ -14,13 +16,19 @@ from backend.app.optimization.reward import compute_reward
 from backend.app.optimization.router_policy import ACTION_TO_REQUEST, EpsilonGreedyRouter
 from backend.app.tools.data_loader import load_product_nav, load_product_risk_events, load_products
 from backend.app.tools.tool_registry import execute_tool, get_registered_tool_names
-from backend.app.weekly_report.generators.benchmark_report_generator import peer_benchmark, weekly_product_detail
+from backend.app.weekly_report.generators.benchmark_report_generator import peer_benchmark, top_peers, weekly_product_detail
 from backend.app.weekly_report.generators.weekly_report_generator import generate_weekly_report, weekly_summary
 from backend.app.weekly_report.weekly_report_verifier import verify_weekly_report
 from backend.app.dpo.dpo_dataset_validator import validate_dpo_dataset
 from backend.app.data_sources.base import REQUIRED_SOURCE_FIELDS
 from backend.app.data_sources.quality.lineage_builder import lineage_for_evidence
 from backend.app.models.qwen_risk_adapter import QwenRiskClassifier
+from backend.app.product_taxonomy.manual_override_store import create_override
+from backend.app.product_taxonomy.series_classifier import classify_products
+from backend.app.product_taxonomy.series_performance import compute_series_performance
+from backend.app.benchmark.reference_rate_engine import compare_product_to_reference, load_reference_rates
+from backend.app.skills.harness_validator import HarnessValidator
+from backend.app.skills.skill_executor import execute_skill_harness
 
 
 def test_tool_registry_has_required_tools() -> None:
@@ -283,7 +291,7 @@ def test_freshness_api() -> None:
 def test_manual_upload_schema_preview() -> None:
     client = TestClient(app)
     csv_text = "report_date,product_code,product_name,product_type,channel,risk_level,product_scale_bn,scale_wow_bn,scale_mom_bn,latest_nav,return_3m,max_drawdown,volatility,sharpe,benchmark_status\n2025-04-04,WPX001,样例,纯固收,个金,R2,1.2,0.1,0.2,1.01,0.01,-0.02,0.03,0.5,in_range\n"
-    uploaded = client.post("/api/data/upload", json={"file_name": "weekly.csv", "text": csv_text, "target_schema": "product_weekly_snapshot"}).json()
+    uploaded = client.post("/api/data/upload", json={"file_name": "weekly.csv", "dataset_scope": "own_company", "text": csv_text, "target_schema": "product_weekly_snapshot"}).json()
     preview = client.get(f"/api/data/upload/{uploaded['upload_id']}/schema-preview").json()
     quality = client.get(f"/api/data/upload/{uploaded['upload_id']}/quality-report").json()
     assert preview["schema_preview"]["parser_status"] == "parsed"
@@ -302,3 +310,118 @@ def test_verifier_blocks_fake_realtime_claim() -> None:
     verification = verify_weekly_report(report)
     assert verification["pass"] is False
     assert "source_overclaim" in verification["failed_checks"]
+
+
+def test_upload_scope_required() -> None:
+    client = TestClient(app)
+    response = client.post(
+        "/api/data/upload",
+        json={"file_name": "weekly.csv", "text": "report_date,product_code,product_name\n2025-04-04,WPX001,测试\n", "target_schema": "product_weekly_snapshot"},
+    )
+    assert response.status_code == 422
+
+
+def test_own_company_upload_triggers_series_classification() -> None:
+    client = TestClient(app)
+    csv_text = "report_date,product_code,product_name,product_type,channel,risk_level\n2025-04-04,WPX101,稳健添利90天持有期A,纯固收,个金,R2\n"
+    uploaded = client.post(
+        "/api/data/upload",
+        json={"file_name": "own.csv", "dataset_scope": "own_company", "text": csv_text, "target_schema": "product_weekly_snapshot"},
+    )
+    assert uploaded.status_code == 200
+    classified = classify_products(
+        products=[{"product_code": "WPX101", "product_name": "稳健添利90天持有期A", "product_type": "纯固收", "channel": "个金", "risk_level": "R2"}],
+        apply_manual=False,
+    )
+    assert classified["classified_products"][0]["suggested_series_id"] == "stable_income"
+
+
+def test_full_market_upload_updates_peer_universe() -> None:
+    client = TestClient(app)
+    csv_text = "peer_product_code,report_date,return_3m\nPRX001,2025-04-04,0.012\n"
+    response = client.post(
+        "/api/data/upload",
+        json={"file_name": "peer.csv", "dataset_scope": "full_market", "text": csv_text, "target_schema": "peer_product_metrics"},
+    )
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["dataset_scope"] == "full_market"
+    assert payload["source_type"] == "manual_upload"
+
+
+def test_reference_rates_upload_updates_benchmark_panel() -> None:
+    client = TestClient(app)
+    csv_text = "rate_id,as_of_date,currency,rate_type,tenor_days,tenor_label,annual_yield\nRMB_TEST_3M,2025-04-04,CNY,deposit,90,3M,0.015\n"
+    response = client.post(
+        "/api/data/upload",
+        json={"file_name": "rates.csv", "dataset_scope": "reference_rates", "text": csv_text, "target_schema": "reference_rates"},
+    )
+    assert response.status_code == 200
+    assert response.json()["dataset_scope"] == "reference_rates"
+    rates = load_reference_rates("2025-04-04")
+    assert not rates.empty
+    comparison = compare_product_to_reference({"product_code": "WP0001", "return_3m": 0.01, "holding_period_days": 90, "benchmark_lower": 0.02, "benchmark_upper": 0.04})
+    assert comparison["comparisons"]
+
+
+def test_manual_override_changes_series_membership() -> None:
+    before = classify_products(products=[{"product_code": "TST_SERIES_1", "product_name": "现金优选日开A", "product_type": "现金管理"}], apply_manual=False)
+    assert before["classified_products"][0]["suggested_series_id"] == "cash"
+    override = create_override(product_code="TST_SERIES_1", product_name="现金优选日开A", old_series_id="cash", new_series_id="manual_series", action_type="move", reason="pytest")
+    after = classify_products(products=[{"product_code": "TST_SERIES_1", "product_name": "现金优选日开A", "product_type": "现金管理"}])
+    assert after["classified_products"][0]["suggested_series_id"] == "manual_series"
+    assert after["classified_products"][0]["evidence_id"] == override["evidence_id"]
+
+
+def test_series_performance_recomputed_after_override() -> None:
+    create_override(product_code="TST_SERIES_2", product_name="稳健添利90天", old_series_id="stable_income", new_series_id="manual_perf", action_type="move", reason="pytest")
+    performance = compute_series_performance(
+        products=[
+            {"product_code": "TST_SERIES_2", "product_name": "稳健添利90天", "product_type": "纯固收", "product_scale_bn": 10, "return_3m": 0.01, "return_1m": 0.003, "return_6m": 0.02, "max_drawdown": -0.01, "volatility": 0.02, "sharpe": 0.8, "benchmark_status": "in_range"},
+            {"product_code": "TST_SERIES_3", "product_name": "多元配置180天", "product_type": "多资产", "product_scale_bn": 5, "return_3m": 0.02, "return_1m": 0.004, "return_6m": 0.03, "max_drawdown": -0.03, "volatility": 0.06, "sharpe": 0.6, "benchmark_status": "below_lower"},
+        ]
+    )
+    row = next(item for item in performance["series"] if item["series_id"] == "manual_perf")
+    assert row["product_count"] == 1
+    assert row["total_scale_bn"] == 10
+
+
+def test_product_names_not_ellipsized_snapshot() -> None:
+    css = (Path(__file__).resolve().parents[1] / "frontend" / "src" / "styles.css").read_text(encoding="utf-8")
+    assert ".product-name-cell" in css
+    assert "text-overflow: unset" in css
+    assert "white-space: normal" in css
+
+
+def test_top_peers_global_rank_not_cyclic() -> None:
+    payload = top_peers(limit=24)
+    ranks = [row["global_rank"] for row in payload["table"]]
+    assert ranks == list(range(1, len(ranks) + 1))
+    assert max(ranks) > 8
+
+
+def test_product_selector_uses_filtered_products() -> None:
+    source = (Path(__file__).resolve().parents[1] / "frontend" / "src" / "pages" / "ProductBenchmarkWorkbench.jsx").read_text(encoding="utf-8")
+    assert "filteredProducts.slice(0, 120)" in source
+    assert "setSelectedCode('')" in source
+
+
+def test_skill_harness_trace_contains_selected_skills() -> None:
+    trace = execute_skill_harness("生成产品周报", {"report_date": "2025-04-04"})
+    assert trace["selected_skills"]
+    assert trace["skill_calls"]
+    assert trace["skill_calls"][0]["skill_call_id"].startswith("sc_")
+    assert "harness_result" in trace["skill_calls"][0]
+
+
+def test_harness_blocks_missing_evidence() -> None:
+    result = HarnessValidator().validate("近3个月收益 2.10%，最大回撤 -0.50%。", report_type="weekly_report")
+    assert result["pass"] is False
+    assert "required_evidence_rules" in result["failed_rules"]
+
+
+def test_dpo_output_goes_through_verifier() -> None:
+    trace = execute_skill_harness("生成产品周报", {"report_date": "2025-04-04", "task_type": "weekly_product_summary"})
+    skill_names = [call["skill_name"] for call in trace["skill_calls"]]
+    assert "dpo_report_skill" in skill_names
+    assert "verifier_skill" in skill_names

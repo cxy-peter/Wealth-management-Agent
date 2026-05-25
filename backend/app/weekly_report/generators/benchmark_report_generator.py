@@ -145,7 +145,16 @@ def channel_benchmark(product_type: str | None = None, channel: str | None = Non
 
 def top_peers(product_type: str | None = None, report_date: str | None = None, limit: int = 20) -> dict[str, Any]:
     selected_date = _latest_date(report_date)
-    rows = load_top_peer_products(product_type=product_type, report_date=selected_date).head(limit)
+    rows = load_top_peer_products(product_type=product_type, report_date=selected_date).copy()
+    if not rows.empty:
+        if "product_scale_bn" not in rows.columns:
+            rows["product_scale_bn"] = 0.0
+        rows = rows.sort_values(
+            ["return_3m", "sharpe", "max_drawdown", "product_scale_bn", "peer_product_code"],
+            ascending=[False, False, True, False, True],
+        ).reset_index(drop=True)
+        rows["global_rank"] = range(1, len(rows) + 1)
+        rows = rows.head(limit)
     return {
         "report_date": selected_date,
         "product_type": product_type,

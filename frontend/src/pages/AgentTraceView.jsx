@@ -1,7 +1,7 @@
 import { CheckCircle2, GitBranch, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getDataLineage, getDpoEval, getJobEvents } from '../api.js';
+import { getDataLineage, getDpoEval, getJobEvents, runSkillHarness } from '../api.js';
 import { contextualBanditResults, dataFreshnessMock, dpoAgentEvalMock, evalResults } from '../data/mockData.js';
 
 function pct(value, digits = 1) {
@@ -363,6 +363,58 @@ function DpoCalibrationPanel({ analysis, dpoEval }) {
   );
 }
 
+function SkillHarnessPanel({ trace }) {
+  const selectedSkills = trace?.selected_skills || [];
+  const skillCalls = trace?.skill_calls || [];
+  const harness = trace?.harness_result || {};
+  return (
+    <div className="page-stack nested-stack">
+      <section className="panel">
+        <div className="section-title">
+          <span>Skill / Harness Runtime</span>
+          <strong>{harness.pass === false ? '需复核' : '通过'}</strong>
+        </div>
+        <div className="pill-list">
+          {selectedSkills.map((skill) => <span key={skill}>{skill}</span>)}
+        </div>
+        <div className="two-column-facts skill-summary-grid">
+          <div><span>selected_skills</span><strong>{selectedSkills.length}</strong></div>
+          <div><span>harness pass/fail</span><strong>{harness.pass === false ? 'fail' : 'pass'}</strong></div>
+          <div><span>failed rules</span><strong>{(harness.failed_rules || []).join(', ') || '无'}</strong></div>
+          <div><span>source boundary check</span><strong>{harness.source_boundary_check || 'pass'}</strong></div>
+        </div>
+      </section>
+      <section className="table-panel compact-table">
+        <div className="section-title table-title">
+          <span>skill call trace</span>
+          <strong>{skillCalls.length}</strong>
+        </div>
+        <table>
+          <thead>
+            <tr><th>skill_call_id</th><th>skill_name</th><th>status</th><th>latency</th><th>risk</th><th>evidence_id</th><th>harness</th></tr>
+          </thead>
+          <tbody>
+            {skillCalls.map((call) => (
+              <tr key={call.skill_call_id}>
+                <td>{call.skill_call_id}</td>
+                <td>{call.skill_name}</td>
+                <td>{call.success ? 'pass' : 'fail'}</td>
+                <td>{Number(call.latency_ms || 0).toFixed(1)} ms</td>
+                <td>{call.risk_level}</td>
+                <td>{(call.evidence_ids || []).join(', ')}</td>
+                <td>{call.harness_result?.pass === false ? (call.harness_result.failed_rules || []).join(', ') : 'pass'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <TechnicalDetails label="查看 Skill 输入/输出">
+        <pre className="json-block">{JSON.stringify(trace, null, 2)}</pre>
+      </TechnicalDetails>
+    </div>
+  );
+}
+
 function QualityEvalPanel() {
   const strategies = contextualBanditResults.strategies || {};
   return (
@@ -421,9 +473,14 @@ export default function AgentTraceView({ analysis }) {
   const [toolCalls, setToolCalls] = useState(analysis.tool_calls || []);
   const [lineage, setLineage] = useState(null);
   const [dpoEval, setDpoEval] = useState(dpoAgentEvalMock);
+  const [skillHarnessTrace, setSkillHarnessTrace] = useState(analysis.skill_harness_trace || null);
 
   useEffect(() => {
     getDpoEval().then(setDpoEval).catch(() => setDpoEval(dpoAgentEvalMock));
+    runSkillHarness({
+      user_task: '生成产品周报并进行 DPO 报告校准',
+      task_payload: { report_date: analysis.weekly_report_date || '2025-04-04', task_type: 'weekly_product_summary' }
+    }).then(setSkillHarnessTrace).catch(() => setSkillHarnessTrace(analysis.skill_harness_trace || null));
   }, []);
 
   async function refreshTrace() {
@@ -483,6 +540,7 @@ export default function AgentTraceView({ analysis }) {
         <button className={activeTab === 'tools' ? 'active' : ''} onClick={() => setActiveTab('tools')}>工具调用记录</button>
         <button className={activeTab === 'quality' ? 'active' : ''} onClick={() => setActiveTab('quality')}>报告质检</button>
         <button className={activeTab === 'lineage' ? 'active' : ''} onClick={() => setActiveTab('lineage')}>数据溯源</button>
+        <button className={activeTab === 'skill' ? 'active' : ''} onClick={() => setActiveTab('skill')}>Skill / Harness</button>
         <button className={activeTab === 'dpo' ? 'active' : ''} onClick={() => setActiveTab('dpo')}>AI 报告校准</button>
         <button className={activeTab === 'eval' ? 'active' : ''} onClick={() => setActiveTab('eval')}>质量评估</button>
       </div>
@@ -490,6 +548,7 @@ export default function AgentTraceView({ analysis }) {
       {activeTab === 'tools' ? <ToolCallPanel toolCalls={toolCalls} events={events} planner={planner} evidenceIds={evidenceIds} /> : null}
       {activeTab === 'quality' ? <ReportQualityPanel verifier={verifier} guardrail={guardrail} /> : null}
       {activeTab === 'lineage' ? <LineagePanel lineage={lineage} evidenceIds={evidenceIds} onLookup={lookupLineage} /> : null}
+      {activeTab === 'skill' ? <SkillHarnessPanel trace={skillHarnessTrace || analysis.skill_harness_trace || { selected_skills: [], skill_calls: [], harness_result: { pass: true, failed_rules: [] } }} /> : null}
       {activeTab === 'dpo' ? <DpoCalibrationPanel analysis={analysis} dpoEval={dpoEval} /> : null}
       {activeTab === 'eval' ? <QualityEvalPanel /> : null}
     </div>

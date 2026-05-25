@@ -1,7 +1,14 @@
 import { FileSpreadsheet, UploadCloud, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { autoMapColumns, inferSchema, qualityReport, saveUpload } from '../../sessionDataStore.js';
+import {
+  DATASET_SCOPES,
+  allowedSchemasForScope,
+  autoMapColumns,
+  inferSchema,
+  qualityReport,
+  saveUpload
+} from '../../sessionDataStore.js';
 
 function readFileAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
@@ -50,7 +57,7 @@ async function parseFile(file) {
     return { parser_status: 'parsed', file_type: 'xlsx', sheets, warnings: [] };
   }
   if (lower.endsWith('.pptx')) {
-    return { parser_status: 'unsupported_or_optional', file_type: 'pptx', sheets: [], warnings: ['PPTX demo only exposes backend optional parser hook.'] };
+    return { parser_status: 'unsupported_or_optional', file_type: 'pptx', sheets: [], warnings: ['PPTX 仅保留后端可选解析接口。'] };
   }
   return { parser_status: 'unsupported_or_optional', file_type: lower.split('.').pop() || 'unknown', sheets: [], warnings: ['当前前端 demo 仅支持 CSV/XLSX。'] };
 }
@@ -73,7 +80,10 @@ function FieldMapping({ mapping }) {
 export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
   const [fileState, setFileState] = useState(null);
   const [selectedSheet, setSelectedSheet] = useState('');
+  const [datasetScope, setDatasetScope] = useState('');
+  const [schemaOverride, setSchemaOverride] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const activeSheet = useMemo(() => {
     if (!fileState?.sheets?.length) return null;
@@ -81,9 +91,11 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
   }, [fileState, selectedSheet]);
 
   const columns = useMemo(() => Object.keys(activeSheet?.rows?.[0] || {}), [activeSheet]);
-  const schema = useMemo(() => inferSchema(columns), [columns]);
+  const detectedSchema = useMemo(() => inferSchema(columns, datasetScope), [columns, datasetScope]);
+  const allowedSchemas = useMemo(() => allowedSchemasForScope(datasetScope), [datasetScope]);
+  const schema = schemaOverride || (allowedSchemas.includes(detectedSchema) ? detectedSchema : allowedSchemas[0] || detectedSchema);
   const mapping = useMemo(() => autoMapColumns(columns), [columns]);
-  const report = useMemo(() => qualityReport(activeSheet?.rows || [], schema, mapping), [activeSheet, schema, mapping]);
+  const report = useMemo(() => qualityReport(activeSheet?.rows || [], schema, mapping, datasetScope), [activeSheet, schema, mapping, datasetScope]);
 
   async function handleFile(event) {
     const file = event.target.files?.[0];
@@ -91,15 +103,26 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
     const parsed = await parseFile(file);
     setFileState({ ...parsed, file_name: file.name });
     setSelectedSheet(parsed.sheets?.[0]?.name || '');
+    setSchemaOverride('');
+    setError('');
   }
 
   function confirmImport() {
+    if (!datasetScope) {
+      setError('请先选择 dataset_scope。');
+      return;
+    }
     if (!activeSheet?.rows?.length) return;
     setSaving(true);
-    const result = saveUpload({ fileName: fileState.file_name, schema, rows: activeSheet.rows, mapping });
-    setSaving(false);
-    onImported?.(result);
-    onClose?.();
+    try {
+      const result = saveUpload({ fileName: fileState.file_name, schema, rows: activeSheet.rows, mapping, datasetScope });
+      onImported?.(result);
+      onClose?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '导入失败');
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!isOpen) return null;
@@ -107,19 +130,42 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
     <div className="drawer-backdrop" role="presentation">
       <aside className="review-drawer product-drawer" aria-label="导入周报和净值数据">
         <div className="section-title">
-          <span>导入周报/净值数据</span>
+          <span>导入周报/净值/同业/利率数据</span>
           <button className="icon-btn" onClick={onClose} title="关闭导入">
             <X size={18} />
           </button>
         </div>
+        <section className="panel">
+          <div className="section-title">
+            <span>dataset_scope</span>
+            <strong>必选</strong>
+          </div>
+          <div className="scope-selector-grid">
+            {Object.entries(DATASET_SCOPES).map(([scope, config]) => (
+              <button
+                type="button"
+                key={scope}
+                className={`scope-card ${datasetScope === scope ? 'active' : ''}`}
+                onClick={() => {
+                  setDatasetScope(scope);
+                  setSchemaOverride('');
+                }}
+              >
+                <strong>{scope}</strong>
+                <span>{config.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
         <section className="upload-dropzone">
           <UploadCloud size={24} />
           <div>
             <strong>选择 CSV 或 XLSX 文件</strong>
-            <p>Vercel demo 默认仅在浏览器本地解析并写入 localStorage，不上传真实内部或敏感数据。</p>
+            <p>Vercel demo 默认仅在浏览器本地解析并写入 localStorage，不上传真实内部或敏感数据。每条记录会生成 upload_id、dataset_scope、source_type=manual_upload 和 evidence_id。</p>
           </div>
           <input type="file" accept=".csv,.xlsx,.xls,.pptx" onChange={handleFile} />
         </section>
+        {error ? <div className="inline-alert">{error}</div> : null}
         {fileState ? (
           <div className="page-stack nested-stack">
             <section className="split-grid">
@@ -137,7 +183,7 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
               </div>
               <div className="panel">
                 <div className="section-title">
-                  <span>Sheet</span>
+                  <span>Sheet / Schema</span>
                   <strong>{fileState.sheets?.length || 0}</strong>
                 </div>
                 <label className="field-group">
@@ -145,6 +191,14 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
                   <select value={selectedSheet} onChange={(event) => setSelectedSheet(event.target.value)}>
                     {(fileState.sheets || []).map((sheet) => (
                       <option key={sheet.name} value={sheet.name}>{sheet.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field-group">
+                  <span>目标 schema</span>
+                  <select value={schema} onChange={(event) => setSchemaOverride(event.target.value)} disabled={!datasetScope}>
+                    {(allowedSchemas.length ? allowedSchemas : [schema]).map((item) => (
+                      <option key={item} value={item}>{item}</option>
                     ))}
                   </select>
                 </label>
@@ -163,6 +217,7 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
                 <strong>{report.parser_status}</strong>
               </div>
               <div className="two-column-facts">
+                <div><span>scope / schema 是否匹配</span><strong>{report.scope_valid ? '通过' : '需调整'}</strong></div>
                 <div><span>缺少必需字段</span><strong>{report.missing_required_fields.join(', ') || '无'}</strong></div>
                 <div><span>日期格式错误</span><strong>{report.bad_date_count}</strong></div>
                 <div><span>重复键</span><strong>{report.duplicate_key_count}</strong></div>
@@ -187,7 +242,7 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
                 </tbody>
               </table>
             </section>
-            <button className="primary-btn" onClick={confirmImport} disabled={saving || report.missing_required_fields.length > 0}>
+            <button className="primary-btn" onClick={confirmImport} disabled={saving || !datasetScope || report.missing_required_fields.length > 0 || !report.scope_valid}>
               <FileSpreadsheet size={18} />
               确认导入并刷新工作台
             </button>
