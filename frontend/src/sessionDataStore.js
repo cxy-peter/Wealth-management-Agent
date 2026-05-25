@@ -1,17 +1,43 @@
-const STORE_KEY = 'wealth_agent_session_uploads_v2';
+const STORE_KEY = 'wealth_agent_session_uploads_v3';
+
+export const IMPORT_MODES = {
+  merge_with_demo: 'merge_with_demo',
+  replace_synthetic_for_scope: 'replace_synthetic_for_scope',
+  session_only: 'session_only',
+  clear_scope_then_import: 'clear_scope_then_import'
+};
+
+export const DATA_MODES = {
+  demo_synthetic: 'Demo synthetic',
+  uploaded_only: 'Uploaded only',
+  official_sample_uploaded: 'Official sample + uploaded',
+  hybrid: 'Hybrid'
+};
+
+const SCOPE_SCHEMAS = {
+  own_company: ['product_weekly_snapshot', 'product_nav_weekly', 'product_scale_history', 'product_benchmark_status'],
+  full_market: ['peer_product_universe', 'peer_product_metrics', 'channel_peer_universe', 'top_peer_products'],
+  reference_rates: ['reference_rates']
+};
+
+const SYNTHETIC_SOURCE_BY_SCOPE = {
+  own_company: 'synthetic_weekly_snapshot',
+  full_market: 'synthetic_weekly_snapshot',
+  reference_rates: 'synthetic_reference_rates'
+};
 
 export const DATASET_SCOPES = {
   own_company: {
     label: '自家公司产品数据',
-    schemas: ['product_weekly_snapshot', 'product_nav_weekly', 'product_scale_history', 'product_benchmark_status']
+    schemas: SCOPE_SCHEMAS.own_company
   },
   full_market: {
     label: '全市场/同业产品数据',
-    schemas: ['peer_product_universe', 'peer_product_metrics', 'channel_peer_universe', 'top_peer_products']
+    schemas: SCOPE_SCHEMAS.full_market
   },
   reference_rates: {
     label: '基准利率数据',
-    schemas: ['reference_rates']
+    schemas: SCOPE_SCHEMAS.reference_rates
   }
 };
 
@@ -37,7 +63,13 @@ function safeJsonParse(value, fallback) {
 }
 
 export function readSessionStore() {
-  return safeJsonParse(window.localStorage.getItem(STORE_KEY), { uploads: [], records: {} });
+  const store = safeJsonParse(window.localStorage.getItem(STORE_KEY), { uploads: [], records: {} });
+  return {
+    uploads: store.uploads || [],
+    records: store.records || {},
+    data_mode: store.data_mode || 'hybrid',
+    synthetic_disabled_scopes: store.synthetic_disabled_scopes || {}
+  };
 }
 
 export function writeSessionStore(nextStore) {
@@ -93,6 +125,90 @@ export function inferSchema(columns = [], datasetScope = '') {
 
 export function allowedSchemasForScope(datasetScope) {
   return DATASET_SCOPES[datasetScope]?.schemas || [];
+}
+
+export function setDataMode(dataMode) {
+  const store = readSessionStore();
+  store.data_mode = dataMode || 'hybrid';
+  writeSessionStore(store);
+  return store;
+}
+
+export function getDataMode() {
+  return readSessionStore().data_mode || 'hybrid';
+}
+
+function schemaScope(schema) {
+  return Object.entries(SCOPE_SCHEMAS).find(([, schemas]) => schemas.includes(schema))?.[0] || '';
+}
+
+function isSyntheticRecord(row, scope) {
+  return row?.source_type === SYNTHETIC_SOURCE_BY_SCOPE[scope] || String(row?.source_type || '').startsWith('synthetic_');
+}
+
+function clearScopeRecords(store, datasetScope, { syntheticOnly = false } = {}) {
+  const schemas = SCOPE_SCHEMAS[datasetScope] || [];
+  const next = { ...store, records: { ...(store.records || {}) } };
+  for (const schema of schemas) {
+    const rows = next.records[schema] || [];
+    next.records[schema] = syntheticOnly
+      ? rows.filter((row) => !isSyntheticRecord(row, datasetScope))
+      : rows.filter((row) => row.dataset_scope !== datasetScope);
+  }
+  return next;
+}
+
+export function deleteSyntheticForScope(datasetScope) {
+  let store = readSessionStore();
+  store = clearScopeRecords(store, datasetScope, { syntheticOnly: true });
+  store.synthetic_disabled_scopes = { ...(store.synthetic_disabled_scopes || {}), [datasetScope]: true };
+  writeSessionStore(store);
+  return store;
+}
+
+export function restoreDemoSynthetic(datasetScope = '') {
+  const store = readSessionStore();
+  if (datasetScope) {
+    delete store.synthetic_disabled_scopes[datasetScope];
+  } else {
+    store.synthetic_disabled_scopes = {};
+  }
+  writeSessionStore(store);
+  return store;
+}
+
+export function isSyntheticDisabled(datasetScope) {
+  const store = readSessionStore();
+  return Boolean(store.synthetic_disabled_scopes?.[datasetScope]) || store.data_mode === 'uploaded_only';
+}
+
+export function sessionSourceCounts(demoCounts = {}) {
+  const store = readSessionStore();
+  const counts = {
+    own_company: {},
+    full_market: {},
+    reference_rates: {}
+  };
+  for (const [schema, rows] of Object.entries(store.records || {})) {
+    const scope = schemaScope(schema);
+    if (!scope) continue;
+    for (const row of rows || []) {
+      const sourceType = row.source_type || 'manual_upload';
+      counts[scope][sourceType] = (counts[scope][sourceType] || 0) + 1;
+    }
+  }
+  for (const [scope, value] of Object.entries(demoCounts || {})) {
+    if (!counts[scope]) counts[scope] = {};
+    if (!isSyntheticDisabled(scope)) {
+      const syntheticType = SYNTHETIC_SOURCE_BY_SCOPE[scope];
+      counts[scope][syntheticType] = Math.max(counts[scope][syntheticType] || 0, Number(value || 0));
+    }
+  }
+  return {
+    data_mode: store.data_mode || 'hybrid',
+    synthetic_disabled_scopes: store.synthetic_disabled_scopes || {},
+    scopes: counts
+  };
 }
 
 export function autoMapColumns(columns = []) {
@@ -240,17 +356,40 @@ export function qualityReport(rows, schema, mapping, datasetScope = '') {
   };
 }
 
-export function saveUpload({ fileName, schema, rows, mapping, datasetScope }) {
+export function saveUpload({
+  fileName,
+  schema,
+  rows,
+  mapping,
+  datasetScope,
+  importMode = IMPORT_MODES.merge_with_demo,
+  deleteSynthetic = false
+}) {
   if (!datasetScope || !DATASET_SCOPES[datasetScope]) {
     throw new Error('dataset_scope is required');
   }
   const uploadId = `upload_${Date.now().toString(36)}`;
   const normalized = normalizeRecords(rows, schema, mapping, uploadId, datasetScope, fileName);
   const report = qualityReport(rows, schema, mapping, datasetScope);
-  const store = readSessionStore();
+  let store = readSessionStore();
+  if (deleteSynthetic || importMode === IMPORT_MODES.replace_synthetic_for_scope) {
+    store = clearScopeRecords(store, datasetScope, { syntheticOnly: true });
+    store.synthetic_disabled_scopes = { ...(store.synthetic_disabled_scopes || {}), [datasetScope]: true };
+  }
+  if (importMode === IMPORT_MODES.clear_scope_then_import) {
+    store = clearScopeRecords(store, datasetScope);
+    store.synthetic_disabled_scopes = { ...(store.synthetic_disabled_scopes || {}), [datasetScope]: true };
+  }
+  if (importMode === IMPORT_MODES.session_only) {
+    store.data_mode = 'uploaded_only';
+  } else if (!store.data_mode) {
+    store.data_mode = 'hybrid';
+  }
   const upload = {
     upload_id: uploadId,
     dataset_scope: datasetScope,
+    import_mode: importMode,
+    delete_synthetic: Boolean(deleteSynthetic),
     source_type: 'manual_upload',
     file_name: fileName,
     schema,
@@ -272,11 +411,20 @@ export function saveUpload({ fileName, schema, rows, mapping, datasetScope }) {
 export function applySessionProducts(payload, filters = {}) {
   const store = readSessionStore();
   const uploaded = (store.records?.product_weekly_snapshot || []).filter((row) => (row.dataset_scope || 'own_company') === 'own_company');
-  if (!uploaded.length) return payload;
+  const syntheticDisabled = isSyntheticDisabled('own_company');
+  if (!uploaded.length) {
+    return syntheticDisabled
+      ? { ...payload, products: [], count: 0, product_count: 0, source_type: 'uploaded_only_empty' }
+      : payload;
+  }
   const reportDate = filters.report_date || payload.report_date;
   const rows = uploaded.filter((row) => !reportDate || row.report_date === reportDate);
-  if (!rows.length) return payload;
-  const byCode = new Map((payload.products || []).map((row) => [row.product_code, row]));
+  if (!rows.length) {
+    return syntheticDisabled
+      ? { ...payload, products: [], count: 0, product_count: 0, source_type: 'uploaded_only_empty' }
+      : payload;
+  }
+  const byCode = new Map(syntheticDisabled ? [] : (payload.products || []).map((row) => [row.product_code, row]));
   for (const row of rows) {
     byCode.set(row.product_code, {
       ...byCode.get(row.product_code),
@@ -290,13 +438,25 @@ export function applySessionProducts(payload, filters = {}) {
     ...payload,
     products,
     count: products.length,
-    source_type: 'manual_upload_overlay'
+    product_count: products.length,
+    source_type: syntheticDisabled ? 'manual_upload' : 'manual_upload_overlay'
   };
 }
 
 export function applySessionSummary(summary, productsPayload) {
   const products = productsPayload?.products || [];
-  if (!products.length || productsPayload.source_type !== 'manual_upload_overlay') return summary;
+  if (!products.length && productsPayload?.source_type === 'uploaded_only_empty') {
+    return {
+      ...summary,
+      product_count: 0,
+      kpis: { ...summary.kpis, total_scale_bn: 0, scale_wow_bn: 0, benchmark_pass_rate: 0, attention_product_count: 0 },
+      attention_top10: [],
+      benchmark_failed_products: [],
+      percentile_decline_products: [],
+      source_type: 'uploaded_only_empty'
+    };
+  }
+  if (!products.length || !String(productsPayload.source_type || '').includes('manual_upload')) return summary;
   const totalScale = products.reduce((sum, row) => sum + Number(row.product_scale_bn || 0), 0);
   const scaleWow = products.reduce((sum, row) => sum + Number(row.scale_wow_bn || 0), 0);
   const benchmarkPass = products.filter((row) => row.benchmark_status === 'in_range' || row.benchmark_status === 'above_upper').length;
@@ -314,7 +474,7 @@ export function applySessionSummary(summary, productsPayload) {
       attention_product_count: attention.length
     },
     attention_top10: attention.length ? attention : summary.attention_top10,
-    source_type: 'manual_upload_overlay'
+    source_type: productsPayload.source_type === 'manual_upload' ? 'manual_upload' : 'manual_upload_overlay'
   };
 }
 
@@ -337,7 +497,10 @@ export function sessionPeerRecords() {
 
 export function applySessionPeerBenchmark(peerPayload, productCode = '') {
   const { metrics, universe } = sessionPeerRecords();
-  if (!metrics.length) return peerPayload;
+  const syntheticDisabled = isSyntheticDisabled('full_market');
+  if (!metrics.length) {
+    return syntheticDisabled ? { ...peerPayload, peer_count: 0, table: [], source_type: 'uploaded_only_empty' } : peerPayload;
+  }
   const universeByCode = new Map(universe.map((row) => [row.peer_product_code, row]));
   const productType = peerPayload?.product?.product_type;
   const rows = metrics
@@ -345,20 +508,21 @@ export function applySessionPeerBenchmark(peerPayload, productCode = '') {
     .filter((row) => !productType || !row.product_type || row.product_type === productType)
     .sort((a, b) => Number(b.return_3m || 0) - Number(a.return_3m || 0))
     .slice(0, 24);
-  if (!rows.length) return peerPayload;
+  if (!rows.length) return syntheticDisabled ? { ...peerPayload, peer_count: 0, table: [], source_type: 'uploaded_only_empty' } : peerPayload;
   return {
     ...peerPayload,
     product_code: productCode || peerPayload?.product_code,
     peer_count: rows.length,
     table: rows,
-    source_type: 'manual_upload_overlay',
+    source_type: syntheticDisabled ? 'manual_upload' : 'manual_upload_overlay',
     evidence_ids: [...new Set([...(peerPayload?.evidence_ids || []), ...rows.map((row) => row.evidence_id).filter(Boolean)])]
   };
 }
 
 export function applySessionTopPeers(payload) {
   const rows = sessionPeerRecords().top;
-  if (!rows.length) return payload;
+  const syntheticDisabled = isSyntheticDisabled('full_market');
+  if (!rows.length) return syntheticDisabled ? { ...payload, source_type: 'uploaded_only_empty', count: 0, table: [] } : payload;
   const sorted = [...rows].sort((a, b) =>
     Number(b.return_3m || 0) - Number(a.return_3m || 0) ||
     Number(b.sharpe || 0) - Number(a.sharpe || 0) ||
@@ -377,4 +541,25 @@ export function applySessionTopPeers(payload) {
 export function sessionReferenceRates() {
   const store = readSessionStore();
   return (store.records?.reference_rates || []).filter((row) => row.dataset_scope === 'reference_rates');
+}
+
+export function applySessionReferenceRates(payload) {
+  const uploaded = sessionReferenceRates();
+  const syntheticDisabled = isSyntheticDisabled('reference_rates');
+  const baseRates = syntheticDisabled ? [] : (payload.rates || []);
+  const ids = new Set();
+  const rates = [...uploaded, ...baseRates].filter((row) => {
+    const key = `${row.rate_id}_${row.as_of_date}`;
+    if (ids.has(key)) return false;
+    ids.add(key);
+    return true;
+  });
+  return {
+    ...payload,
+    count: rates.length,
+    rates,
+    source_type: uploaded.length
+      ? (syntheticDisabled ? 'manual_upload' : 'manual_upload_overlay')
+      : (syntheticDisabled ? 'uploaded_only_empty' : payload.source_type)
+  };
 }

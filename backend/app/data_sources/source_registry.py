@@ -44,6 +44,27 @@ SOURCE_FILE_CONFIG = [
         "parser_version": "citic_wealth_adapter.v1",
     },
     {
+        "source_type": "official_public_nav",
+        "source_name": "BOC public NAV adapter sample",
+        "source_url_or_file": "https://www.bocwm.cn/",
+        "confidence_level": "high",
+        "parser_version": "boc_nav_adapter.v1",
+    },
+    {
+        "source_type": "registry_lookup_sample",
+        "source_name": "Financial product registry lookup sample",
+        "source_url_or_file": "manual_check_required:financial_product_registry",
+        "confidence_level": "medium",
+        "parser_version": "registry_lookup_adapter.v1",
+    },
+    {
+        "source_type": "public_reference_rate_api",
+        "source_name": "US Treasury / reference rate adapter sample",
+        "source_url_or_file": "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/daily_treasury_rates",
+        "confidence_level": "high",
+        "parser_version": "us_treasury_adapter.v1",
+    },
+    {
         "source_type": "manual_upload",
         "source_name": "Manual upload staging",
         "source_url_or_file": "data/uploads/upload_index.json",
@@ -231,4 +252,3 @@ def refresh_demo(as_of_date: str | None = None, base_date: str | None = None, se
     from backend.app.data_sources.synthetic.next_week_generator import generate_next_week_snapshot
 
     return generate_next_week_snapshot(as_of_date=as_of_date, base_date=base_date, seed=seed, n_products=n_products)
-

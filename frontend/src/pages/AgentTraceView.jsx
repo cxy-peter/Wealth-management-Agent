@@ -1,7 +1,7 @@
 import { CheckCircle2, GitBranch, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getDataLineage, getDpoEval, getJobEvents, runSkillHarness } from '../api.js';
+import { getDataLineage, getDpoEval, getJobEvents, runExternalVerification, runSkillHarness } from '../api.js';
 import { contextualBanditResults, dataFreshnessMock, dpoAgentEvalMock, evalResults } from '../data/mockData.js';
 
 function pct(value, digits = 1) {
@@ -415,6 +415,91 @@ function SkillHarnessPanel({ trace }) {
   );
 }
 
+function ExternalVerificationPanel({ verification }) {
+  const result = verification?.external_verification_result || {};
+  const coverage = verification?.source_coverage || {};
+  return (
+    <div className="page-stack nested-stack">
+      <section className="metric-grid compact">
+        <div className="metric-tile green">
+          <span>外部验证覆盖率</span>
+          <strong>{pct(result.verification_score || 0, 0)}</strong>
+        </div>
+        <div className="metric-tile">
+          <span>官方净值</span>
+          <strong>{coverage.official_public_nav || 0} 条</strong>
+        </div>
+        <div className="metric-tile">
+          <span>官方披露</span>
+          <strong>{coverage.official_disclosure_sample || 0} 条</strong>
+        </div>
+        <div className="metric-tile amber">
+          <span>冲突字段</span>
+          <strong>{(result.conflicting_fields || []).length} 条</strong>
+        </div>
+      </section>
+      <section className="split-grid">
+        <div className="panel">
+          <div className="section-title">
+            <span>External Verification</span>
+            <strong>{(result.warnings || []).length ? '需关注' : 'sample fallback'}</strong>
+          </div>
+          <div className="two-column-facts">
+            <div><span>verified_fields</span><strong>{(result.verified_fields || []).join(', ') || '无'}</strong></div>
+            <div><span>unverified_fields</span><strong>{(result.unverified_fields || []).join(', ') || '无'}</strong></div>
+            <div><span>reference_rate_api</span><strong>{coverage.public_reference_rate_api || 0} 条</strong></div>
+            <div><span>registry_lookup</span><strong>{coverage.registry_lookup_sample || 0} 条</strong></div>
+          </div>
+          {(result.warnings || []).length ? (
+            <div className="warning-list">
+              {result.warnings.map((item) => <span key={item}>{item}</span>)}
+            </div>
+          ) : null}
+        </div>
+        <div className="panel">
+          <div className="section-title">
+            <span>来源边界</span>
+            <strong>{result.source_boundary?.pass === false ? 'fail' : 'pass'}</strong>
+          </div>
+          <p className="panel-copy">真实 adapter 默认关闭；成功时写入 official/public source metadata，失败时记录 failed，不阻塞 demo。</p>
+          <TechnicalDetails>
+            <pre className="json-block">{JSON.stringify(verification, null, 2)}</pre>
+          </TechnicalDetails>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SourceCoveragePanel({ verification }) {
+  const coverage = verification?.source_coverage || {
+    official_public_nav: 0,
+    official_disclosure_sample: 0,
+    manual_upload: 0,
+    public_reference_rate_api: 0,
+    synthetic_weekly_snapshot: 3
+  };
+  const total = Object.values(coverage).reduce((sum, value) => sum + Number(value || 0), 0) || 1;
+  return (
+    <section className="panel">
+      <div className="section-title">
+        <span>Source Coverage</span>
+        <strong>{total} records</strong>
+      </div>
+      <div className="distribution-bars">
+        {Object.entries(coverage).map(([sourceType, count]) => (
+          <div key={sourceType}>
+            <span>{sourceType}</span>
+            <div><i style={{ width: `${Math.max(4, (Number(count || 0) / total) * 100)}%` }} /></div>
+            <strong>{count}</strong>
+          </div>
+        ))}
+      </div>
+      <p className="panel-copy">报告生成时会区分 official、uploaded、public_reference_rate_api 和 synthetic 数据；synthetic 分位不得写成真实全市场排名。</p>
+    </section>
+  );
+}
+
 function QualityEvalPanel() {
   const strategies = contextualBanditResults.strategies || {};
   return (
@@ -474,6 +559,7 @@ export default function AgentTraceView({ analysis }) {
   const [lineage, setLineage] = useState(null);
   const [dpoEval, setDpoEval] = useState(dpoAgentEvalMock);
   const [skillHarnessTrace, setSkillHarnessTrace] = useState(analysis.skill_harness_trace || null);
+  const [externalVerification, setExternalVerification] = useState(analysis.external_verification || null);
 
   useEffect(() => {
     getDpoEval().then(setDpoEval).catch(() => setDpoEval(dpoAgentEvalMock));
@@ -481,6 +567,10 @@ export default function AgentTraceView({ analysis }) {
       user_task: '生成产品周报并进行 DPO 报告校准',
       task_payload: { report_date: analysis.weekly_report_date || '2025-04-04', task_type: 'weekly_product_summary' }
     }).then(setSkillHarnessTrace).catch(() => setSkillHarnessTrace(analysis.skill_harness_trace || null));
+    runExternalVerification({
+      product_code: analysis.product_code || 'AF245408',
+      report_text: analysis.report_markdown || ''
+    }).then(setExternalVerification).catch(() => setExternalVerification(analysis.external_verification || null));
   }, []);
 
   async function refreshTrace() {
@@ -537,9 +627,11 @@ export default function AgentTraceView({ analysis }) {
       </section>
       <div className="tabs">
         <button className={activeTab === 'process' ? 'active' : ''} onClick={() => setActiveTab('process')}>执行流程</button>
-        <button className={activeTab === 'tools' ? 'active' : ''} onClick={() => setActiveTab('tools')}>工具调用记录</button>
+        <button className={activeTab === 'tools' ? 'active' : ''} onClick={() => setActiveTab('tools')}>Tool Trace</button>
         <button className={activeTab === 'quality' ? 'active' : ''} onClick={() => setActiveTab('quality')}>报告质检</button>
-        <button className={activeTab === 'lineage' ? 'active' : ''} onClick={() => setActiveTab('lineage')}>数据溯源</button>
+        <button className={activeTab === 'lineage' ? 'active' : ''} onClick={() => setActiveTab('lineage')}>Data Lineage</button>
+        <button className={activeTab === 'external' ? 'active' : ''} onClick={() => setActiveTab('external')}>External Verification</button>
+        <button className={activeTab === 'coverage' ? 'active' : ''} onClick={() => setActiveTab('coverage')}>Source Coverage</button>
         <button className={activeTab === 'skill' ? 'active' : ''} onClick={() => setActiveTab('skill')}>Skill / Harness</button>
         <button className={activeTab === 'dpo' ? 'active' : ''} onClick={() => setActiveTab('dpo')}>AI 报告校准</button>
         <button className={activeTab === 'eval' ? 'active' : ''} onClick={() => setActiveTab('eval')}>质量评估</button>
@@ -548,6 +640,8 @@ export default function AgentTraceView({ analysis }) {
       {activeTab === 'tools' ? <ToolCallPanel toolCalls={toolCalls} events={events} planner={planner} evidenceIds={evidenceIds} /> : null}
       {activeTab === 'quality' ? <ReportQualityPanel verifier={verifier} guardrail={guardrail} /> : null}
       {activeTab === 'lineage' ? <LineagePanel lineage={lineage} evidenceIds={evidenceIds} onLookup={lookupLineage} /> : null}
+      {activeTab === 'external' ? <ExternalVerificationPanel verification={externalVerification} /> : null}
+      {activeTab === 'coverage' ? <SourceCoveragePanel verification={externalVerification} /> : null}
       {activeTab === 'skill' ? <SkillHarnessPanel trace={skillHarnessTrace || analysis.skill_harness_trace || { selected_skills: [], skill_calls: [], harness_result: { pass: true, failed_rules: [] } }} /> : null}
       {activeTab === 'dpo' ? <DpoCalibrationPanel analysis={analysis} dpoEval={dpoEval} /> : null}
       {activeTab === 'eval' ? <QualityEvalPanel /> : null}

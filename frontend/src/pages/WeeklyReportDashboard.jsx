@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { generateWeeklyReport, getDataFreshness, getWeeklyProducts, getWeeklyReportDates, getWeeklySummary } from '../api.js';
 import { dataFreshnessMock, dpoAgentEvalMock, sampleAnalysis, weeklyMock, weeklyProductsMock } from '../data/mockData.js';
 import DataUploadDrawer from './components/DataUploadDrawer.jsx';
+import DataModeSwitch from './components/DataModeSwitch.jsx';
 import ProductSeriesManager from './components/ProductSeriesManager.jsx';
 import ReferenceRateBenchmarkPanel from './components/ReferenceRateBenchmarkPanel.jsx';
 import SeriesComparePanel from './components/SeriesComparePanel.jsx';
@@ -373,6 +374,14 @@ export default function WeeklyReportDashboard({ analysis, onAnalysis, onOpenBenc
           导入周报/净值数据
         </button>
       </section>
+
+      <DataModeSwitch
+        demoCounts={{
+          own_company: products.length || summary.product_count || 0,
+          full_market: 420,
+          reference_rates: 12
+        }}
+      />
 
       <section className="section-heading">
         <div>

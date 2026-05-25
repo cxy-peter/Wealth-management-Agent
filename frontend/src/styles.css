@@ -1445,6 +1445,66 @@ th.sticky-col {
   background: #eaf5f1;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #2f3a37;
+}
+
+.data-mode-panel {
+  border-left: 3px solid #22776f;
+}
+
+.data-mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.data-mode-controls select {
+  max-width: 260px;
+}
+
+.source-count-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.source-count-row {
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fbfaf6;
+  display: grid;
+  gap: 4px;
+}
+
+.source-count-row span {
+  font-size: 12px;
+  color: #64716d;
+  overflow-wrap: anywhere;
+}
+
+.warning-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.warning-list span {
+  border: 1px solid #ead4a2;
+  background: #fff8e7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #8a5a16;
+  font-size: 12px;
+}
+
 .scope-card span,
 .series-chip-grid span,
 .series-product-list span,
@@ -1613,6 +1673,7 @@ th.sticky-col {
   .series-layout,
   .uploaded-series-strip,
   .scope-selector-grid,
+  .source-count-grid,
   .series-toolbar,
   .series-selector {
     grid-template-columns: 1fr;

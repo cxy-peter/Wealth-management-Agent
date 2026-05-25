@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-25T00:05:10.609952+00:00",
+  "generated_at": "2026-05-25T01:16:40.590433+00:00",
   "case_count": 20,
   "metrics": {
     "tool_call_success": 1.0,
@@ -8,14 +8,14 @@
     "risk_warning_coverage": 1.0,
     "evidence_coverage": 1.0,
     "forbidden_wording_fail_rate": 0.0,
-    "avg_latency_ms": 250.08
+    "avg_latency_ms": 200.56
   },
   "guardrail_terms_count": 7,
   "cases": [
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 708.91,
+      "latency_ms": 542.4,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -23,7 +23,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_9f7702c673c7",
+      "run_id": "run_1ec47d169793",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -31,7 +31,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 294.06,
+      "latency_ms": 209.91,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -39,7 +39,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_d524b406e56f",
+      "run_id": "run_b998da085d64",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -47,7 +47,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 131.97,
+      "latency_ms": 99.5,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -55,7 +55,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_83b84f5e378b",
+      "run_id": "run_90045339d8c3",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -63,7 +63,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 131.97,
+      "latency_ms": 94.05,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -71,7 +71,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_8e139f8cd5fd",
+      "run_id": "run_81e6406509db",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -79,7 +79,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 242.87,
+      "latency_ms": 157.1,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -87,7 +87,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_ab2f57e80aad",
+      "run_id": "run_f5795bf8c721",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -95,7 +95,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 580.88,
+      "latency_ms": 268.75,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -103,7 +103,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_43b7e7ab15fe",
+      "run_id": "run_04e000cf7f2b",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -111,7 +111,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 151.07,
+      "latency_ms": 106.79,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -119,7 +119,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_1922d1b0c622",
+      "run_id": "run_f15929c55ab0",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -127,7 +127,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 137.1,
+      "latency_ms": 146.17,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -135,7 +135,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_2692197f48fe",
+      "run_id": "run_59e6ccd8d967",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -143,7 +143,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 83.99,
+      "latency_ms": 85.07,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -151,7 +151,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_94619aaf1306",
+      "run_id": "run_98299b9bec61",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -159,7 +159,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 774.55,
+      "latency_ms": 634.73,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -167,7 +167,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_c8c73e5e9565",
+      "run_id": "run_df92f8c77ef4",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -175,7 +175,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 156.99,
+      "latency_ms": 138.5,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -183,7 +183,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_d43259685cf2",
+      "run_id": "run_a3c4bfee8fd0",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -191,7 +191,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 154.23,
+      "latency_ms": 134.34,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -199,7 +199,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_ecebe6b08ae5",
+      "run_id": "run_dcb8d547eb07",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -207,7 +207,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 301.55,
+      "latency_ms": 272.22,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -215,7 +215,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_be2fe33cf355",
+      "run_id": "run_a018b83437f7",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -223,7 +223,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 368.14,
+      "latency_ms": 367.14,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -231,7 +231,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_1bceb34599a7",
+      "run_id": "run_74ba912b54ef",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -239,7 +239,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 130.22,
+      "latency_ms": 128.35,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -247,7 +247,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_a26ab6387184",
+      "run_id": "run_54abfc289454",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -255,7 +255,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 120.86,
+      "latency_ms": 109.92,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -263,7 +263,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_74e25237fafa",
+      "run_id": "run_b60c8ca4ece1",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -271,7 +271,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 113.57,
+      "latency_ms": 106.41,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -279,7 +279,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_be87831ed502",
+      "run_id": "run_46a658796de2",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -287,7 +287,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 172.81,
+      "latency_ms": 170.0,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -295,7 +295,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_353ffc82eb2d",
+      "run_id": "run_b99baf76b5e1",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -303,7 +303,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 101.65,
+      "latency_ms": 101.54,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -311,7 +311,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_f072e94a2c63",
+      "run_id": "run_9471943e9612",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true
@@ -319,7 +319,7 @@
     {
       "symbol": "600519",
       "company": "贵州茅台",
-      "latency_ms": 144.28,
+      "latency_ms": 138.29,
       "tool_call_success": true,
       "report_format_pass": true,
       "metric_consistency": true,
@@ -327,7 +327,7 @@
       "evidence_coverage": true,
       "forbidden_wording_fail": false,
       "verification_pass": true,
-      "run_id": "run_965f9cec8435",
+      "run_id": "run_0e93cddadf4b",
       "workflow_engine": "langgraph",
       "report_path": "reports/eval_600519.md",
       "passed": true

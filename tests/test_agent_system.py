@@ -27,6 +27,11 @@ from backend.app.product_taxonomy.manual_override_store import create_override
 from backend.app.product_taxonomy.series_classifier import classify_products
 from backend.app.product_taxonomy.series_performance import compute_series_performance
 from backend.app.benchmark.reference_rate_engine import compare_product_to_reference, load_reference_rates
+from backend.app.data_sources.real_adapters.official_nav.boc_nav_adapter import fetch_public_nav
+from backend.app.data_sources.real_adapters.registry.registry_lookup_adapter import lookup_registry_code
+from backend.app.external_verification.external_verification_agent import run_external_verification
+from backend.app.external_verification.source_boundary_guardrail import check_source_boundary
+from backend.app.external_verification.verification_score import external_verification_score
 from backend.app.skills.harness_validator import HarnessValidator
 from backend.app.skills.skill_executor import execute_skill_harness
 
@@ -425,3 +430,127 @@ def test_dpo_output_goes_through_verifier() -> None:
     skill_names = [call["skill_name"] for call in trace["skill_calls"]]
     assert "dpo_report_skill" in skill_names
     assert "verifier_skill" in skill_names
+
+
+def test_import_mode_replace_synthetic_for_own_company() -> None:
+    client = TestClient(app)
+    csv_text = "report_date,product_code,product_name\n2025-04-04,WPX201,上传产品\n"
+    response = client.post(
+        "/api/data/upload",
+        json={
+            "file_name": "own.csv",
+            "dataset_scope": "own_company",
+            "text": csv_text,
+            "target_schema": "product_weekly_snapshot",
+            "import_mode": "replace_synthetic_for_scope",
+            "delete_synthetic": True,
+        },
+    )
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["synthetic_action"] == "scope_synthetic_disabled"
+    assert payload["delete_synthetic"] is True
+
+
+def test_import_mode_replace_synthetic_for_full_market() -> None:
+    client = TestClient(app)
+    csv_text = "peer_product_code,report_date,return_3m\nPRX201,2025-04-04,0.01\n"
+    response = client.post(
+        "/api/data/upload",
+        json={
+            "file_name": "peer.csv",
+            "dataset_scope": "full_market",
+            "text": csv_text,
+            "target_schema": "peer_product_metrics",
+            "import_mode": "replace_synthetic_for_scope",
+            "delete_synthetic": True,
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["synthetic_action"] == "scope_synthetic_disabled"
+
+
+def test_import_mode_replace_synthetic_for_reference_rates() -> None:
+    client = TestClient(app)
+    csv_text = "rate_id,as_of_date,tenor_days,annual_yield\nR_TEST,2025-04-04,90,0.015\n"
+    response = client.post(
+        "/api/data/upload",
+        json={
+            "file_name": "rates.csv",
+            "dataset_scope": "reference_rates",
+            "text": csv_text,
+            "target_schema": "reference_rates",
+            "import_mode": "clear_scope_then_import",
+            "delete_synthetic": True,
+        },
+    )
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["dataset_scope"] == "reference_rates"
+    assert payload["synthetic_action"] == "scope_synthetic_disabled"
+
+
+def test_data_mode_uploaded_only_excludes_synthetic() -> None:
+    source = (Path(__file__).resolve().parents[1] / "frontend" / "src" / "sessionDataStore.js").read_text(encoding="utf-8")
+    assert "uploaded_only" in source
+    assert "isSyntheticDisabled('own_company')" in source
+    assert "uploaded_only_empty" in source
+
+
+def test_official_adapter_failure_does_not_break_demo(monkeypatch) -> None:
+    monkeypatch.setenv("ENABLE_REAL_DATA_ADAPTERS", "false")
+    result = fetch_public_nav("AF245408")
+    assert result.adapter_status == "disabled_sample"
+    assert result.records
+    assert result.records[0].source_type == "official_public_nav"
+
+
+def test_external_verification_marks_unknown_registry_not_verified() -> None:
+    result = lookup_registry_code("bad code with spaces")
+    payload = result.records[0].payload
+    assert payload["registry_status"] == "unknown"
+    assert payload["verified"] is False
+
+
+def test_source_boundary_blocks_real_market_claim_for_synthetic() -> None:
+    result = check_source_boundary(
+        "本产品处于真实全市场排名前列。",
+        {"source_types": ["synthetic_weekly_snapshot"], "synthetic_peer_universe": True},
+    )
+    assert result["pass"] is False
+    assert "synthetic_data_real_market_claim" in result["failed_rules"]
+
+
+def test_lineage_contains_external_source_url() -> None:
+    result = run_external_verification("AF245408")
+    records = result["external_verification_result"]["official_sources_used"]
+    assert records
+    assert records[0]["source_url_or_file"]
+    assert records[0]["evidence_id"]
+
+
+def test_external_verification_score_penalizes_conflict() -> None:
+    clean = external_verification_score(
+        official_nav_coverage=1,
+        disclosure_coverage=1,
+        reference_rate_coverage=1,
+        registry_check_coverage=1,
+        source_freshness_score=1,
+        conflict_penalty=0,
+    )
+    conflict = external_verification_score(
+        official_nav_coverage=1,
+        disclosure_coverage=1,
+        reference_rate_coverage=1,
+        registry_check_coverage=1,
+        source_freshness_score=1,
+        conflict_penalty=1,
+    )
+    assert conflict < clean
+
+
+def test_report_requires_manual_review_when_official_nav_conflicts() -> None:
+    result = run_external_verification("AF245408", uploaded_nav=0.98, report_text="基于用户上传数据生成周报摘要。")
+    verification = result["external_verification_result"]
+    assert verification["conflicting_fields"]
+    assert verification["source_boundary"]["manual_review_required"] is True

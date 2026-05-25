@@ -1,14 +1,20 @@
 {
   "uploads": [
     {
-      "upload_id": "upload_b6e413d58d72",
+      "upload_id": "upload_41393d89fdf5",
       "dataset_scope": "own_company",
+      "import_mode": "merge_with_demo",
+      "delete_synthetic": false,
       "source_type": "manual_upload",
+      "source_name": "product_weekly_snapshot",
+      "source_url_or_file": "manual_upload:weekly.csv",
+      "fetched_at": "2026-05-25T01:18:20+00:00",
+      "confidence_level": "user_uploaded",
       "file_name": "weekly.csv",
       "target_schema": "product_weekly_snapshot",
       "parser_version": "backend_upload_parser.v2",
       "as_of_date": null,
-      "evidence_id": "ev_upload_upload_b6e413d58d72",
+      "evidence_id": "ev_upload_upload_41393d89fdf5",
       "parser_status": "parsed",
       "schema_preview": {
         "parser_status": "parsed",
@@ -93,17 +99,24 @@
         ],
         "missing_required_fields": [],
         "mapping_status": "pass"
-      }
+      },
+      "synthetic_action": "kept_demo_synthetic"
     },
     {
-      "upload_id": "upload_226f525f116d",
+      "upload_id": "upload_5c58e369dadd",
       "dataset_scope": "own_company",
+      "import_mode": "merge_with_demo",
+      "delete_synthetic": false,
       "source_type": "manual_upload",
+      "source_name": "product_weekly_snapshot",
+      "source_url_or_file": "manual_upload:own.csv",
+      "fetched_at": "2026-05-25T01:18:22+00:00",
+      "confidence_level": "user_uploaded",
       "file_name": "own.csv",
       "target_schema": "product_weekly_snapshot",
       "parser_version": "backend_upload_parser.v2",
       "as_of_date": null,
-      "evidence_id": "ev_upload_upload_226f525f116d",
+      "evidence_id": "ev_upload_upload_5c58e369dadd",
       "parser_status": "parsed",
       "schema_preview": {
         "parser_status": "parsed",
@@ -171,17 +184,24 @@
           "benchmark_status"
         ],
         "mapping_status": "needs_confirmation"
-      }
+      },
+      "synthetic_action": "kept_demo_synthetic"
     },
     {
-      "upload_id": "upload_75537c9df22d",
+      "upload_id": "upload_3d27ca5a624a",
       "dataset_scope": "full_market",
+      "import_mode": "merge_with_demo",
+      "delete_synthetic": false,
       "source_type": "manual_upload",
+      "source_name": "peer_product_metrics",
+      "source_url_or_file": "manual_upload:peer.csv",
+      "fetched_at": "2026-05-25T01:18:22+00:00",
+      "confidence_level": "user_uploaded",
       "file_name": "peer.csv",
       "target_schema": "peer_product_metrics",
       "parser_version": "backend_upload_parser.v2",
       "as_of_date": null,
-      "evidence_id": "ev_upload_upload_75537c9df22d",
+      "evidence_id": "ev_upload_upload_3d27ca5a624a",
       "parser_status": "parsed",
       "schema_preview": {
         "parser_status": "parsed",
@@ -229,17 +249,24 @@
           "drawdown_percentile"
         ],
         "mapping_status": "needs_confirmation"
-      }
+      },
+      "synthetic_action": "kept_demo_synthetic"
     },
     {
-      "upload_id": "upload_f6bcf80bd43d",
+      "upload_id": "upload_6db8ae5ac176",
       "dataset_scope": "reference_rates",
+      "import_mode": "merge_with_demo",
+      "delete_synthetic": false,
       "source_type": "manual_upload",
+      "source_name": "reference_rates",
+      "source_url_or_file": "manual_upload:rates.csv",
+      "fetched_at": "2026-05-25T01:18:22+00:00",
+      "confidence_level": "user_uploaded",
       "file_name": "rates.csv",
       "target_schema": "reference_rates",
       "parser_version": "backend_upload_parser.v2",
       "as_of_date": null,
-      "evidence_id": "ev_upload_upload_f6bcf80bd43d",
+      "evidence_id": "ev_upload_upload_6db8ae5ac176",
       "parser_status": "parsed",
       "schema_preview": {
         "parser_status": "parsed",
@@ -276,7 +303,200 @@
         "required_fields": [],
         "missing_required_fields": [],
         "mapping_status": "pass"
-      }
+      },
+      "synthetic_action": "kept_demo_synthetic"
+    },
+    {
+      "upload_id": "upload_374bfcb172af",
+      "dataset_scope": "own_company",
+      "import_mode": "replace_synthetic_for_scope",
+      "delete_synthetic": true,
+      "source_type": "manual_upload",
+      "source_name": "product_weekly_snapshot",
+      "source_url_or_file": "manual_upload:own.csv",
+      "fetched_at": "2026-05-25T01:18:26+00:00",
+      "confidence_level": "user_uploaded",
+      "file_name": "own.csv",
+      "target_schema": "product_weekly_snapshot",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_374bfcb172af",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "report_date",
+              "product_code",
+              "product_name"
+            ],
+            "sample_rows": [
+              {
+                "report_date": "2025-04-04",
+                "product_code": "WPX201",
+                "product_name": "上传产品"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "product_weekly_snapshot",
+        "mapping": {
+          "report_date": "report_date",
+          "product_code": "product_code",
+          "product_name": "product_name"
+        },
+        "required_fields": [
+          "report_date",
+          "product_code",
+          "product_name",
+          "product_type",
+          "channel",
+          "risk_level",
+          "product_scale_bn",
+          "scale_wow_bn",
+          "scale_mom_bn",
+          "latest_nav",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "benchmark_status"
+        ],
+        "missing_required_fields": [
+          "product_type",
+          "channel",
+          "risk_level",
+          "product_scale_bn",
+          "scale_wow_bn",
+          "scale_mom_bn",
+          "latest_nav",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "benchmark_status"
+        ],
+        "mapping_status": "needs_confirmation"
+      },
+      "synthetic_action": "scope_synthetic_disabled"
+    },
+    {
+      "upload_id": "upload_ac9f79b47b67",
+      "dataset_scope": "full_market",
+      "import_mode": "replace_synthetic_for_scope",
+      "delete_synthetic": true,
+      "source_type": "manual_upload",
+      "source_name": "peer_product_metrics",
+      "source_url_or_file": "manual_upload:peer.csv",
+      "fetched_at": "2026-05-25T01:18:26+00:00",
+      "confidence_level": "user_uploaded",
+      "file_name": "peer.csv",
+      "target_schema": "peer_product_metrics",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_ac9f79b47b67",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "peer_product_code",
+              "report_date",
+              "return_3m"
+            ],
+            "sample_rows": [
+              {
+                "peer_product_code": "PRX201",
+                "report_date": "2025-04-04",
+                "return_3m": "0.01"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "peer_product_metrics",
+        "mapping": {
+          "peer_product_code": "peer_product_code",
+          "report_date": "report_date",
+          "return_3m": "return_3m"
+        },
+        "required_fields": [
+          "peer_product_code",
+          "report_date",
+          "return_3m",
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "return_percentile",
+          "drawdown_percentile"
+        ],
+        "missing_required_fields": [
+          "max_drawdown",
+          "volatility",
+          "sharpe",
+          "return_percentile",
+          "drawdown_percentile"
+        ],
+        "mapping_status": "needs_confirmation"
+      },
+      "synthetic_action": "scope_synthetic_disabled"
+    },
+    {
+      "upload_id": "upload_29a641a62ee6",
+      "dataset_scope": "reference_rates",
+      "import_mode": "clear_scope_then_import",
+      "delete_synthetic": true,
+      "source_type": "manual_upload",
+      "source_name": "reference_rates",
+      "source_url_or_file": "manual_upload:rates.csv",
+      "fetched_at": "2026-05-25T01:18:26+00:00",
+      "confidence_level": "user_uploaded",
+      "file_name": "rates.csv",
+      "target_schema": "reference_rates",
+      "parser_version": "backend_upload_parser.v2",
+      "as_of_date": null,
+      "evidence_id": "ev_upload_upload_29a641a62ee6",
+      "parser_status": "parsed",
+      "schema_preview": {
+        "parser_status": "parsed",
+        "file_type": "csv",
+        "sheets": [
+          {
+            "sheet_name": "csv",
+            "columns": [
+              "rate_id",
+              "as_of_date",
+              "tenor_days",
+              "annual_yield"
+            ],
+            "sample_rows": [
+              {
+                "rate_id": "R_TEST",
+                "as_of_date": "2025-04-04",
+                "tenor_days": "90",
+                "annual_yield": "0.015"
+              }
+            ]
+          }
+        ]
+      },
+      "mapping_preview": {
+        "target_schema": "reference_rates",
+        "mapping": {},
+        "required_fields": [],
+        "missing_required_fields": [],
+        "mapping_status": "pass"
+      },
+      "synthetic_action": "scope_synthetic_disabled"
     }
   ]
 }

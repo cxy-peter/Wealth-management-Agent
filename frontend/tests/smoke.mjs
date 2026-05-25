@@ -70,6 +70,11 @@ async function run() {
     }, null, { timeout: 20000 });
     const dateOptions = await page.getByTestId('weekly-date-select').locator('option').count();
     if (dateOptions < 4) fail(`日期下拉选项不足 4 个，当前 ${dateOptions}`);
+    await page.locator('.data-mode-panel').waitFor({ timeout: 15000 });
+    const dataModeText = await page.locator('.data-mode-panel').innerText();
+    if (!dataModeText.includes('own_company') || !dataModeText.includes('synthetic_weekly_snapshot')) {
+      fail('数据模式卡片未展示 source_type record_count');
+    }
 
     const firstAttentionName = page.locator('.attention-product-name').first();
     await firstAttentionName.waitFor({ timeout: 15000 });
@@ -137,6 +142,10 @@ async function run() {
     for (const keyword of ['selected_skills', 'harness pass/fail', 'source boundary check']) {
       if (!skillText.includes(keyword)) fail(`Skill/Harness tab 缺少 ${keyword}`);
     }
+    await page.getByRole('button', { name: 'External Verification' }).click();
+    await page.getByText('外部验证覆盖率').waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Source Coverage' }).click();
+    await page.getByText('official_public_nav').waitFor({ timeout: 15000 });
     await page.getByRole('button', { name: 'AI 报告校准' }).click();
     await page.getByText('AI 报告校准结果').waitFor({ timeout: 15000 });
     const dpoText = await visibleText(page);

@@ -1,6 +1,50 @@
 {
   "overrides": [
     {
+      "override_id": "override_83528aa3551d",
+      "product_code": "TST_SERIES_2",
+      "product_name": "稳健添利90天",
+      "old_series_id": "stable_income",
+      "new_series_id": "manual_perf",
+      "action_type": "move",
+      "reason": "pytest",
+      "created_at": "2026-05-25T01:18:22.621016+00:00",
+      "evidence_id": "ev_series_override_TST_SERIES_2_0ab37be1"
+    },
+    {
+      "override_id": "override_c6eedd55d72d",
+      "product_code": "TST_SERIES_1",
+      "product_name": "现金优选日开A",
+      "old_series_id": "cash",
+      "new_series_id": "manual_series",
+      "action_type": "move",
+      "reason": "pytest",
+      "created_at": "2026-05-25T01:18:22.614676+00:00",
+      "evidence_id": "ev_series_override_TST_SERIES_1_9aff4145"
+    },
+    {
+      "override_id": "override_a536c8930831",
+      "product_code": "TST_SERIES_2",
+      "product_name": "稳健添利90天",
+      "old_series_id": "stable_income",
+      "new_series_id": "manual_perf",
+      "action_type": "move",
+      "reason": "pytest",
+      "created_at": "2026-05-25T01:16:11.000410+00:00",
+      "evidence_id": "ev_series_override_TST_SERIES_2_6d95f51b"
+    },
+    {
+      "override_id": "override_c732bf743958",
+      "product_code": "TST_SERIES_1",
+      "product_name": "现金优选日开A",
+      "old_series_id": "cash",
+      "new_series_id": "manual_series",
+      "action_type": "move",
+      "reason": "pytest",
+      "created_at": "2026-05-25T01:16:10.998085+00:00",
+      "evidence_id": "ev_series_override_TST_SERIES_1_b787ac6c"
+    },
+    {
       "override_id": "override_da8224e858bf",
       "product_code": "TST_SERIES_2",
       "product_name": "稳健添利90天",

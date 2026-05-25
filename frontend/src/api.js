@@ -1,6 +1,12 @@
 const API_BASE = (import.meta.env.VITE_WEALTH_AGENT_API_BASE || '').replace(/\/$/, '');
 
-import { applySessionPeerBenchmark, applySessionProducts, applySessionSummary, applySessionTopPeers } from './sessionDataStore.js';
+import {
+  applySessionPeerBenchmark,
+  applySessionProducts,
+  applySessionReferenceRates,
+  applySessionSummary,
+  applySessionTopPeers
+} from './sessionDataStore.js';
 
 async function getJson(path) {
   if (!API_BASE) {
@@ -155,7 +161,35 @@ export async function getReferenceRates() {
   try {
     return await getJson('/api/reference-rates');
   } catch {
-    return getDemoJson('reference_rates.json').catch(() => ({ count: 0, rates: [] }));
+    const payload = await getDemoJson('reference_rates.json').catch(() => ({ count: 0, rates: [] }));
+    return applySessionReferenceRates(payload);
+  }
+}
+
+export async function runExternalVerification(payload = {}) {
+  try {
+    return await postJson('/api/external-verification/run', payload);
+  } catch {
+    return {
+      product_code: payload.product_code || 'WP0001',
+      external_verification_result: {
+        verified_fields: [],
+        unverified_fields: ['registry_code'],
+        conflicting_fields: [],
+        official_sources_used: [],
+        synthetic_fields_used: ['peer_percentile'],
+        verification_score: 0.42,
+        warnings: ['真实 adapter 未启用，当前展示 sample/mock 核验结果。']
+      },
+      source_coverage: {
+        official_public_nav: 0,
+        official_disclosure_sample: 0,
+        registry_lookup_sample: 1,
+        public_reference_rate_api: 0,
+        manual_upload: 0,
+        synthetic_weekly_snapshot: 3
+      }
+    };
   }
 }
 

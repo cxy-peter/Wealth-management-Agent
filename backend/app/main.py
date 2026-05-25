@@ -7,6 +7,7 @@ import io
 import json
 import os
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,7 @@ from backend.app.data_sources.quality.freshness_checker import freshness_report
 from backend.app.data_sources.quality.lineage_builder import lineage_for_evidence
 from backend.app.data_sources.source_registry import list_data_sources, refresh_demo
 from backend.app.evaluation import run_evaluation
+from backend.app.external_verification.external_verification_agent import run_external_verification
 from backend.app.benchmark.reference_rate_engine import compare_product_to_reference, load_reference_rates
 from backend.app.product_taxonomy.manual_override_store import create_override, list_overrides
 from backend.app.product_taxonomy.series_classifier import classify_products
@@ -133,6 +135,8 @@ class ReviewRequest(BaseModel):
 class DataUploadRequest(BaseModel):
     file_name: str
     dataset_scope: str = Field(..., description="own_company/full_market/reference_rates")
+    import_mode: str = "merge_with_demo"
+    delete_synthetic: bool = False
     content_base64: str | None = None
     text: str | None = None
     target_schema: str = "product_weekly_snapshot"
@@ -162,6 +166,13 @@ class ManualSeriesOverrideRequest(BaseModel):
 class SkillHarnessRequest(BaseModel):
     user_task: str = "生成产品周报"
     task_payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class ExternalVerificationRequest(BaseModel):
+    product_code: str = "AF245408"
+    registry_code: str | None = None
+    uploaded_nav: float | None = None
+    report_text: str = ""
 
 
 def _write_upload_index() -> None:
@@ -217,6 +228,8 @@ DATASET_SCOPE_SCHEMAS = {
     "reference_rates": {"reference_rates"},
 }
 
+IMPORT_MODES = {"merge_with_demo", "replace_synthetic_for_scope", "session_only", "clear_scope_then_import"}
+
 
 def _validate_dataset_scope(dataset_scope: str, target_schema: str) -> None:
     allowed = DATASET_SCOPE_SCHEMAS.get(dataset_scope)
@@ -224,6 +237,11 @@ def _validate_dataset_scope(dataset_scope: str, target_schema: str) -> None:
         raise HTTPException(status_code=422, detail="dataset_scope must be own_company, full_market, or reference_rates")
     if target_schema not in allowed:
         raise HTTPException(status_code=422, detail=f"target_schema {target_schema} is not allowed for dataset_scope {dataset_scope}")
+
+
+def _validate_import_mode(import_mode: str) -> None:
+    if import_mode not in IMPORT_MODES:
+        raise HTTPException(status_code=422, detail="import_mode must be merge_with_demo, replace_synthetic_for_scope, session_only, or clear_scope_then_import")
 
 
 @app.get("/health")
@@ -263,6 +281,7 @@ def post_data_refresh_demo(req: RefreshDemoRequest | None = None) -> dict[str, A
 @app.post("/api/data/upload")
 def post_data_upload(req: DataUploadRequest) -> dict[str, Any]:
     _validate_dataset_scope(req.dataset_scope, req.target_schema)
+    _validate_import_mode(req.import_mode)
     upload_id = f"upload_{uuid.uuid4().hex[:12]}"
     preview = _preview_upload(req)
     columns = _preview_columns(preview)
@@ -270,7 +289,13 @@ def post_data_upload(req: DataUploadRequest) -> dict[str, Any]:
     record = {
         "upload_id": upload_id,
         "dataset_scope": req.dataset_scope,
+        "import_mode": req.import_mode,
+        "delete_synthetic": req.delete_synthetic,
         "source_type": "manual_upload",
+        "source_name": req.target_schema,
+        "source_url_or_file": f"manual_upload:{req.file_name}",
+        "fetched_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "confidence_level": "user_uploaded",
         "file_name": req.file_name,
         "target_schema": req.target_schema,
         "parser_version": "backend_upload_parser.v2",
@@ -279,19 +304,29 @@ def post_data_upload(req: DataUploadRequest) -> dict[str, Any]:
         "parser_status": preview.get("parser_status"),
         "schema_preview": preview,
         "mapping_preview": mapping,
+        "synthetic_action": "scope_synthetic_disabled"
+        if (req.delete_synthetic or req.import_mode in {"replace_synthetic_for_scope", "clear_scope_then_import"})
+        else "kept_demo_synthetic",
     }
     UPLOAD_STORE[upload_id] = record
     _write_upload_index()
     return {
         "upload_id": upload_id,
         "dataset_scope": req.dataset_scope,
+        "import_mode": req.import_mode,
+        "delete_synthetic": req.delete_synthetic,
         "source_type": "manual_upload",
+        "source_name": req.target_schema,
+        "source_url_or_file": f"manual_upload:{req.file_name}",
+        "fetched_at": record["fetched_at"],
+        "confidence_level": "user_uploaded",
         "file_name": req.file_name,
         "parser_version": "backend_upload_parser.v2",
         "as_of_date": None,
         "evidence_id": f"ev_upload_{upload_id}",
         "parser_status": preview.get("parser_status"),
         "mapping_preview": mapping,
+        "synthetic_action": record["synthetic_action"],
     }
 
 
@@ -609,6 +644,16 @@ def post_reference_rate_benchmark(payload: dict[str, Any]) -> dict[str, Any]:
 @app.post("/api/skills/run")
 def post_skill_harness(req: SkillHarnessRequest) -> dict[str, Any]:
     return execute_skill_harness(req.user_task, req.task_payload)
+
+
+@app.post("/api/external-verification/run")
+def post_external_verification(req: ExternalVerificationRequest) -> dict[str, Any]:
+    return run_external_verification(
+        req.product_code,
+        registry_code=req.registry_code,
+        uploaded_nav=req.uploaded_nav,
+        report_text=req.report_text,
+    )
 
 
 @app.post("/api/eval/run")

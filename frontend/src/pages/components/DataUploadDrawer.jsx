@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import {
   DATASET_SCOPES,
+  IMPORT_MODES,
   allowedSchemasForScope,
   autoMapColumns,
   inferSchema,
@@ -82,6 +83,8 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
   const [selectedSheet, setSelectedSheet] = useState('');
   const [datasetScope, setDatasetScope] = useState('');
   const [schemaOverride, setSchemaOverride] = useState('');
+  const [importMode, setImportMode] = useState(IMPORT_MODES.merge_with_demo);
+  const [deleteSynthetic, setDeleteSynthetic] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -113,9 +116,21 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
       return;
     }
     if (!activeSheet?.rows?.length) return;
+    if (deleteSynthetic || importMode === IMPORT_MODES.replace_synthetic_for_scope || importMode === IMPORT_MODES.clear_scope_then_import) {
+      const confirmed = window.confirm('将删除当前 scope 的 synthetic 数据，但不会影响仓库 sample 文件，可通过恢复 demo 数据重置。是否继续？');
+      if (!confirmed) return;
+    }
     setSaving(true);
     try {
-      const result = saveUpload({ fileName: fileState.file_name, schema, rows: activeSheet.rows, mapping, datasetScope });
+      const result = saveUpload({
+        fileName: fileState.file_name,
+        schema,
+        rows: activeSheet.rows,
+        mapping,
+        datasetScope,
+        importMode,
+        deleteSynthetic
+      });
       onImported?.(result);
       onClose?.();
     } catch (err) {
@@ -156,6 +171,39 @@ export default function DataUploadDrawer({ isOpen, onClose, onImported }) {
               </button>
             ))}
           </div>
+        </section>
+        <section className="panel">
+          <div className="section-title">
+            <span>导入模式</span>
+            <strong>session demo store</strong>
+          </div>
+          <label className="field-group">
+            <span>import_mode</span>
+            <select value={importMode} onChange={(event) => {
+              setImportMode(event.target.value);
+              if (event.target.value === IMPORT_MODES.replace_synthetic_for_scope || event.target.value === IMPORT_MODES.clear_scope_then_import) {
+                setDeleteSynthetic(true);
+              }
+            }}>
+              <option value={IMPORT_MODES.merge_with_demo}>merge_with_demo</option>
+              <option value={IMPORT_MODES.replace_synthetic_for_scope}>replace_synthetic_for_scope</option>
+              <option value={IMPORT_MODES.session_only}>session_only</option>
+              <option value={IMPORT_MODES.clear_scope_then_import}>clear_scope_then_import</option>
+            </select>
+          </label>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={deleteSynthetic}
+              onChange={(event) => setDeleteSynthetic(event.target.checked)}
+            />
+            <span>删除当前 scope 的 synthetic 数据</span>
+          </label>
+          {deleteSynthetic ? (
+            <p className="inline-alert">将删除当前 scope 的 synthetic 数据，但不会影响仓库 sample 文件，可通过恢复 demo 数据重置。</p>
+          ) : (
+            <p className="panel-copy">默认合并上传数据和 demo 数据；所有上传记录都会标记为 source_type=manual_upload。</p>
+          )}
         </section>
         <section className="upload-dropzone">
           <UploadCloud size={24} />
